@@ -1,26 +1,19 @@
-package gooracle
+package selectstrtg
 
 import (
 	"runtime"
 	"strconv"
 )
 
-// SelectCaseController defines the interface for guiding select case during application running
-// It tries to provide answer to question 'when application reach the select at given file and line, which case it should choose'
-// This functionality expected to be cooperated with instrumentation.
-type SelectCaseStrategy interface {
-	GetCase(filename string, line, numOfCases int) int
+// SelectCaseInOrder will return case number according to the inputs' order.
+type SelectCaseInOrder struct {
+	// select identifer (filname + line number) => case recorder
+	id2Cr map[string]*SelectCaseRecorder
 }
 
 type SelectCaseRecorder struct {
 	inputs       []runtime.SelectInfo
 	lastInputIdx int
-}
-
-// SelectCaseInOrder will return case number according to the inputs' order.
-type SelectCaseInOrder struct {
-	// select identifer (filname + line number) => case recorder
-	id2Cr map[string]*SelectCaseRecorder
 }
 
 // NewSelectCaseInOrder creates a SelectCaseInOrder by given list of inputs.

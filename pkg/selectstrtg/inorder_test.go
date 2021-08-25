@@ -1,4 +1,4 @@
-package gooracle
+package selectstrtg
 
 import (
 	"runtime"

@@ -7,6 +7,7 @@ Fuzzing concurrent Go programs
     - [GFuzz Oracle](#gfuzz-oracle)
   - [Packages](#packages)
     - [pkg/gooracle](#pkggooracle)
+    - [pkg/selectstrtg](#pkgselectstrtg)
   - [Dev](#dev)
 
 
@@ -27,7 +28,11 @@ and golang package `runtime` patched in advance.
 ### pkg/gooracle
 
 Package `gooracle` is part of GFuzz Oracle. This package requires patched golang environment to work properly. It provides
-1. Forcing/recording select choice
+1. Detecting blocking/non-blocking issue happened during application runtime.
+
+### pkg/selectstrtg
+
+Package `selectstrtg` provides a list of strategies for application to choose proper select case by given a list of select choices (optional)
 
 ## Dev
 Since large parts of GFuzz are required instrumented Golang environment, we would suggest develop/test in universal Docker environment.
