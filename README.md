@@ -7,6 +7,7 @@ Fuzzing concurrent Go programs
     - [GFuzz Oracle](#gfuzz-oracle)
   - [Packages](#packages)
     - [pkg/gooracle](#pkggooracle)
+  - [Dev](#dev)
 
 
 
@@ -25,5 +26,18 @@ and golang package `runtime` patched in advance.
 
 ### pkg/gooracle
 
-Package `gooracle` is part of GFuzz Oracle. It provides
-1. 
+Package `gooracle` is part of GFuzz Oracle. This package requires patched golang environment to work properly. It provides
+1. Forcing/recording select choice
+
+## Dev
+Since large parts of GFuzz are required instrumented Golang environment, we would suggest develop/test in universal Docker environment.
+
+```bash
+
+// The script will 
+// 1. build a container with instrumented Golang environment 
+// 2. mapping current directly and run the container
+// 3. try `make test` after the container bring up!
+$ ./script/dev.sh
+
+```

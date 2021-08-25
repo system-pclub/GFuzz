@@ -5,12 +5,12 @@ GOROOT=$(go env GOROOT)
 GOROOT_SRC=$GOROOT/src
 RUNTIME=$GOROOT_SRC/runtime
 
-cp runtime/my* $RUNTIME
-cp runtime/select.go $RUNTIME/select.go
-cp runtime/chan.go $RUNTIME/chan.go
-cp runtime/runtime2.go $RUNTIME/runtime2.go
-cp runtime/proc.go $RUNTIME/proc.go
-cp -r goFuzz/gooracle $GOROOT_SRC
-cp -r time $GOROOT_SRC
-cp -r sync $GOROOT_SRC
-cp reflect/value.go $GOROOT_SRC/reflect/value.go
+cp patch/runtime/my* $RUNTIME
+cp patch/runtime/select.go $RUNTIME/select.go
+cp patch/runtime/chan.go $RUNTIME/chan.go
+cp patch/runtime/runtime2.go $RUNTIME/runtime2.go
+cp patch/runtime/proc.go $RUNTIME/proc.go
+cp -r pkg/gooracle $GOROOT_SRC
+cp -r patch/time $GOROOT_SRC
+cp -r patch/sync $GOROOT_SRC
+cp patch/reflect/value.go $GOROOT_SRC/reflect/value.go
