@@ -36,6 +36,15 @@ func (r *PassRegistry) ListOfPasses() []InstPass {
 	return passes
 }
 
+func (r *PassRegistry) ListOfPassNames() []string {
+	passes := make([]string, 0, len(r.n2p))
+
+	for _, p := range r.n2p {
+		passes = append(passes, p.Name())
+	}
+	return passes
+}
+
 // HasPass return true if pass registered, false otherwise
 func (r *PassRegistry) HasPass(name string) bool {
 	_, err := r.GetPass(name)

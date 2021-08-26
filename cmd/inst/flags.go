@@ -8,7 +8,10 @@ import (
 
 var opts struct {
 	Passes []string `long:"passes" description:"A list of passes you want to use in this instrumentation"`
-	File   string   `long:"file" required:"true"`
+	Dir    string   `long:"dir" description:"instrument all go source code under this directory"`
+	Args   struct {
+		Globs []string
+	} `positional-arg-name:"globs" positional-args:"yes"`
 }
 
 func parseFlags() {
