@@ -7,7 +7,7 @@ Fuzzing concurrent Go programs
     - [GFuzz Oracle](#gfuzz-oracle)
   - [Packages](#packages)
     - [pkg/gooracle](#pkggooracle)
-    - [pkg/selectstrtg](#pkgselectstrtg)
+    - [pkg/selefcm (select enforcement)](#pkgselefcm-select-enforcement)
   - [Dev](#dev)
 
 
@@ -30,9 +30,9 @@ and golang package `runtime` patched in advance.
 Package `gooracle` is part of GFuzz Oracle. This package requires patched golang environment to work properly. It provides
 1. Detecting blocking/non-blocking issue happened during application runtime.
 
-### pkg/selectstrtg
+### pkg/selefcm (select enforcement)
 
-Package `selectstrtg` provides a list of strategies for application to choose proper select case by given a list of select choices (optional)
+Package `selefcm` provides a list of strategies for application to choose proper select case by given a list of select choices (optional)
 
 ## Dev
 Since large parts of GFuzz are required instrumented Golang environment, we would suggest develop/test in universal Docker environment.

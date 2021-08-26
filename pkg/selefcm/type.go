@@ -1,4 +1,4 @@
-package selectstrtg
+package selefcm
 
 // SelectCaseController defines the interface for guiding select case during application running
 // It tries to provide answer to question 'when application reach the select at given file and line, which case it should choose'
