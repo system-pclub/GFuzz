@@ -23,3 +23,8 @@ func Run(iCtx *InstContext, r *PassRegistry, passNames []string) error {
 	}
 	return runPasses(iCtx, passes)
 }
+
+// NewInstContext creates a InstContext by given Golang source file
+func NewInstContext(goSrcFile string) (*InstContext, error) {
+
+}
