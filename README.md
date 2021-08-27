@@ -42,11 +42,12 @@ Package `inst` provides modifying golang source code framework and utilities. It
 
 #### Built-in Passes
 
+
 <table>
 <tr>
-<td> Pass </td>
- <td> Description </td> 
- <td>Example</td>
+<th> Pass </th>
+ <th> Description </th> 
+ <th>Example</th>
 </tr>
 
 <tr>
@@ -89,7 +90,7 @@ gooracle.StoreChMakeInfo(ch, <some random number>)
 <td>transform select into select with integer case (each case is one of original case and timeout)</td>
 <td></td>
 </tr>
-
+</table>
 
 ## Dev
 Since large parts of GFuzz are required instrumented Golang environment, we would suggest develop/test in universal Docker environment.
