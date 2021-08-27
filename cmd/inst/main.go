@@ -14,10 +14,6 @@ func main() {
 	// register passes
 	reg.AddPass(&pass.SelEfcmPass{})
 
-	if len(opts.Args.Globs) == 0 {
-		log.Panic("at least one glob need to present")
-	}
-
 	// prepare passes
 	var passes []string
 	if len(opts.Passes) > 0 {
