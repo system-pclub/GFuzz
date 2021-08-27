@@ -1,11 +1,5 @@
 package inst
 
-import (
-	"go/parser"
-	"go/token"
-	"io/ioutil"
-)
-
 // runPasses executes given passes with provided instrumentation context
 func runPasses(iCtx *InstContext, passes []InstPass) error {
 	for _, p := range passes {
@@ -28,22 +22,4 @@ func Run(iCtx *InstContext, r *PassRegistry, passNames []string) error {
 		passes = append(passes, pass)
 	}
 	return runPasses(iCtx, passes)
-}
-
-// NewInstContext creates a InstContext by given Golang source file
-func NewInstContext(goSrcFile string) (*InstContext, error) {
-	oldSource, err := ioutil.ReadFile(goSrcFile)
-	if err != nil {
-		return nil, err
-	}
-
-	tokenFSet := token.NewFileSet()
-	ast, err := parser.ParseFile(tokenFSet, goSrcFile, oldSource, parser.ParseComments)
-	if err != nil {
-		return nil, err
-	}
-	return &InstContext{
-		File: goSrcFile,
-		Ast:  ast,
-	}, nil
 }

@@ -11,6 +11,11 @@ func (p *MockPass) Name() string {
 func (p *MockPass) Run(iCtx *InstContext) error {
 	return nil
 }
+
+func (p *MockPass) Deps() []string {
+	return nil
+}
+
 func TestAddGetRegistryPass(t *testing.T) {
 	reg := NewPassRegistry()
 	p := &MockPass{}

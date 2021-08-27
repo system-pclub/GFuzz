@@ -47,16 +47,31 @@ func main() {
 		goSrcFiles = append(goSrcFiles, files...)
 	}
 
+	if opts.File != "" {
+		// TODO: validate file:
+		// if exist, if .go
+		goSrcFiles = append(goSrcFiles, opts.File)
+	}
+
 	// handle go source files
+	// TODO: use goroutine to accelerate
 	for _, src := range goSrcFiles {
 		iCtx, err := inst.NewInstContext(src)
 		if err != nil {
-			log.Panic(err)
+			log.Print(err)
+			continue
 		}
 
 		err = inst.Run(iCtx, reg, passes)
 		if err != nil {
-			log.Panic(err)
+			log.Print(err)
+			continue
+		}
+
+		err = iCtx.Dump()
+		if err != nil {
+			log.Print(err)
+			continue
 		}
 	}
 }
