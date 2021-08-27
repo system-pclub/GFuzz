@@ -8,6 +8,8 @@ Fuzzing concurrent Go programs
   - [Packages](#packages)
     - [pkg/gooracle](#pkggooracle)
     - [pkg/selefcm (select enforcement)](#pkgselefcm-select-enforcement)
+    - [pkg/inst (instrumentation)](#pkginst-instrumentation)
+      - [Built-in Passes](#built-in-passes)
   - [Dev](#dev)
 
 
@@ -33,6 +35,61 @@ Package `gooracle` is part of GFuzz Oracle. This package requires patched golang
 ### pkg/selefcm (select enforcement)
 
 Package `selefcm` provides a list of strategies for application to choose proper select case by given a list of select choices (optional)
+
+### pkg/inst (instrumentation)
+
+Package `inst` provides modifying golang source code framework and utilities. It provides `InstPass` interface to easily write your own pass to instrument/modify/analysis golang source code.
+
+#### Built-in Passes
+
+<table>
+<tr>
+<td> Pass </td>
+ <td> Description </td> 
+ <td>Example</td>
+</tr>
+
+<tr>
+<td>channel-record</td>
+<td>record channel related operations like make, send, recv, close</td>
+<td>
+
+```go
+//before
+ch := make(chan int)
+
+//after
+
+ch := make(chan int
+gooracle.StoreChMakeInfo(ch, <some random number>)
+```
+</td>
+</tr>
+
+<tr>
+<td>mutex-record</td>
+<td>record mutex related operations </td>
+<td></td>
+</tr>
+
+<tr>
+<td>wg-record</td>
+<td>record WaitGroup related operations</td>
+<td></td>
+</tr>
+
+<tr>
+<td>cv-record</td>
+<td>record Conditional Variable related operations</td>
+<td></td>
+</tr>
+
+<tr>
+<td>select-enforce</td>
+<td>transform select into select with integer case (each case is one of original case and timeout)</td>
+<td></td>
+</tr>
+
 
 ## Dev
 Since large parts of GFuzz are required instrumented Golang environment, we would suggest develop/test in universal Docker environment.
