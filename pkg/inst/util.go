@@ -5,6 +5,7 @@ import (
 	"go/ast"
 	"go/format"
 	"go/token"
+	"io/fs"
 	"os"
 
 	"golang.org/x/tools/go/ast/astutil"
@@ -34,10 +35,20 @@ func AddImport(fs *token.FileSet, ast *ast.File, name string, path string) error
 // DumpAstFile serialized AST to given file
 func DumpAstFile(fset *token.FileSet, astFile *ast.File, dstFile string) error {
 	fi, err := os.Stat(dstFile)
+	var mode fs.FileMode
 	if err != nil {
-		return err
+		// return any error except not exist
+		if !os.IsNotExist(err) {
+			return err
+		} else {
+			// if file not exist, use default mode
+			mode = 0666
+		}
+	} else {
+		// if file exist, use same mode
+		mode = fi.Mode()
 	}
-	w, err := os.OpenFile(dstFile, os.O_WRONLY, fi.Mode())
+	w, err := os.OpenFile(dstFile, os.O_CREATE|os.O_WRONLY, mode)
 	defer w.Close()
 	if err != nil {
 		return err

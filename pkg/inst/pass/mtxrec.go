@@ -18,7 +18,7 @@ func (p *MtxRecPass) Name() string {
 
 func (p *MtxRecPass) Run(iCtx *inst.InstContext) error {
 	inst.AddImport(iCtx.FS, iCtx.AstFile, "gooracle", "gooracle")
-	iCtx.AstFile = astutil.Apply(iCtx.AstFile, instChOps, nil).(*ast.File)
+	iCtx.AstFile = astutil.Apply(iCtx.AstFile, instMtxOps, nil).(*ast.File)
 	return nil
 }
 

@@ -18,7 +18,7 @@ func (p *WgRecPass) Name() string {
 
 func (p *WgRecPass) Run(iCtx *inst.InstContext) error {
 	inst.AddImport(iCtx.FS, iCtx.AstFile, "gooracle", "gooracle")
-	iCtx.AstFile = astutil.Apply(iCtx.AstFile, instChOps, nil).(*ast.File)
+	iCtx.AstFile = astutil.Apply(iCtx.AstFile, instWgOps, nil).(*ast.File)
 	return nil
 }
 

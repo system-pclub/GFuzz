@@ -7,7 +7,7 @@ import (
 )
 
 var opts struct {
-	Passes []string `long:"passes" description:"A list of passes you want to use in this instrumentation"`
+	Passes []string `long:"pass" description:"A list of passes you want to use in this instrumentation"`
 	Dir    string   `long:"dir" description:"Instrument all go source files under this directory"`
 	File   string   `long:"file" description:"Instrument single go source file"`
 	Out    string   `long:"out" description:"Output instrumented golang source file to the given file. Only allow when instrumenting single golang source file"`
