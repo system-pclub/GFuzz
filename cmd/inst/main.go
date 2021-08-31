@@ -13,6 +13,10 @@ func main() {
 
 	// register passes
 	reg.AddPass(&pass.SelEfcmPass{})
+	reg.AddPass(&pass.ChRecPass{})
+	reg.AddPass(&pass.CvRecPass{})
+	reg.AddPass(&pass.MtxRecPass{})
+	reg.AddPass(&pass.WgRecPass{})
 
 	// prepare passes
 	var passes []string
@@ -49,6 +53,10 @@ func main() {
 		goSrcFiles = append(goSrcFiles, opts.File)
 	}
 
+	if opts.Out != "" && len(goSrcFiles) != 1 {
+		log.Panic("--out is only allow with instrumenting single golang source file")
+	}
+
 	// handle go source files
 	// TODO: use goroutine to accelerate
 	for _, src := range goSrcFiles {
@@ -64,7 +72,12 @@ func main() {
 			continue
 		}
 
-		err = iCtx.Dump()
+		if opts.Out != "" {
+			err = inst.DumpAstFile(iCtx.FS, iCtx.AstFile, opts.Out)
+		} else {
+			// dump AST in-place
+			err = inst.DumpAstFile(iCtx.FS, iCtx.AstFile, iCtx.File)
+		}
 		if err != nil {
 			log.Print(err)
 			continue

@@ -17,11 +17,11 @@ import (
 type SelEfcmPass struct{}
 
 func (p *SelEfcmPass) Name() string {
-	return "select-enforce"
+	return "selefcm"
 }
 
 func (p *SelEfcmPass) Run(iCtx *inst.InstContext) error {
-	addImport(iCtx.FS, iCtx.AstFile, "gooracle", "gooracle")
+	inst.AddImport(iCtx.FS, iCtx.AstFile, "gooracle", "gooracle")
 	newAST := astutil.Apply(iCtx.AstFile, preWithoutSelect, nil)
 	newASTAfterSelectCopy := astutil.Apply(newAST, preOnlySelect, nil)
 	iCtx.AstFile = newASTAfterSelectCopy.(*ast.File)

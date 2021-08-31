@@ -1,14 +1,16 @@
-package pass
+package inst
 
 import (
 	"fmt"
 	"go/ast"
+	"go/format"
 	"go/token"
+	"os"
 
 	"golang.org/x/tools/go/ast/astutil"
 )
 
-func addImport(fs *token.FileSet, ast *ast.File, name string, path string) error {
+func AddImport(fs *token.FileSet, ast *ast.File, name string, path string) error {
 	for _, vecImportSpec := range astutil.Imports(fs, ast) {
 		for _, importSpec := range vecImportSpec {
 			if importSpec != nil && importSpec.Name != nil {
@@ -25,6 +27,25 @@ func addImport(fs *token.FileSet, ast *ast.File, name string, path string) error
 	ok := astutil.AddNamedImport(fs, ast, name, path)
 	if !ok {
 		return fmt.Errorf("failed to add import %s %s", name, path)
+	}
+	return nil
+}
+
+// DumpAstFile serialized AST to given file
+func DumpAstFile(fset *token.FileSet, astFile *ast.File, dstFile string) error {
+	fi, err := os.Stat(dstFile)
+	if err != nil {
+		return err
+	}
+	w, err := os.OpenFile(dstFile, os.O_WRONLY, fi.Mode())
+	defer w.Close()
+	if err != nil {
+		return err
+	}
+
+	err = format.Node(w, fset, astFile)
+	if err != nil {
+		return err
 	}
 	return nil
 }
