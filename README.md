@@ -47,49 +47,52 @@ Package `inst` provides modifying golang source code framework and utilities. It
 <tr>
 <th> Pass </th>
  <th> Description </th> 
+ <th> Source</th>
  <th>Example</th>
 </tr>
 
 <tr>
-<td>channel-record</td>
+<td>chrec</td>
 <td>record channel related operations like make, send, recv, close</td>
-<td>
-
-```go
-//before
-ch := make(chan int)
-
-//after
-
-ch := make(chan int
-gooracle.StoreChMakeInfo(ch, <some random number>)
-```
-</td>
+<td><a href="pkg/inst/pass/chrec.go">pkg/inst/pass/chrec.go</a></td>
+<td><a href="examples/inst/chrec">examples/inst/chrec</a></td>
 </tr>
 
 <tr>
-<td>mutex-record</td>
+<td>mtxrec</td>
 <td>record mutex related operations </td>
-<td></td>
+<td><a href="pkg/inst/pass/mtxrec.go">pkg/inst/pass/mtxrec.go</a></td>
+<td><a href="examples/inst/mtxrec">examples/inst/mtxrec</a></td>
 </tr>
 
 <tr>
-<td>wg-record</td>
+<td>wgrec</td>
 <td>record WaitGroup related operations</td>
-<td></td>
+<td><a href="pkg/inst/pass/wgrec.go">pkg/inst/pass/wgrec.go</a></td>
+<td><a href="examples/inst/wgrec">examples/inst/wgrec</a></td>
 </tr>
 
 <tr>
-<td>cv-record</td>
+<td>cvrec</td>
 <td>record Conditional Variable related operations</td>
-<td></td>
+<td><a href="pkg/inst/pass/cvrec.go">pkg/inst/pass/cvrec.go</a></td>
+<td><a href="examples/inst/cvrec">examples/inst/cvrec</a></td>
 </tr>
 
 <tr>
-<td>select-enforce</td>
+<td>selefcm</td>
 <td>transform select into select with integer case (each case is one of original case and timeout)</td>
-<td></td>
+<td><a href="pkg/inst/pass/selefcm.go">pkg/inst/pass/selefcm.go</a></td>
+<td><a href="examples/inst/selefcm">examples/inst/selefcm</a></td>
 </tr>
+
+<tr>
+<td>oracle</td>
+<td>insert function call to trigger oracle at the beginning of Test function or main program (TODO)</td>
+<td><a href="pkg/inst/pass/oracle.go">pkg/inst/pass/oracle.go</a></td>
+<td><a href="examples/inst/oracle">examples/inst/oracle</a></td>
+</tr>
+
 </table>
 
 ## Dev

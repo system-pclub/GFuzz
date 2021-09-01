@@ -3,3 +3,4 @@
 ./bin/inst --file examples/inst/mtxrec/before.go --out examples/inst/mtxrec/after.go --pass mtxrec
 ./bin/inst --file examples/inst/selefcm/before.go --out examples/inst/selefcm/after.go --pass selefcm
 ./bin/inst --file examples/inst/wgrec/before.go --out examples/inst/wgrec/after.go --pass wgrec
+./bin/inst --file examples/inst/oracle/before.go --out examples/inst/oracle/after.go --pass oracle

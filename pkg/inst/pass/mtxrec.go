@@ -58,7 +58,6 @@ func instMtxOps(c *astutil.Cursor) bool {
 						Value:    strconv.Itoa(intID),
 					}})
 					c.InsertBefore(newCall)
-					boolNeedInstrument = true // We need to import gooracle
 					records = append(records, strconv.Itoa(intID)+":trad"+op)
 					Uint16OpID++
 				}

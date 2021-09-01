@@ -17,6 +17,7 @@ func main() {
 	reg.AddPass(&pass.CvRecPass{})
 	reg.AddPass(&pass.MtxRecPass{})
 	reg.AddPass(&pass.WgRecPass{})
+	reg.AddPass(&pass.OraclePass{})
 
 	// prepare passes
 	var passes []string
