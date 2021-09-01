@@ -8,7 +8,7 @@ import (
 func Hello() {
 	ch1 := make(chan int)
 	ch2 := make(chan struct{})
-	switch gooracle.ReadSelect("/gfuzz/examples/inst/selefcm/before.go", 9, 3) {
+	switch gooracle.ReadSelect("/gfuzz/_examples/inst/selefcm/before.go", 9, 3) {
 	case 0:
 		select {
 		case <-ch1:
