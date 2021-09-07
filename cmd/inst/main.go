@@ -4,9 +4,11 @@ import (
 	"gfuzz/pkg/inst"
 	"gfuzz/pkg/inst/pass"
 	"log"
+	"os"
 )
 
 func main() {
+
 	parseFlags()
 
 	reg := inst.NewPassRegistry()
@@ -56,6 +58,11 @@ func main() {
 
 	if opts.Out != "" && len(goSrcFiles) != 1 {
 		log.Panic("--out is only allow with instrumenting single golang source file")
+	}
+
+	if len(goSrcFiles) == 0 {
+		log.Println("No go source file(s) found")
+		os.Exit(0)
 	}
 
 	// handle go source files
