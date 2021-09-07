@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"os"
 
 	flags "github.com/jessevdk/go-flags"
 )
@@ -17,8 +17,17 @@ var opts struct {
 }
 
 func parseFlags() {
-	_, err := flags.Parse(&opts)
-	if err != nil {
-		log.Panic(err)
+
+	if _, err := flags.Parse(&opts); err != nil {
+		switch flagsErr := err.(type) {
+		case flags.ErrorType:
+			if flagsErr == flags.ErrHelp {
+				os.Exit(0)
+			}
+			os.Exit(1)
+		default:
+			os.Exit(1)
+		}
 	}
+
 }
