@@ -1,4 +1,4 @@
-package selectstrtg
+package selefcm
 
 import (
 	"runtime"
