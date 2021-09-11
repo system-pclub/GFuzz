@@ -1,0 +1,11 @@
+name: gfuzz-ci
+on: [push, pull_request]
+jobs:
+  gfuzz-unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Prepare docker image
+        run: docker build -t gfuzz:test .
+      - name: Run unit tests
+        run: docker run -v "$GITHUB_WORKSPACE:/gfuzz" gfuzz:test make test
