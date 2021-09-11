@@ -3,17 +3,20 @@ package selefcm
 import (
 	"runtime"
 	"strconv"
+	"sync/atomic"
 )
 
 // SelectCaseInOrder will return case number according to the inputs' order.
 type SelectCaseInOrder struct {
-	// select identifer (filname + line number) => case recorder
+	// id2Cr is map from: select identifer (filname + line number) => case recorder
+	// We don't need to add mutex is here since it aims to be read-only after initialization:
+	// means no new SelectCaseRecorder will be added.
 	id2Cr map[string]*SelectCaseRecorder
 }
 
 type SelectCaseRecorder struct {
 	inputs       []runtime.SelectInfo
-	lastInputIdx int
+	lastInputIdx int32
 }
 
 // NewSelectCaseInOrder creates a SelectCaseInOrder by given list of inputs.
@@ -43,8 +46,17 @@ func (s *SelectCaseInOrder) GetCase(filename string, line, numOfCases int) int {
 	if !exist {
 		return -1
 	}
+	var newIdx int32
 
-	idx := (cr.lastInputIdx + 1) % len(cr.inputs)
-	cr.lastInputIdx = idx
-	return cr.inputs[idx].IntPrioCase
+	// lock-free update lastInputIdx
+	for {
+		oldIdx := atomic.LoadInt32(&cr.lastInputIdx)
+		newIdx = (oldIdx + 1) % int32(len(cr.inputs))
+		res := atomic.CompareAndSwapInt32(&cr.lastInputIdx, oldIdx, newIdx)
+		if res {
+			break
+		}
+	}
+
+	return cr.inputs[newIdx].IntPrioCase
 }
