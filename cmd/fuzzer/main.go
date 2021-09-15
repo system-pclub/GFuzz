@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -13,6 +14,15 @@ var (
 
 func main() {
 	parseFlags()
+
+	if opts.Version {
+		fmt.Printf("GFuzz Version: %s Build: %s", Version, Build)
+		os.Exit(0)
+	}
+
+	if opts.OutputDir == "" {
+		log.Fatal("--outputDir is required")
+	}
 
 	if _, err := os.Stat(opts.OutputDir); os.IsNotExist(err) {
 		err := os.Mkdir(opts.OutputDir, os.ModePerm)
