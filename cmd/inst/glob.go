@@ -1,10 +1,9 @@
 package main
 
 import (
-	"os"
 	"strings"
 
-	"github.com/bmatcuk/doublestar/v4"
+	"gfuzz/pkg/utils/fs"
 )
 
 func listGoSrcByDir(dir string) ([]string, error) {
@@ -13,14 +12,5 @@ func listGoSrcByDir(dir string) ([]string, error) {
 		ptn = dir + "/"
 	}
 	ptn = ptn + "**/*.go"
-	return listGoSrcByGlob(ptn)
-}
-
-func listGoSrcByGlob(glob string) ([]string, error) {
-	fsys := os.DirFS(".")
-	matches, err := doublestar.Glob(fsys, glob)
-	if err != nil {
-		return nil, err
-	}
-	return matches, nil
+	return fs.ListFilesByGlob(ptn)
 }

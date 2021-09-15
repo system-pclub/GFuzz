@@ -3,6 +3,8 @@ package main
 import (
 	"gfuzz/pkg/inst"
 	"gfuzz/pkg/inst/pass"
+	"gfuzz/pkg/utils/fs"
+
 	"log"
 	"os"
 )
@@ -34,7 +36,7 @@ func main() {
 
 	if len(opts.Args.Globs) > 0 {
 		for _, g := range opts.Args.Globs {
-			files, err := listGoSrcByGlob(g)
+			files, err := fs.ListFilesByGlob(g)
 			if err != nil {
 				log.Panic(err)
 			}
