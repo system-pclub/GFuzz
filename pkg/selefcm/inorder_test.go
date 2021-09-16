@@ -1,29 +1,25 @@
 package selefcm
 
 import (
-	"runtime"
 	"testing"
 )
 
 func TestNewSelectCaseInOrderHappy(t *testing.T) {
-	inputs := []runtime.SelectInfo{
-		runtime.SelectInfo{
-			StrFileName: "abc.go",
-			StrLineNum:  "1",
-			IntNumCase:  3,
-			IntPrioCase: 0,
+	inputs := []SelEfcm{
+		{
+			ID:         "abc.go:1",
+			NumOfCases: 3,
+			Case:       0,
 		},
-		runtime.SelectInfo{
-			StrFileName: "abc.go",
-			StrLineNum:  "1",
-			IntNumCase:  3,
-			IntPrioCase: 1,
+		{
+			ID:         "abc.go:1",
+			NumOfCases: 3,
+			Case:       1,
 		},
-		runtime.SelectInfo{
-			StrFileName: "abc.go",
-			StrLineNum:  "1",
-			IntNumCase:  3,
-			IntPrioCase: 2,
+		{
+			ID:         "abc.go:1",
+			NumOfCases: 3,
+			Case:       2,
 		},
 	}
 	strat := NewSelectCaseInOrder(inputs)
@@ -32,54 +28,51 @@ func TestNewSelectCaseInOrderHappy(t *testing.T) {
 		t.FailNow()
 	}
 
-	if len(cr.inputs) != 3 {
+	if len(cr.efcms) != 3 {
 		t.FailNow()
 	}
 }
 
 func TestNewSelectCaseInOrderGetCaseHit(t *testing.T) {
-	inputs := []runtime.SelectInfo{
-		runtime.SelectInfo{
-			StrFileName: "abc.go",
-			StrLineNum:  "1",
-			IntNumCase:  3,
-			IntPrioCase: 0,
+	inputs := []SelEfcm{
+		{
+			ID:         "abc.go:1",
+			NumOfCases: 3,
+			Case:       0,
 		},
-		runtime.SelectInfo{
-			StrFileName: "abc.go",
-			StrLineNum:  "1",
-			IntNumCase:  3,
-			IntPrioCase: 1,
+		{
+			ID:         "abc.go:1",
+			NumOfCases: 3,
+			Case:       1,
 		},
-		runtime.SelectInfo{
-			StrFileName: "abc.go",
-			StrLineNum:  "1",
-			IntNumCase:  3,
-			IntPrioCase: 2,
+		{
+			ID:         "abc.go:1",
+			NumOfCases: 3,
+			Case:       2,
 		},
 	}
 	strat := NewSelectCaseInOrder(inputs)
-	if strat.GetCase("abc.go", 1, 3) != 0 {
+	if strat.GetCase("abc.go:1") != 0 {
 		t.FailNow()
 	}
 
-	if strat.GetCase("abc.go", 1, 3) != 1 {
+	if strat.GetCase("abc.go:1") != 1 {
 		t.FailNow()
 	}
 
-	if strat.GetCase("abc.go", 1, 3) != 2 {
+	if strat.GetCase("abc.go:1") != 2 {
 		t.FailNow()
 	}
 
-	if strat.GetCase("abc.go", 1, 3) != 0 {
+	if strat.GetCase("abc.go:1") != 0 {
 		t.FailNow()
 	}
 }
 
 func TestNewSelectCaseInOrderGetCaseNoHit(t *testing.T) {
-	inputs := []runtime.SelectInfo{}
+	inputs := []SelEfcm{}
 	strat := NewSelectCaseInOrder(inputs)
-	if strat.GetCase("abc.go", 1, 3) != -1 {
+	if strat.GetCase("abc.go:1") != -1 {
 		t.FailNow()
 	}
 

@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"gfuzz/pkg/exec"
+	"gfuzz/pkg/fuzz"
 	"log"
 	"os"
 	"path/filepath"
@@ -15,6 +17,7 @@ var (
 func main() {
 	parseFlags()
 
+	// flags sanity check
 	if opts.Version {
 		fmt.Printf("GFuzz Version: %s Build: %s", Version, Build)
 		os.Exit(0)
@@ -22,6 +25,10 @@ func main() {
 
 	if opts.OutputDir == "" {
 		log.Fatal("--outputDir is required")
+	}
+
+	if opts.InstStats == "" {
+		log.Fatal("--instStats is required")
 	}
 
 	if _, err := os.Stat(opts.OutputDir); os.IsNotExist(err) {
@@ -39,4 +46,14 @@ func main() {
 
 	log.Printf("GFuzz Version: %s Build: %s", Version, Build)
 
+	var execs []exec.Executable
+	if opts.TestBinGlobs != "" {
+		execs = exec.ListExecutablesFromTestBinGlobs(opts.TestBinGlobs)
+	}
+
+	// prepare fuzzing configuration
+	config := fuzz.NewConfig()
+
+	// start fuzzing
+	fuzz.Main(execs, config)
 }

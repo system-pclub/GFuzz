@@ -1,13 +1,23 @@
 VERSION=`cat VERSION`
 BUILD=`git log -1 --format=%h`-`date '+%s'`
 
-FUZZER_LD_FLAGS="-X main.Version=${VERSION} -X main.Build=${BUILD}"
+BIN_FUZZER_LD_FLAGS="-X main.Version=${VERSION} -X main.Build=${BUILD}"
+BIN_INST_LD_FLAGS="-X main.Version=${VERSION} -X main.Build=${BUILD}"
 
-inst:
+.PHONY: all test clean tidy
+all: bin/inst bin/fuzzer
+
+tidy:
 	go mod tidy
-	go build -o bin/inst gfuzz/cmd/inst
 
-fuzzer:
-	go build -o bin/fuzzer -ldflags $(FUZZER_LD_FLAGS) gfuzz/cmd/fuzzer
+bin/inst: tidy
+	go build -o bin/inst -ldflags $(BIN_INST_LD_FLAGS) gfuzz/cmd/inst
+
+bin/fuzzer: tidy
+	go build -o bin/fuzzer -ldflags $(BIN_FUZZER_LD_FLAGS) gfuzz/cmd/fuzzer
+
 test:
 	go test -v gfuzz/pkg/...
+
+clean:
+	rm -rf bin

@@ -1,6 +1,7 @@
 package pass
 
 import (
+	"fmt"
 	"gfuzz/pkg/inst"
 	"go/ast"
 	"go/token"
@@ -93,9 +94,7 @@ func preOnlySelect(c *astutil.Cursor) bool {
 			oriSelect.VecCommClause = append(oriSelect.VecCommClause, commClause)
 			oriSelect.VecOp = append(oriSelect.VecOp, commClause.Comm)
 			vecContent := []ast.Stmt{}
-			for _, stmt := range commClause.Body {
-				vecContent = append(vecContent, stmt)
-			}
+			vecContent = append(vecContent, commClause.Body...)
 			oriSelect.VecBody = append(oriSelect.VecBody, vecContent)
 		}
 
@@ -103,15 +102,11 @@ func preOnlySelect(c *astutil.Cursor) bool {
 		newSwitch := &ast.SwitchStmt{
 			Switch: 0,
 			Init:   nil,
-			Tag: NewArgCall("gooracle", "ReadSelect", []ast.Expr{
+			Tag: NewArgCall("gooracle", "GetSelEfcmSwitchCaseIdx", []ast.Expr{
 				&ast.BasicLit{ // first parameter: filename
 					ValuePos: 0,
 					Kind:     token.STRING,
-					Value:    "\"" + positionOriSelect.Filename + "\"",
-				}, &ast.BasicLit{ // second parameter: linenumber of original select
-					ValuePos: 0,
-					Kind:     token.INT,
-					Value:    strconv.Itoa(positionOriSelect.Line),
+					Value:    fmt.Sprintf("\"%s:%d\"", positionOriSelect.Filename, positionOriSelect.Line),
 				}, &ast.BasicLit{
 					ValuePos: 0,
 					Kind:     token.INT,

@@ -1,17 +1,28 @@
 package main
 
 import (
+	"fmt"
 	"gfuzz/pkg/inst"
 	"gfuzz/pkg/inst/pass"
+	"gfuzz/pkg/inst/stats"
 	"gfuzz/pkg/utils/fs"
-
 	"log"
 	"os"
+)
+
+var (
+	Version string
+	Build   string
 )
 
 func main() {
 
 	parseFlags()
+
+	if opts.Version {
+		fmt.Printf("GFuzz Version: %s Build: %s", Version, Build)
+		os.Exit(0)
+	}
 
 	reg := inst.NewPassRegistry()
 
@@ -91,6 +102,14 @@ func main() {
 		if err != nil {
 			log.Print(err)
 			continue
+		}
+	}
+
+	// handle output
+	if opts.StatsOut != "" {
+		err := stats.ToFile(opts.StatsOut)
+		if err != nil {
+			log.Fatalf("writing stats to %s: %s", opts.StatsOut, err)
 		}
 	}
 }
