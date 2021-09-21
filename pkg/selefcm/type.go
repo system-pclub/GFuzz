@@ -12,14 +12,11 @@ type SelEfcm struct {
 	// ID is where select is, usually is filename + linenumber
 	ID string `json:"id"`
 
-	// Total number of cases of this select
-	NumOfCases int `json:"num_of_cases"`
-
 	// Case to be enforced
 	Case int `json:"case"`
 }
 
-type SelEfcmInput struct {
+type SelEfcmConfig struct {
 	SelTimeout int       `json:"sel_timeout"`
 	Efcms      []SelEfcm `json:"efcms"`
 }

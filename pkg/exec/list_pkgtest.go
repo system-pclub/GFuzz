@@ -53,7 +53,7 @@ func parseGoCmdListOutput(output string) ([]string, error) {
 
 // ListTestsInPackage lists all tests in the given package
 // pkg can be ./... to search in all packages
-func ListTestsInPackage(goModRootPath string, pkg string) ([]*GoTest, error) {
+func ListExecutablesInPackage(goModRootPath string, pkg string) ([]Executable, error) {
 	if pkg == "" {
 		pkg = "./..."
 	}
@@ -86,9 +86,9 @@ func ListTestsInPackage(goModRootPath string, pkg string) ([]*GoTest, error) {
 		return nil, err
 	}
 
-	goTests := make([]*GoTest, 0, len(testFuncs))
+	goTests := make([]Executable, 0, len(testFuncs))
 	for _, testFunc := range testFuncs {
-		goTests = append(goTests, &GoTest{
+		goTests = append(goTests, &GoPkgTest{
 			Func:    testFunc,
 			Package: pkg,
 		})
@@ -111,4 +111,31 @@ func parseGoCmdTestListOutput(output string) ([]string, error) {
 		}
 	}
 	return filtered, nil
+}
+
+func ListExecutablesFromGoModule(goModDir string) ([]Executable, error) {
+	// Find all tests in all packages
+	packages, err := ListPackages(goModDir)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list packages at %s: %v", goModDir, err)
+	}
+
+	var execs []Executable
+
+	// ListTestsInPackage utilized command `go test -list` which cannot be run in parallel if they share same go code file.
+	// Run parallel will cause `intput/output error` when `go test` tries to open file already opened by previous `go test` command.
+	// Using other methold like `find Test | grep` can find test name but cannot find package location
+	for _, pkg := range packages {
+
+		testsInPkg, err := ListExecutablesInPackage(goModDir, pkg)
+		if err != nil {
+			log.Printf("[ignored] failed to list tests at package %s: %v", pkg, err)
+			continue
+		}
+
+		execs = append(execs, testsInPkg...)
+
+	}
+
+	return execs, nil
 }

@@ -1,4 +1,4 @@
-package fuzz
+package fuzzer
 
 import (
 	"context"
@@ -13,15 +13,18 @@ import (
 	"strings"
 	"time"
 
-	fuzzerExec "gfuzz/pkg/fuzzer/exec"
+	gExec "gfuzz/pkg/exec"
+	"gfuzz/pkg/oraclert"
 )
 
-type RunTask struct {
-	id    string
-	stage FuzzStage
-	input *OracleRtInput
-	exec  fuzzerExec.Executable
-	entry *QueueEntry
+type ExecTask struct {
+	ID             string
+	OracleRtConfig *oraclert.Config
+	Exec           gExec.Executable
+}
+
+type ExecOutput struct {
+	OracleRtOutput *oraclert.Output
 }
 
 func getInputFilePath(outputDir string) (string, error) {
@@ -40,25 +43,6 @@ func getRecordFilePath(outputDir string) (string, error) {
 	return filepath.Abs(path.Join(outputDir, "record"))
 }
 
-func NewRunTask(input *Input, stage FuzzStage, entryIdx uint64, execCount int, entry *FuzzQueryEntry) (*RunTask, error) {
-
-	src := input.Src()
-
-	task := &RunTask{
-		input: input,
-		entry: entry,
-		stage: stage,
-		id:    fmt.Sprintf("%s-%s-%d-%d", src, stage, entryIdx, execCount),
-	}
-	return task, nil
-}
-
-func ShouldSkipRunTask(fuzzCtx *FuzzContext, task *RunTask) bool {
-	if task == nil {
-		return true
-	}
-	return ShouldSkipInput(fuzzCtx, task.input)
-}
 func Run(ctx context.Context, fuzzCtx *FuzzContext, task *RunTask) (*RunResult, error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -66,7 +50,7 @@ func Run(ctx context.Context, fuzzCtx *FuzzContext, task *RunTask) (*RunResult, 
 		}
 	}()
 
-	workerID := ctx.Value("workerID").(string)
+	logger := getWorkerLogger(ctx)
 
 	var err error
 	input := task.input

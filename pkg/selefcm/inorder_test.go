@@ -7,19 +7,16 @@ import (
 func TestNewSelectCaseInOrderHappy(t *testing.T) {
 	inputs := []SelEfcm{
 		{
-			ID:         "abc.go:1",
-			NumOfCases: 3,
-			Case:       0,
+			ID:   "abc.go:1",
+			Case: 0,
 		},
 		{
-			ID:         "abc.go:1",
-			NumOfCases: 3,
-			Case:       1,
+			ID:   "abc.go:1",
+			Case: 1,
 		},
 		{
-			ID:         "abc.go:1",
-			NumOfCases: 3,
-			Case:       2,
+			ID:   "abc.go:1",
+			Case: 2,
 		},
 	}
 	strat := NewSelectCaseInOrder(inputs)
@@ -36,19 +33,16 @@ func TestNewSelectCaseInOrderHappy(t *testing.T) {
 func TestNewSelectCaseInOrderGetCaseHit(t *testing.T) {
 	inputs := []SelEfcm{
 		{
-			ID:         "abc.go:1",
-			NumOfCases: 3,
-			Case:       0,
+			ID:   "abc.go:1",
+			Case: 0,
 		},
 		{
-			ID:         "abc.go:1",
-			NumOfCases: 3,
-			Case:       1,
+			ID:   "abc.go:1",
+			Case: 1,
 		},
 		{
-			ID:         "abc.go:1",
-			NumOfCases: 3,
-			Case:       2,
+			ID:   "abc.go:1",
+			Case: 2,
 		},
 	}
 	strat := NewSelectCaseInOrder(inputs)

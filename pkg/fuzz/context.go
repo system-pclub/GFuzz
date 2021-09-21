@@ -8,11 +8,10 @@ import (
 )
 
 // fuzzerContext is a global context during whole fuzzing process.
-var fuzzerContext *Context = NewContext()
+var fuzContext *Context = NewContext()
 
 // Context record all necessary information for help fuzzer to prioritize input and record process.
 type Context struct {
-	runTaskCh        chan *RunTask // task for worker to run
 	fuzzingQueue     *list.List
 	fqLock           sync.RWMutex // lock for fuzzingQueue
 	mainRecord       *Record

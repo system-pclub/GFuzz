@@ -1,34 +1,10 @@
 package oraclert
 
 import (
-	"gfuzz/pkg/oraclert/env"
-	"gfuzz/pkg/selefcm"
-	"io/ioutil"
-	"os"
 	"runtime"
 	"sync/atomic"
 	"time"
 )
-
-var (
-	efcmStrat  selefcm.SelectCaseStrategy
-	selTimeout int
-)
-
-func init() {
-	efcmFile := os.Getenv(env.GFUZZ_ENV_SELEFCM_FILE)
-	data, err := ioutil.ReadFile(efcmFile)
-	if err == nil {
-		l, err := selefcm.Deserilize(data)
-		if err == nil {
-			// We can create different strategies according to our needs
-			efcmStrat = selefcm.NewSelectCaseInOrder(l.Efcms)
-			selTimeout = l.SelTimeout
-		}
-	} else {
-		println(err)
-	}
-}
 
 // GetSelEfcmCaseIdx will be instrumented to each select in target program.
 func GetSelEfcmSwitchCaseIdx(selectID string) int {

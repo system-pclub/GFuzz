@@ -5,46 +5,22 @@ import (
 	"log"
 	"math/rand"
 
-	gfuzzExec "gfuzz/pkg/fuzzer/exec"
+	gExec "gfuzz/pkg/exec"
+	"gfuzz/pkg/oraclert"
 )
 
-// QueueEntry records the multiple run results for an input and history score
-// Notes:
-//   1. An input can be run multiple times
-//   2. An input will be randomly mutated to run
+// QueueEntry records all information about fuzzing progress for given executable
 type QueueEntry struct {
-	Idx                 uint64
-	Stage               FuzzStage
-	IsFavored           bool
-	BestScore           int
-	ExecutionCount      int
-	CurrInput           *OracleRtInput
-	Exec                gfuzzExec.Executable
-	CurrRecordHashSlice []string
+	Stage                FuzzStage
+	BestScore            int
+	ExecutionCount       int
+	OracleRtConfig       *oraclert.Config
+	Exec                 gExec.Executable
+	OracleRtConfigHashes []string
 }
 
 func (e *QueueEntry) String() string {
 	return fmt.Sprintf("%s:%s:%d", e.Exec, e.Stage, e.Idx)
-}
-
-func NewInitStageFuzzQueryEntryWithGoTest(test *GoTest) *QueueEntry {
-	return &QueueEntry{
-		Stage: InitStage,
-		CurrInput: &Input{
-			Note:      NotePrintInput,
-			GoTestCmd: test,
-		},
-	}
-}
-
-func NewInitStageFuzzQueryEntryWithCustomCmd(customCmd string) *QueueEntry {
-	return &QueueEntry{
-		Stage: InitStage,
-		CurrInput: &Input{
-			Note:      QueueEntry,
-			CustomCmd: customCmd,
-		},
-	}
 }
 
 // HandleFuzzQueryEntry will handle a single entry from fuzzCtx's fuzzingQueue
