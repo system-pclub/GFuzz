@@ -1,5 +1,0 @@
-package output
-
-func getSelEfcmHistory() {
-
-}

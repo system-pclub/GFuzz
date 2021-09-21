@@ -27,7 +27,6 @@ const (
 var GFuzzBenchmark bool = os.Getenv("GF_BENCHMARK") == "1"
 
 var StrTestPath string
-var BoolFirstRun bool = true
 var StrTestMod string
 var StrTestName string
 var StrTestFile string
@@ -50,6 +49,10 @@ type OracleEntry struct {
 
 func init() {
 	runtime.FnPointer2String = StrPointer
+}
+
+func StrPointer(v interface{}) string {
+	return fmt.Sprintf("%p", v)
 }
 
 var BoolOracleStarted bool = false // This variable is used to avoid this problem: a test invokes multiple tests, and so our
@@ -110,40 +113,9 @@ func BeforeRunFuzz() (result *OracleEntry) {
 	StrTestPath = os.Getenv("TestPath")
 	//StrTestPath ="/data/ziheng/shared/gotest/gotest/src/gotest/testdata/toyprogram"
 
-	// Create an output file and bound os.Stdout to it
-	//OpenOutputFile() // No need
-
 	// read input file
 	if GFuzzBenchmark {
-		BoolFirstRun = false
 		runtime.RecordSelectChoice = false
-	} else {
-		file, err := os.Open(FileNameOfInput())
-		if err != nil {
-			fmt.Println("Failed to open input file:", FileNameOfInput())
-			return
-		}
-		defer file.Close()
-
-		var text []string
-
-		scanner := bufio.NewScanner(file)
-		scanner.Split(bufio.ScanLines)
-
-		for scanner.Scan() {
-			text = append(text, scanner.Text())
-		}
-
-		if len(text) > 0 && text[0] == NotePrintInput {
-			runtime.RecordSelectChoice = true
-		} else {
-			BoolFirstRun = false
-		}
-
-		MapInput = ParseInputStr(text)
-		if MapInput == nil {
-			fmt.Println("Error when parsing input during text start: MapInput is nil")
-		}
 	}
 	CheckBugStart(result)
 	return
@@ -300,17 +272,9 @@ func CheckBugLate() {
 
 	// print record
 	// create output file using runtime's global variable
-	CreateRecordFile()
-
-	// print op-cov
-	// dump operation records
-	opFile := os.Getenv("GF_OP_COV_FILE")
-	if opFile != "" {
-		err := dumpOpRecordsToFile(opFile, opRecords)
-		if err != nil {
-			// print to error
-			println(err)
-		}
+	err = DumpOracleRtOutput(rtConfig)
+	if err != nil {
+		println("DumpOracleRtOutput", err)
 	}
 }
 
@@ -383,25 +347,13 @@ func AfterRunFuzz(entry *OracleEntry) {
 		return
 	}
 
-	// if this is the first run, create input file using runtime's global variable
-	if BoolFirstRun {
-		CreateInput()
+	err := DumpOracleRtOutput(rtConfig)
+	if err != nil {
+		println("DumpOracleRtOutput", err)
 	}
-
-	// create output file using runtime's global variable
-	CreateRecordFile()
 
 	CheckBugEnd(entry)
 
-	// dump operation records
-	opFile := os.Getenv("GF_OP_COV_FILE")
-	if opFile != "" {
-		err := dumpOpRecordsToFile(opFile, opRecords)
-		if err != nil {
-			// print to error
-			println(err)
-		}
-	}
 }
 
 // Only enables oracle

@@ -14,17 +14,21 @@ import (
 	"time"
 
 	gExec "gfuzz/pkg/exec"
-	"gfuzz/pkg/oraclert"
+	"gfuzz/pkg/oraclert/config"
+	"gfuzz/pkg/oraclert/output"
 )
 
 type ExecTask struct {
 	ID             string
-	OracleRtConfig *oraclert.Config
+	OracleRtConfig *config.Config
 	Exec           gExec.Executable
+	// OutputDir indicates the output directory
+	// for this execution
+	OutputDir string
 }
 
 type ExecOutput struct {
-	OracleRtOutput *oraclert.Output
+	OracleRtOutput *output.Output
 }
 
 func getInputFilePath(outputDir string) (string, error) {
@@ -58,7 +62,7 @@ func Run(ctx context.Context, fuzzCtx *FuzzContext, task *RunTask) (*RunResult, 
 	// Setting up related file paths
 
 	runOutputDir := path.Join(OutputDir, task.id)
-	err = createDir(runOutputDir)
+	err = fs.createDir(runOutputDir)
 	if err != nil {
 		return nil, err
 	}

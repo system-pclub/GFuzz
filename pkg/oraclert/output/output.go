@@ -1,15 +1,14 @@
 package output
 
 import (
-	"gfuzz/pkg/oraclert/config"
-	"gfuzz/pkg/selefcm"
+	"encoding/json"
 )
 
 type Output struct {
-	Tuples         map[uint32]uint32     `json:"tuple"`
-	Channels       map[string]ChanRecord `json:"channels"`
-	Ops            []string              `json:"ops"`
-	SelEfcmHistory []selefcm.SelEfcm     `json:"sel_efcm_history"`
+	Tuples   map[uint32]uint32     `json:"tuple"`
+	Channels map[string]ChanRecord `json:"channels"`
+	Ops      []uint16              `json:"ops"`
+	Selects  []SelectRecord        `json:"selects"`
 }
 
 type ChanRecord struct {
@@ -20,22 +19,25 @@ type ChanRecord struct {
 	PeakBuf   int    `json:"peak_buf"`
 }
 
-func GenerateOracleRtOutput(config *config.Config) *Output {
-	output := &Output{
-		Tuples: getTuples(),
-	}
-
-	if config.DumpSelEfcmHistory {
-
-	}
-
-	return output
+type SelectRecord struct {
+	ID     string `json:"id"`
+	Cases  uint   `json:"cases"`
+	Chosen uint   `json:"chosen"`
 }
 
-func Serialize() {
-
+func Serialize(o *Output) ([]byte, error) {
+	if o == nil {
+		return []byte{}, nil
+	}
+	return json.Marshal(o)
 }
 
-func Deserialize() {
+func Deserialize(data []byte) (*Output, error) {
+	o := Output{}
+	err := json.Unmarshal(data, &o)
+	if err != nil {
+		return nil, err
+	}
+	return &o, nil
 
 }

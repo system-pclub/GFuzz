@@ -8,8 +8,9 @@ import (
 // Config contains all information need to be passed to fuzz target (consumed by oracle runtime)
 type Config struct {
 	// SelEfcm, select enforcement
-	SelEfcm            selefcm.SelEfcmConfig `json:"selefcm"`
-	DumpSelEfcmHistory bool                  `json:"dump_sel_efcm_history"`
+	SelEfcm      selefcm.SelEfcmConfig `json:"selefcm"`
+	RecordSelect bool                  `json:"record_select"`
+	Output       string                `json:"output"`
 }
 
 func Serialize(l *Config) ([]byte, error) {
