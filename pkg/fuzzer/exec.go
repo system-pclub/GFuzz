@@ -4,144 +4,65 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	fexec "gfuzz/pkg/fuzz/exec"
 	"io/ioutil"
 	"log"
 	"os"
-	"os/exec"
-	"path"
-	"path/filepath"
 	"strings"
 	"time"
-
-	gExec "gfuzz/pkg/exec"
-	"gfuzz/pkg/oraclert/config"
-	"gfuzz/pkg/oraclert/output"
 )
 
-type ExecTask struct {
-	ID             string
-	OracleRtConfig *config.Config
-	Exec           gExec.Executable
-	// OutputDir indicates the output directory
-	// for this execution
-	OutputDir string
-}
-
-type ExecOutput struct {
-	OracleRtOutput *output.Output
-}
-
-func getInputFilePath(outputDir string) (string, error) {
-	return filepath.Abs(path.Join(outputDir, "input"))
-}
-
-func getOutputFilePath(outputDir string) (string, error) {
-	return filepath.Abs(path.Join(outputDir, "stdout"))
-}
-
-func getOpCovFilePath(outputDir string) (string, error) {
-	return filepath.Abs(path.Join(outputDir, "opcov"))
-}
-
-func getRecordFilePath(outputDir string) (string, error) {
-	return filepath.Abs(path.Join(outputDir, "record"))
-}
-
-func Run(ctx context.Context, fuzzCtx *FuzzContext, task *RunTask) (*RunResult, error) {
-	defer func() {
-		if r := recover(); r != nil {
-			log.Printf("[Task %s] recovered from panic in fuzzer", task.id)
-		}
-	}()
+func Run(ctx context.Context, input *fexec.Input) (*fexec.Output, error) {
 
 	logger := getWorkerLogger(ctx)
 
 	var err error
-	input := task.input
 
 	// Setting up related file paths
-
-	runOutputDir := path.Join(OutputDir, task.id)
-	err = fs.createDir(runOutputDir)
+	err = os.MkdirAll(input.OutputDir, os.ModePerm)
 	if err != nil {
 		return nil, err
 	}
 
-	gfInputFp, err := getInputFilePath(runOutputDir)
+	gfInputFp, err := input.GetInputFilePath()
 	if err != nil {
 		return nil, err
 	}
 
-	gfOutputFp, err := getOutputFilePath(runOutputDir)
+	gfOutputFp, err := input.GetOutputFilePath()
 	if err != nil {
 		return nil, err
 	}
-	gfRecordFp, err := getRecordFilePath(runOutputDir)
+	gfRtOutputFp, err := input.GetOracleRtOutputFilePath()
 	if err != nil {
 		return nil, err
 	}
-	// gfErrFp, err := getErrFilePath(runOutputDir)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	gfOpCovFp, err := getOpCovFilePath(runOutputDir)
-	if err != nil {
-		return nil, err
-	}
-
-	boolFirstRun := input.Note == NotePrintInput
 
 	// Create the input file into disk
-	err = SerializeInput(input, gfInputFp)
+	iBytes, err := fexec.Serialize(input)
 	if err != nil {
 		return nil, err
 	}
-
-	var globalTuple string
-	if GlobalTuple {
-		globalTuple = "1"
-	} else {
-		globalTuple = "0"
+	err = os.WriteFile(gfInputFp, iBytes, os.ModePerm)
+	if err != nil {
+		return nil, err
 	}
 
 	// prepare timeout context
-	runCtx, cancel := context.WithTimeout(ctx, time.Duration(3)*time.Minute)
+	cmdCtx, cancel := context.WithTimeout(ctx, time.Duration(3)*time.Minute)
 	defer cancel()
 
-	var cmd *exec.Cmd
-	if task.input.GoTestCmd != nil {
-		if task.input.GoTestCmd.Bin != "" {
-			// Since golang's compiled test can only be one per package, so we just assume the test func must exist in the given binary
-			cmd = exec.CommandContext(runCtx, task.input.GoTestCmd.Bin, "-test.timeout", "1m", "-test.parallel", "1", "-test.v", "-test.run", input.GoTestCmd.Func)
-		} else {
-			var pkg = input.GoTestCmd.Package
-			if pkg == "" {
-				pkg = "./..."
-			}
-			cmd = exec.CommandContext(runCtx, "go", "test", "-timeout", "1m", "-v", "-run", input.GoTestCmd.Func, pkg)
-		}
-	} else if task.input.CustomCmd != "" {
-		cmds := strings.SplitN(task.input.CustomCmd, " ", 2)
-		cmd = exec.CommandContext(runCtx, cmds[0], cmds[1])
-	} else {
-		return nil, fmt.Errorf("either testname or custom command is required")
+	cmd, err := input.Exec.GetCmd(cmdCtx)
+	if err != nil {
+		return nil, err
 	}
-	cmd.Dir = TargetGoModDir
 
 	// setting up environment variables
 	env := os.Environ()
 	env = append(env, fmt.Sprintf("GF_RECORD_FILE=%s", gfRecordFp))
 	env = append(env, fmt.Sprintf("GF_OUTPUT_FILE=%s", gfOutputFp))
 	env = append(env, fmt.Sprintf("GF_INPUT_FILE=%s", gfInputFp))
-	env = append(env, fmt.Sprintf("GF_OP_COV_FILE=%s", gfOpCovFp))
-	env = append(env, fmt.Sprintf("BitGlobalTuple=%s", globalTuple))
-	env = append(env, fmt.Sprintf("GF_TIME_DIVIDE=%d", TimeDivide))
-	if ScoreSdk {
-		env = append(env, "GF_SCORE_SDK=1")
-	}
-	if ScoreAllPrim {
-		env = append(env, "GF_SCORE_TRAD=1")
-	}
+
 	if GoRoot != "" {
 		env = append(env, fmt.Sprintf("GOROOT=%s", GoRoot))
 	}
@@ -169,28 +90,6 @@ func Run(ctx context.Context, fuzzCtx *FuzzContext, task *RunTask) (*RunResult, 
 		if errors.Is(runErr, context.DeadlineExceeded) {
 			timeout = true
 		}
-	}
-
-	// Read the newly printed input file if this is the first run
-	var retInput *Input
-	if boolFirstRun {
-		log.Printf("[Worker %s][Task %s] first run, reading input file %s", workerID, task.id, gfInputFp)
-		bytes, err := ioutil.ReadFile(gfInputFp)
-		if err != nil {
-			return nil, err
-		}
-
-		retInput, err = ParseInputFile(string(bytes))
-		if err != nil {
-			return nil, err
-		}
-
-		// assign missing parts in input file
-		retInput.GoTestCmd = task.input.GoTestCmd
-		retInput.CustomCmd = task.input.CustomCmd
-
-	} else {
-		retInput = nil
 	}
 
 	// Read the printed record file

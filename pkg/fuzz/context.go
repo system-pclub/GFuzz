@@ -2,32 +2,24 @@ package fuzz
 
 import (
 	"container/list"
+	"gfuzz/pkg/exec"
 	"sync"
 	"sync/atomic"
 	"time"
 )
 
-// fuzzerContext is a global context during whole fuzzing process.
-var fuzContext *Context = NewContext()
-
 // Context record all necessary information for help fuzzer to prioritize input and record process.
 type Context struct {
-	fuzzingQueue     *list.List
-	fqLock           sync.RWMutex // lock for fuzzingQueue
+	q                *list.List
+	qLock            sync.RWMutex // lock for fuzzingQueue
 	mainRecord       *Record
 	allRecordHashMap map[string]struct{}
-
-	// A map from bug ID to stdout file contains that bug
-	allBugID2Fp  map[string]*BugMetrics
-	bugID2FpLock sync.RWMutex
 
 	// Metrics
 	numOfBugsFound      uint64
 	numOfRuns           uint64
 	numOfFuzzQueryEntry uint64
 	numOfTargets        uint64
-	targetStages        map[string]*TargetMetrics
-	targetStagesLock    sync.RWMutex
 	startAt             time.Time
 
 	// timeout counter: src => how many times timeout when running this src
@@ -37,39 +29,18 @@ type Context struct {
 }
 
 // NewContext returns a new FuzzerContext
-func NewContext() *Context {
+func NewContext(execs []exec.Executable) *Context {
+	q := list.New()
+	for e := range execs {
+		q.PushBack(e)
+	}
 	return &Context{
-		runTaskCh:        make(chan *RunTask),
-		fuzzingQueue:     list.New(),
+		q:                q,
 		mainRecord:       EmptyRecord(),
 		allRecordHashMap: make(map[string]struct{}),
-		allBugID2Fp:      make(map[string]*BugMetrics),
-		targetStages:     make(map[string]*TargetMetrics),
 		timeoutTargets:   make(map[string]uint32),
 		startAt:          time.Now(),
 	}
-}
-
-func (c *Context) DequeueQueryEntry() (*QueueEntry, error) {
-	c.fqLock.RLock()
-	if c.fuzzingQueue.Len() == 0 {
-		c.fqLock.RUnlock()
-		return nil, nil
-	}
-	elm := c.fuzzingQueue.Front()
-	c.fqLock.RUnlock()
-
-	c.fqLock.Lock()
-	entry := c.fuzzingQueue.Remove(elm)
-	c.fqLock.Unlock()
-	return entry.(*QueueEntry), nil
-
-}
-func (c *Context) EnqueueQueryEntry(e *QueueEntry) error {
-	c.fqLock.Lock()
-	c.fuzzingQueue.PushBack(e)
-	c.fqLock.Unlock()
-	return nil
 }
 
 func (c *Context) IncNumOfRun() {
@@ -100,25 +71,6 @@ func (c *Context) AddBugID(bugID string, filepath string) {
 	}
 
 }
-
-func (c *Context) UpdateTargetStage(target string, stage FuzzStage) {
-	c.targetStagesLock.Lock()
-	defer c.targetStagesLock.Unlock()
-
-	var track *TargetMetrics
-	var exist bool
-	if track, exist = c.targetStages[target]; !exist {
-		track = &TargetMetrics{
-			At: make(map[FuzzStage]time.Time),
-		}
-		c.targetStages[target] = track
-	}
-
-	if _, exist := track.At[stage]; !exist {
-		track.At[stage] = time.Now()
-	}
-}
-
 func (c *Context) UpdateTargetMaxCaseCov(target string, caseCov float32) {
 	c.targetStagesLock.Lock()
 	defer c.targetStagesLock.Unlock()

@@ -1,10 +1,12 @@
 package fuzzer
 
 import (
+	"context"
 	"gfuzz/pkg/exec"
 	"gfuzz/pkg/fuzz"
 	"log"
 	"os"
+	"time"
 )
 
 // Main starts fuzzing with a given list of executables and configuration
@@ -20,5 +22,28 @@ func Main(execs []exec.Executable, config *fuzz.Config) {
 
 	shuffle(execs)
 
-	startWorkers(config.MaxParallel)
+	fuzzCtx := fuzz.NewContext(execs)
+	eCh := make(chan *fuzz.QueueEntry, config.MaxParallel)
+
+	startWorkers(config.MaxParallel, func(ctx context.Context) {
+		queueEntryWorker(ctx, fuzzCtx, eCh)
+	})
+}
+
+// queueEntryWorker handles a queue entry receives from channel
+func queueEntryWorker(ctx context.Context, fuzzCtx *fuzz.Context, eCh chan *fuzz.QueueEntry) {
+	logger := getWorkerLogger(ctx)
+
+	for {
+		select {
+		case e := <-eCh:
+			err := fuzz.HandleQueueEntry(ctx, fuzzCtx, e)
+			if err != nil {
+				logger.Printf("[entry %s] error: %s", e, err)
+			}
+		case <-time.After(2 * time.Minute):
+			logger.Printf("Timeout. Exited.")
+			return
+		}
+	}
 }

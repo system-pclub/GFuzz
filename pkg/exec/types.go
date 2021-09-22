@@ -40,6 +40,9 @@ type GoPkgTest struct {
 
 	// Which package the test function located (if bin has set, package is bin file name since test bin is compiled by package level)
 	Package string
+
+	// Where is folder contains the go.mod
+	GoModDir string
 }
 
 func (g *GoPkgTest) GetCmd(ctx context.Context) (*exec.Cmd, error) {
@@ -47,7 +50,9 @@ func (g *GoPkgTest) GetCmd(ctx context.Context) (*exec.Cmd, error) {
 	if pkg == "" {
 		pkg = "./..."
 	}
-	return exec.CommandContext(ctx, "go", "test", "-timeout", "1m", "-v", "-run", g.Func, pkg), nil
+	cmd := exec.CommandContext(ctx, "go", "test", "-timeout", "1m", "-v", "-run", g.Func, pkg)
+	cmd.Dir = g.GoModDir
+	return cmd, nil
 }
 
 func (g *GoPkgTest) String() string {

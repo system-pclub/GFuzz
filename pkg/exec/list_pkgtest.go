@@ -53,7 +53,7 @@ func parseGoCmdListOutput(output string) ([]string, error) {
 
 // ListTestsInPackage lists all tests in the given package
 // pkg can be ./... to search in all packages
-func ListExecutablesInPackage(goModRootPath string, pkg string) ([]Executable, error) {
+func ListExecutablesInPackage(goModDir string, pkg string) ([]Executable, error) {
 	if pkg == "" {
 		pkg = "./..."
 	}
@@ -63,8 +63,8 @@ func ListExecutablesInPackage(goModRootPath string, pkg string) ([]Executable, e
 	defer cancel()
 
 	cmd := oe.CommandContext(ctx, "go", "test", "-list", ".*", pkg)
-	if goModRootPath != "" {
-		cmd.Dir = goModRootPath
+	if goModDir != "" {
+		cmd.Dir = goModDir
 	}
 	cmd.Env = os.Environ()
 
@@ -89,8 +89,9 @@ func ListExecutablesInPackage(goModRootPath string, pkg string) ([]Executable, e
 	goTests := make([]Executable, 0, len(testFuncs))
 	for _, testFunc := range testFuncs {
 		goTests = append(goTests, &GoPkgTest{
-			Func:    testFunc,
-			Package: pkg,
+			Func:     testFunc,
+			Package:  pkg,
+			GoModDir: goModDir,
 		})
 	}
 	return goTests, nil

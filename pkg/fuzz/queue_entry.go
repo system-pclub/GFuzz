@@ -1,12 +1,13 @@
 package fuzz
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"math/rand"
 
 	gExec "gfuzz/pkg/exec"
-	"gfuzz/pkg/oraclert"
+	"gfuzz/pkg/oraclert/config"
 )
 
 // QueueEntry records all information about fuzzing progress for given executable
@@ -14,19 +15,19 @@ type QueueEntry struct {
 	Stage                FuzzStage
 	BestScore            int
 	ExecutionCount       int
-	OracleRtConfig       *oraclert.Config
+	OracleRtConfig       *config.Config
 	Exec                 gExec.Executable
 	OracleRtConfigHashes []string
 }
 
 func (e *QueueEntry) String() string {
-	return fmt.Sprintf("%s:%s:%d", e.Exec, e.Stage, e.Idx)
+	return fmt.Sprintf("%s:%s:%d", e.Exec, e.Stage, e.ExecutionCount)
 }
 
 // HandleFuzzQueryEntry will handle a single entry from fuzzCtx's fuzzingQueue
 // Notes:
 //   1. e is expected to be dequeue from fuzzCtx's fuzzingQueue
-func HandleFuzzQueryEntry(e *QueueEntry, fuzzCtx *FuzzContext) error {
+func HandleQueueEntry(ctx context.Context, fuzzCtx *Context, e *QueueEntry) error {
 	// TODO: better way to print FuzzQueryEntry, maybe ID or string of input?
 	log.Printf("handle entry: %s\n", e)
 

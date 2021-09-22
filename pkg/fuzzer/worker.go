@@ -3,12 +3,10 @@ package fuzzer
 import (
 	"context"
 	"fmt"
-	"gfuzz/pkg/fuzz"
 	gLog "gfuzz/pkg/fuzzer/log"
 	"log"
 	"strconv"
 	"sync"
-	"time"
 )
 
 // startWorkers starts parallel workers working on inputCh from fuzzer context.
@@ -28,36 +26,6 @@ func startWorkers(parallel int, worker func(context.Context)) {
 	}
 
 	wg.Wait()
-}
-
-func queueEntryWorker(ctx context.Context, queueEntryCh chan fuzz.QueueEntry) {
-	logger := getWorkerLogger(ctx)
-
-	for {
-		select {
-		// Receive input
-		case task := <-fuzzCtx.runTaskCh:
-			log.Printf("[Worker %d] Working on %s\n", i, task.id)
-			if ShouldSkipRunTask(fuzzCtx, task) {
-				log.Printf("[Worker %d][Task %s] skipped\n", i, task.id)
-				continue
-			}
-			ctx := context.WithValue(context.Background(), "workerID", strconv.Itoa(i))
-			result, err := Run(ctx, fuzzCtx, task)
-			if err != nil {
-				log.Printf("[Worker %d][Task %s] Error: %s\n", i, task.id, err)
-				continue
-			}
-			err = HandleRunResult(ctx, task, result, fuzzCtx)
-			if err != nil {
-				log.Printf("[Worker %d][Task %s] Error: %s\n", i, task.id, err)
-				continue
-			}
-		case <-time.After(3 * time.Minute):
-			log.Printf("[Worker %d] Timeout. Exited", i)
-			return
-		}
-	}
 }
 
 const CTX_KEY_WORKER_ID = "WORKER_ID"
