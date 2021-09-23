@@ -1,10 +1,11 @@
 package fuzz
 
 import (
+	"gfuzz/pkg/oraclert/config"
 	"log"
 )
 
-func ShouldSkipInput(fuzzCtx *FuzzContext, exec string, i *OracleRtInput) bool {
+func ShouldSkipInput(fuzzCtx *Context, exec string, i *config.Config) bool {
 	if i == nil {
 		return true
 	}
@@ -29,8 +30,8 @@ func ShouldSkipInput(fuzzCtx *FuzzContext, exec string, i *OracleRtInput) bool {
 	return false
 }
 
-func (i *OracleRtInput) DeepCopy() *OracleRtInput {
-	newInput := &OracleRtInput{
+func DeepCopy(c *config.Config) *config.Config {
+	newInput := &config.Config{
 		Note:          i.Note,
 		SelectDelayMS: i.SelectDelayMS,
 		VecSelect:     []SelectInput{},

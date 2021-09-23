@@ -37,10 +37,18 @@ func queueEntryWorker(ctx context.Context, fuzzCtx *fuzz.Context, eCh chan *fuzz
 	for {
 		select {
 		case e := <-eCh:
-			err := fuzz.HandleQueueEntry(ctx, fuzzCtx, e)
+			inputs, err := fuzz.HandleQueueEntry(ctx, fuzzCtx, e)
 			if err != nil {
-				logger.Printf("[entry %s] error: %s", e, err)
+				logger.Printf("[entry %s] %s", e, err)
 			}
+
+			for _, i := range inputs {
+				out, err := Run(ctx, i)
+				if err != nil {
+					logger.Printf("[entry %s] %s", e, err)
+				}
+			}
+
 		case <-time.After(2 * time.Minute):
 			logger.Printf("Timeout. Exited.")
 			return
