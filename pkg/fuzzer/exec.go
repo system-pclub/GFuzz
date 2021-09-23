@@ -5,6 +5,9 @@ import (
 	"errors"
 	"fmt"
 	fexec "gfuzz/pkg/fuzz/exec"
+	"gfuzz/pkg/fuzzer/bug"
+	ortEnv "gfuzz/pkg/oraclert/env"
+	ortOut "gfuzz/pkg/oraclert/output"
 	"io/ioutil"
 	"log"
 	"os"
@@ -59,24 +62,19 @@ func Run(ctx context.Context, input *fexec.Input) (*fexec.Output, error) {
 
 	// setting up environment variables
 	env := os.Environ()
-	env = append(env, fmt.Sprintf("GF_RECORD_FILE=%s", gfRecordFp))
-	env = append(env, fmt.Sprintf("GF_OUTPUT_FILE=%s", gfOutputFp))
-	env = append(env, fmt.Sprintf("GF_INPUT_FILE=%s", gfInputFp))
-
-	if GoRoot != "" {
-		env = append(env, fmt.Sprintf("GOROOT=%s", GoRoot))
-	}
+	env = append(env, fmt.Sprintf("%s=%s", ortEnv.ORACLERT_CONFIG_FILE, gfInputFp))
+	env = append(env, fmt.Sprintf("%s=%s", ortEnv.ORACLERT_STDOUT_FILE, gfOutputFp))
+	env = append(env, fmt.Sprintf("%s=%s", ortEnv.ORACLERT_OUTPUT_FILE, gfRtOutputFp))
 
 	cmd.Env = env
 
-	// Save output to the file
+	// redirect stdout to the file
 	outF, err := os.Create(gfOutputFp)
 	if err != nil {
 		return nil, fmt.Errorf("create stdout: %s", err)
 	}
 	defer outF.Close()
 
-	//var buf bytes.Buffer
 	cmd.Stdout = outF
 	cmd.Stderr = outF
 
@@ -85,37 +83,37 @@ func Run(ctx context.Context, input *fexec.Input) (*fexec.Output, error) {
 	var timeout bool = false
 	if runErr != nil {
 		// Go test failed might be intentional
-		log.Printf("[Worker %s][Task %s][ignored] go test command failed: %v", workerID, task.id, runErr)
+		logger.Printf("[input %s][ignored] run failed: %v", input.ID, runErr)
 
 		if errors.Is(runErr, context.DeadlineExceeded) {
 			timeout = true
 		}
 	}
 
-	// Read the printed record file
-	var record *Record
-	b, err := ioutil.ReadFile(gfRecordFp)
+	// Read oracle runtime output
+	ortOutBytes, err := ioutil.ReadFile(gfRtOutputFp)
+	var ortOutput *ortOut.Output
 	if err != nil {
-		log.Printf("[Worker %s][Task %s][ignored] cannot read record file %s: %v", workerID, task.id, gfRecordFp, err)
-	} else {
-		record, err = ParseRecordFile(string(b))
+		logger.Printf("[input %s][ignored] cannot read file %s: %v", input.ID, gfRtOutputFp, err)
 
+	} else {
+		ortOutput, err = ortOut.Deserialize(ortOutBytes)
 		if err != nil {
-			log.Printf("[Worker %s][Task %s][ignored] failed to parse record file %s: %v", workerID, task.id, gfRecordFp, err)
+			logger.Printf("[input %s][ignored] failed to parse file %s: %v", input.ID, gfRtOutputFp, err)
 		}
 	}
 
 	// Read bug IDs from stdout
 	var bugIDs []string
-	b, err = ioutil.ReadFile(gfOutputFp)
+	b, err := ioutil.ReadFile(gfOutputFp)
 	if err != nil {
 		// if error happened, log and ignore
-		log.Printf("[Task %s][ignored] cannot read output file %s: %v", task.id, gfOutputFp, err)
+		logger.Printf("[input %s][ignored] cannot read output file %s: %v", input.ID, gfOutputFp, err)
 	} else {
 		output := string(b)
-		bugIDs, err = GetListOfBugIDFromStdoutContent(output)
+		bugIDs, err = bug.GetListOfBugIDFromStdoutContent(output)
 		if err != nil {
-			log.Printf("[Task %s][ignored] failed to find bug from output %s: %v", task.id, gfOutputFp, err)
+			log.Printf("[input %s][ignored] failed to find bug from output %s: %v", input.ID, gfOutputFp, err)
 		}
 
 		if strings.Contains(output, "panic: test timed out after") {
@@ -123,24 +121,11 @@ func Run(ctx context.Context, input *fexec.Input) (*fexec.Output, error) {
 		}
 	}
 
-	// Read executed operations from gfOpCovFp
-	b, err = ioutil.ReadFile(gfOpCovFp)
-	if err != nil {
-		// if error happened, log and ignore
-		log.Printf("[Task %s][ignored] cannot read operation coverage file %s: %v", task.id, gfOpCovFp, err)
-	}
-	ids := strings.Split(string(b), "\n")
-
-	retOutput := &RunResult{
-		RetInput:       retInput,
-		RetRecord:      record,
+	execOutput := &fexec.Output{
 		BugIDs:         bugIDs,
-		StdoutFilepath: gfOutputFp,
-		opIDs:          ids,
 		IsTimeout:      timeout,
+		OracleRtOutput: ortOutput,
 	}
 
-	// Increment number of runs after a successfully run
-	fuzzCtx.IncNumOfRun()
-	return retOutput, nil
+	return execOutput, nil
 }

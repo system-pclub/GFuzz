@@ -10,7 +10,6 @@ type Config struct {
 	// SelEfcm, select enforcement
 	SelEfcm      selefcm.SelEfcmConfig `json:"selefcm"`
 	RecordSelect bool                  `json:"record_select"`
-	Output       string                `json:"output"`
 }
 
 func Serialize(l *Config) ([]byte, error) {

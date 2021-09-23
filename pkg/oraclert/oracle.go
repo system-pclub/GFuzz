@@ -21,11 +21,6 @@ const (
 	RecordSplitter        = "-----"
 )
 
-// GFuzzBenchmark will omit any operations related to fuzzing
-// including:
-// 1. writing input, record file
-var GFuzzBenchmark bool = os.Getenv("GF_BENCHMARK") == "1"
-
 var StrTestPath string
 var StrTestMod string
 var StrTestName string
@@ -114,7 +109,7 @@ func BeforeRunFuzz() (result *OracleEntry) {
 	//StrTestPath ="/data/ziheng/shared/gotest/gotest/src/gotest/testdata/toyprogram"
 
 	// read input file
-	if GFuzzBenchmark {
+	if ortBenchmark {
 		runtime.RecordSelectChoice = false
 	}
 	CheckBugStart(result)
@@ -249,30 +244,32 @@ func CheckBugLate() {
 		}
 	}
 
-	if GFuzzBenchmark {
+	if ortBenchmark {
 		return
 	}
 	// print bug info
 	str, _ := runtime.CheckBlockEntry()
 
 	// print stdout
-	out, err := os.OpenFile(os.Getenv("GF_OUTPUT_FILE"), os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
-	if err != nil {
-		fmt.Println("Failed to create file:", os.Getenv("GF_OUTPUT_FILE"), err)
-		print(str)
-		return
+	if ortStdoutFile != "" {
+		out, err := os.OpenFile(ortStdoutFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+		if err != nil {
+			fmt.Println("Failed to create file:", ortStdoutFile, err)
+			print(str)
+			return
+		}
+		defer out.Close()
+
+		w := bufio.NewWriter(out)
+		defer w.Flush()
+
+		w.WriteString(str)
+		w.WriteString(runtime.StrWithdraw)
 	}
-	defer out.Close()
-
-	w := bufio.NewWriter(out)
-	defer w.Flush()
-
-	w.WriteString(str)
-	w.WriteString(runtime.StrWithdraw)
 
 	// print record
 	// create output file using runtime's global variable
-	err = DumpOracleRtOutput(rtConfig)
+	err := DumpOracleRtOutput(ortConfig, ortOutputFile)
 	if err != nil {
 		println("DumpOracleRtOutput", err)
 	}
@@ -288,23 +285,26 @@ func CheckBugEnd(entry *OracleEntry) {
 
 		str, _ := runtime.CheckBlockEntry()
 
-		if GFuzzBenchmark {
+		if ortBenchmark {
 			return
+		}
+		if ortStdoutFile != "" {
+			out, err := os.OpenFile(ortStdoutFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+			if err != nil {
+				fmt.Println("Failed to create file:", ortStdoutFile, err)
+				print(str)
+				return
+			}
+			defer out.Close()
+
+			w := bufio.NewWriter(out)
+			defer w.Flush()
+
+			w.WriteString(str)
+			w.WriteString(runtime.StrWithdraw)
+
 		}
 		// print stdout
-		out, err := os.OpenFile(os.Getenv("GF_OUTPUT_FILE"), os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
-		if err != nil {
-			fmt.Println("Failed to create file:", os.Getenv("GF_OUTPUT_FILE"), err)
-			print(str)
-			return
-		}
-		defer out.Close()
-
-		w := bufio.NewWriter(out)
-		defer w.Flush()
-
-		w.WriteString(str)
-		w.WriteString(runtime.StrWithdraw)
 	}
 }
 
@@ -347,7 +347,7 @@ func AfterRunFuzz(entry *OracleEntry) {
 		return
 	}
 
-	err := DumpOracleRtOutput(rtConfig)
+	err := DumpOracleRtOutput(ortConfig, ortOutputFile)
 	if err != nil {
 		println("DumpOracleRtOutput", err)
 	}

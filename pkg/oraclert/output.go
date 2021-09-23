@@ -42,13 +42,13 @@ func GenerateOracleRtOutput(config *config.Config) *output.Output {
 	return output
 }
 
-func DumpOracleRtOutput(config *config.Config) error {
+func DumpOracleRtOutput(config *config.Config, outputFile string) error {
 	o := GenerateOracleRtOutput(config)
 	bytes, err := output.Serialize(o)
 	if err != nil {
 		return err
 	}
-	err = os.WriteFile(config.Output, bytes, 666)
+	err = os.WriteFile(outputFile, bytes, 0666)
 	if err != nil {
 		return err
 	}

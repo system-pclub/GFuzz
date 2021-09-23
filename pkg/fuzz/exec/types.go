@@ -23,8 +23,11 @@ type Input struct {
 	OutputDir string
 }
 
+// Output contains all useful information after a single execution
 type Output struct {
 	OracleRtOutput *output.Output
+	BugIDs         []string
+	IsTimeout      bool
 }
 
 func (i *Input) GetInputFilePath() (string, error) {
