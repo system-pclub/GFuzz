@@ -11,12 +11,11 @@ import (
 type QueueEntry struct {
 	Stage                FuzzStage
 	BestScore            int
-	ExecutionCount       int
 	OracleRtConfig       *config.Config
 	Exec                 gexec.Executable
 	OracleRtConfigHashes []string
 }
 
 func (e *QueueEntry) String() string {
-	return fmt.Sprintf("%s:%s:%d", e.Exec, e.Stage, e.ExecutionCount)
+	return fmt.Sprintf("%s:%s", e.Exec, e.Stage)
 }

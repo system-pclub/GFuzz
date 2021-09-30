@@ -12,9 +12,10 @@ import (
 type Context struct {
 	q            *list.List
 	lock         sync.RWMutex // lock for Context
+	cfg          *Config
 	mainRecord   *Record
 	recordHashes map[string]struct{}
-
+	autoIncID    uint32
 	// Bugs
 	bugs2InputID map[string]string
 
@@ -29,13 +30,14 @@ type Context struct {
 }
 
 // NewContext returns a new FuzzerContext
-func NewContext(execs []exec.Executable) *Context {
+func NewContext(execs []exec.Executable, cfg *Config) *Context {
 	q := list.New()
 	for e := range execs {
 		q.PushBack(e)
 	}
 	return &Context{
 		q:              q,
+		cfg:            cfg,
 		mainRecord:     EmptyRecord(),
 		recordHashes:   make(map[string]struct{}),
 		timeoutTargets: make(map[string]uint32),
@@ -62,7 +64,13 @@ func (c *Context) AddBugID(bugID string, inputID string) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	c.bugs2InputID[bugID] = inputID
+}
 
+func (c *Context) GetAutoIncGlobalID() uint32 {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	c.autoIncID += 1
+	return c.autoIncID
 }
 
 // func (c *Context) UpdateTargetMaxCaseCov(target string, caseCov float32) {

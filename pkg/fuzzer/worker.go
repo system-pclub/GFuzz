@@ -17,12 +17,12 @@ func startWorkers(parallel int, worker func(context.Context)) {
 		ctx := newWorkerContext(strconv.Itoa(i))
 
 		// Start worker
-		go func() {
+		go func(workerID int) {
 			logger := getWorkerLogger(ctx)
-			logger.Printf("[Worker %d] started", i)
+			logger.Printf("[Worker %d] started", workerID)
 			defer wg.Done()
 			worker(ctx)
-		}()
+		}(i)
 	}
 
 	wg.Wait()

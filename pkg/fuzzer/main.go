@@ -16,13 +16,13 @@ func Main(execs []exec.Executable, config *fuzz.Config) {
 		os.Exit(0)
 	}
 
-	for e := range execs {
-		log.Println("found executable: %s", e)
+	for _, e := range execs {
+		log.Printf("found executable: %s", e)
 	}
 
 	shuffle(execs)
 
-	fuzzCtx := fuzz.NewContext(execs)
+	fuzzCtx := fuzz.NewContext(execs, config)
 	eCh := make(chan *fuzz.QueueEntry, config.MaxParallel)
 
 	startWorkers(config.MaxParallel, func(ctx context.Context) {
@@ -43,7 +43,11 @@ func queueEntryWorker(ctx context.Context, fuzzCtx *fuzz.Context, eCh chan *fuzz
 			}
 
 			for _, i := range inputs {
-				out, err := Run(ctx, i)
+				o, err := Run(ctx, i)
+				if err != nil {
+					logger.Printf("[entry %s] %s", e, err)
+				}
+				err = fuzz.HandleExecOutput(fuzzCtx, i, o)
 				if err != nil {
 					logger.Printf("[entry %s] %s", e, err)
 				}

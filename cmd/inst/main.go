@@ -39,6 +39,7 @@ func main() {
 	if len(opts.Passes) > 0 {
 		passes = opts.Passes
 	} else {
+		// default to run all passes if no pass(s) is/are given
 		passes = reg.ListOfPassNames()
 	}
 
