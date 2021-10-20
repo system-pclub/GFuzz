@@ -27,7 +27,7 @@ type GoBinTest struct {
 }
 
 func (g *GoBinTest) GetCmd(ctx context.Context) (*exec.Cmd, error) {
-	return exec.CommandContext(ctx, g.Bin, "-test.timeout", "1m", "-test.parallel", "1", "-test.v", "-test.run", g.Func), nil
+	return exec.CommandContext(ctx, g.Bin, "-test.timeout", "1m", "-test.count=1", "-test.parallel=1", "-test.v", "-test.run", g.Func), nil
 }
 
 func (g *GoBinTest) String() string {
@@ -50,7 +50,7 @@ func (g *GoPkgTest) GetCmd(ctx context.Context) (*exec.Cmd, error) {
 	if pkg == "" {
 		pkg = "./..."
 	}
-	cmd := exec.CommandContext(ctx, "go", "test", "-timeout", "1m", "-v", "-run", g.Func, pkg)
+	cmd := exec.CommandContext(ctx, "go", "test", "-timeout=1m", "-count=1", "-v", "-run", g.Func, pkg)
 	cmd.Dir = g.GoModDir
 	return cmd, nil
 }

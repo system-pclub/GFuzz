@@ -16,6 +16,14 @@ type QueueEntry struct {
 	OracleRtConfigHashes []string
 }
 
+func newQueueEntry(exec gexec.Executable) *QueueEntry {
+	return &QueueEntry{
+		Exec:      exec,
+		Stage:     InitStage,
+		BestScore: 0,
+	}
+}
+
 func (e *QueueEntry) String() string {
-	return fmt.Sprintf("%s:%s", e.Exec, e.Stage)
+	return fmt.Sprintf("%s-%s", e.Exec, e.Stage)
 }

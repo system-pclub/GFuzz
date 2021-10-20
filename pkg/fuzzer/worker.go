@@ -19,7 +19,7 @@ func startWorkers(parallel int, worker func(context.Context)) {
 		// Start worker
 		go func(workerID int) {
 			logger := getWorkerLogger(ctx)
-			logger.Printf("[Worker %d] started", workerID)
+			logger.Printf("started")
 			defer wg.Done()
 			worker(ctx)
 		}(i)
@@ -40,5 +40,5 @@ func getWorkerID(context context.Context) string {
 
 func getWorkerLogger(context context.Context) *log.Logger {
 	workerID := getWorkerID(context)
-	return gLog.NewLogger(fmt.Sprintf("[worker %s]", workerID))
+	return gLog.NewLogger(fmt.Sprintf("[worker %s] ", workerID))
 }

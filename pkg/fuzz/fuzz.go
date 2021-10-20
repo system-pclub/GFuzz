@@ -13,7 +13,7 @@ import (
 
 func newExecInput(fuzzCtx *Context, e *QueueEntry, rtConfig *config.Config) *fexec.Input {
 	globalID := fuzzCtx.GetAutoIncGlobalID()
-	inputID := fmt.Sprintf("%s:%s", globalID, e.String())
+	inputID := fmt.Sprintf("%d-%s", globalID, e.String())
 	dir := path.Join(fuzzCtx.cfg.OutputDir, "exec", inputID)
 	return &fexec.Input{
 		ID:             inputID,

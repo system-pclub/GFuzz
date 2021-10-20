@@ -10,8 +10,9 @@ import (
 
 // Context record all necessary information for help fuzzer to prioritize input and record process.
 type Context struct {
-	q            *list.List
-	lock         sync.RWMutex // lock for Context
+	q            *list.List    // list of QueueEntry
+	prev         *list.Element // previous element returned by NextQueueEntry
+	lock         sync.RWMutex  // lock for Context
 	cfg          *Config
 	mainRecord   *Record
 	recordHashes map[string]struct{}
@@ -32,8 +33,8 @@ type Context struct {
 // NewContext returns a new FuzzerContext
 func NewContext(execs []exec.Executable, cfg *Config) *Context {
 	q := list.New()
-	for e := range execs {
-		q.PushBack(e)
+	for _, e := range execs {
+		q.PushBack(newQueueEntry(e))
 	}
 	return &Context{
 		q:              q,
@@ -71,6 +72,17 @@ func (c *Context) GetAutoIncGlobalID() uint32 {
 	defer c.lock.Unlock()
 	c.autoIncID += 1
 	return c.autoIncID
+}
+
+func (c *Context) NextQueueEntry() *QueueEntry {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	if c.prev == nil || c.prev.Next() == nil {
+		c.prev = c.q.Front()
+	} else {
+		c.prev = c.prev.Next()
+	}
+	return c.prev.Value.(*QueueEntry)
 }
 
 // func (c *Context) UpdateTargetMaxCaseCov(target string, caseCov float32) {

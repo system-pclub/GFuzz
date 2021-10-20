@@ -22,5 +22,6 @@ type Config struct {
 func NewConfig() *Config {
 	return &Config{
 		FuzzerSelectDelayVector: []int{500, 2000, 8000},
+		MaxParallel:             1,
 	}
 }

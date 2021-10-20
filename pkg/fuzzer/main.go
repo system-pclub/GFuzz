@@ -25,9 +25,18 @@ func Main(execs []exec.Executable, config *fuzz.Config) {
 	fuzzCtx := fuzz.NewContext(execs, config)
 	eCh := make(chan *fuzz.QueueEntry, config.MaxParallel)
 
+	go func() {
+		for {
+			// TODO: use interface to handle strategy for next entry
+			next := fuzzCtx.NextQueueEntry()
+			eCh <- next
+		}
+	}()
+
 	startWorkers(config.MaxParallel, func(ctx context.Context) {
 		queueEntryWorker(ctx, fuzzCtx, eCh)
 	})
+
 }
 
 // queueEntryWorker handles a queue entry receives from channel

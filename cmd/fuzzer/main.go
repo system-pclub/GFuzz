@@ -64,6 +64,10 @@ func main() {
 
 	// prepare fuzzing configuration
 	config := fuzz.NewConfig()
+	config.OutputDir, err = filepath.Abs(opts.OutputDir)
+	if err != nil {
+		log.Fatal("filepath.Abs", err)
+	}
 
 	// start fuzzing
 	fuzzer.Main(execs, config)
