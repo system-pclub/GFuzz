@@ -17,7 +17,7 @@ func (p *CvRecPass) Name() string {
 }
 
 func (p *CvRecPass) Run(iCtx *inst.InstContext) error {
-	inst.AddImport(iCtx.FS, iCtx.AstFile, "gooracle", "gooracle")
+	inst.AddImport(iCtx.FS, iCtx.AstFile, oraclertImportName, "gfuzz/pkg/oraclert")
 	iCtx.AstFile = astutil.Apply(iCtx.AstFile, instCvOps, nil).(*ast.File)
 	return nil
 }
@@ -46,7 +46,7 @@ func instCvOps(c *astutil.Cursor) bool {
 
 				if matched {
 					intID := int(Uint16OpID)
-					newCall := NewArgCallExpr("gooracle", "StoreOpInfo", []ast.Expr{&ast.BasicLit{
+					newCall := NewArgCallExpr(oraclertImportName, "StoreOpInfo", []ast.Expr{&ast.BasicLit{
 						ValuePos: 0,
 						Kind:     token.STRING,
 						Value:    "\"" + op + "\"",

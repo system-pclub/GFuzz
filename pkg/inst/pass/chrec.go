@@ -19,7 +19,7 @@ func (p *ChRecPass) Name() string {
 }
 
 func (p *ChRecPass) Run(iCtx *inst.InstContext) error {
-	inst.AddImport(iCtx.FS, iCtx.AstFile, "gooracle", "gooracle")
+	inst.AddImport(iCtx.FS, iCtx.AstFile, oraclertImportName, "gfuzz/pkg/oraclert")
 	iCtx.AstFile = astutil.Apply(iCtx.AstFile, instChOps, nil).(*ast.File)
 	return nil
 }
@@ -34,7 +34,7 @@ func instChOps(c *astutil.Cursor) bool {
 	// channel send operation
 	case *ast.SendStmt:
 		intID := int(Uint16OpID)
-		newCall := NewArgCallExpr("gooracle", "StoreOpInfo", []ast.Expr{&ast.BasicLit{
+		newCall := NewArgCallExpr(oraclertImportName, "StoreOpInfo", []ast.Expr{&ast.BasicLit{
 			ValuePos: 0,
 			Kind:     token.STRING,
 			Value:    "\"Send\"",
@@ -56,7 +56,7 @@ func instChOps(c *astutil.Cursor) bool {
 						if len(callExpr.Args) == 1 { // This is a make operation
 							if _, ok := callExpr.Args[0].(*ast.ChanType); ok {
 								intID := int(Uint16OpID)
-								newCall := NewArgCallExpr("gooracle", "StoreChMakeInfo", []ast.Expr{
+								newCall := NewArgCallExpr(oraclertImportName, "StoreChMakeInfo", []ast.Expr{
 									concrete.Lhs[0],
 									&ast.BasicLit{
 										ValuePos: 0,
@@ -78,7 +78,7 @@ func instChOps(c *astutil.Cursor) bool {
 		if unaryExpr, ok := concrete.X.(*ast.UnaryExpr); ok {
 			if unaryExpr.Op == token.ARROW { // This is a receive operation
 				intID := int(Uint16OpID)
-				newCall := NewArgCallExpr("gooracle", "StoreOpInfo", []ast.Expr{&ast.BasicLit{
+				newCall := NewArgCallExpr(oraclertImportName, "StoreOpInfo", []ast.Expr{&ast.BasicLit{
 					ValuePos: 0,
 					Kind:     token.STRING,
 					Value:    "\"Recv\"",
@@ -96,7 +96,7 @@ func instChOps(c *astutil.Cursor) bool {
 				// channel close operation
 				if funcIdent.Name == "close" {
 					intID := int(Uint16OpID)
-					newCall := NewArgCallExpr("gooracle", "StoreOpInfo", []ast.Expr{&ast.BasicLit{
+					newCall := NewArgCallExpr(oraclertImportName, "StoreOpInfo", []ast.Expr{&ast.BasicLit{
 						ValuePos: 0,
 						Kind:     token.STRING,
 						Value:    "\"Close\"",

@@ -1,32 +1,32 @@
 package mtxrec
 
 import (
-	gooracle "gooracle"
+	"gfuzz/pkg/oraclert"
 	"sync"
 )
 
 func Hello() {
 	m := sync.Mutex{}
-	gooracle.StoreOpInfo("Lock", 0)
+	oraclert.StoreOpInfo("Lock", 0)
 
 	m.Lock()
-	gooracle.StoreOpInfo("Unlock", 1)
+	oraclert.StoreOpInfo("Unlock", 1)
 
 	m.Unlock()
 
 	rwm := sync.RWMutex{}
-	gooracle.StoreOpInfo("Lock", 2)
+	oraclert.StoreOpInfo("Lock", 2)
 
 	rwm.Lock()
-	gooracle.StoreOpInfo("RLock", 3)
+	oraclert.StoreOpInfo("RLock", 3)
 	rwm.RLock()
-	gooracle.StoreOpInfo("Unlock", 4)
+	oraclert.StoreOpInfo("Unlock", 4)
 	rwm.Unlock()
-	gooracle.StoreOpInfo("RUnlock", 5)
+	oraclert.StoreOpInfo("RUnlock", 5)
 	rwm.RUnlock()
-	gooracle.StoreOpInfo("Lock", 6)
+	oraclert.StoreOpInfo("Lock", 6)
 	rwm.RLocker().Lock()
-	gooracle.StoreOpInfo("Unlock", 7)
+	oraclert.StoreOpInfo("Unlock", 7)
 	rwm.RLocker().Unlock()
 
 }

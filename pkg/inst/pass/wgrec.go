@@ -17,7 +17,7 @@ func (p *WgRecPass) Name() string {
 }
 
 func (p *WgRecPass) Run(iCtx *inst.InstContext) error {
-	inst.AddImport(iCtx.FS, iCtx.AstFile, "gooracle", "gooracle")
+	inst.AddImport(iCtx.FS, iCtx.AstFile, oraclertImportName, "gfuzz/pkg/oraclert")
 	iCtx.AstFile = astutil.Apply(iCtx.AstFile, instWgOps, nil).(*ast.File)
 	return nil
 }
@@ -46,7 +46,7 @@ func instWgOps(c *astutil.Cursor) bool {
 
 				if matched {
 					intID := int(Uint16OpID)
-					newCall := NewArgCallExpr("gooracle", "StoreOpInfo", []ast.Expr{&ast.BasicLit{
+					newCall := NewArgCallExpr(oraclertImportName, "StoreOpInfo", []ast.Expr{&ast.BasicLit{
 						ValuePos: 0,
 						Kind:     token.STRING,
 						Value:    "\"" + op + "\"",

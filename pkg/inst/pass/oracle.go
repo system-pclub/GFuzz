@@ -17,7 +17,7 @@ func (p *OraclePass) Name() string {
 }
 
 func (p *OraclePass) Run(iCtx *inst.InstContext) error {
-	inst.AddImport(iCtx.FS, iCtx.AstFile, "gooracle", "gooracle")
+	inst.AddImport(iCtx.FS, iCtx.AstFile, oraclertImportName, "gfuzz/pkg/oraclert")
 	iCtx.AstFile = astutil.Apply(iCtx.AstFile, instOracle, nil).(*ast.File)
 	return nil
 }
@@ -61,11 +61,11 @@ func instOracle(c *astutil.Cursor) bool {
 			newIdent,
 		}
 		newAssign.Rhs = []ast.Expr{
-			NewArgCall("gooracle", "BeforeRun", nil),
+			NewArgCall(oraclertImportName, "BeforeRun", nil),
 		}
 		c.InsertBefore(newAssign)
 
-		newAfterTestCall := NewArgCall("gooracle", "AfterRun", []ast.Expr{
+		newAfterTestCall := NewArgCall(oraclertImportName, "AfterRun", []ast.Expr{
 			newIdent,
 		})
 		newDefer := &ast.DeferStmt{
@@ -79,7 +79,7 @@ func instOracle(c *astutil.Cursor) bool {
 	if cStmt, ok := c.Node().(ast.Stmt); ok {
 		for _, recvAndFirstStmt := range vecRecvAndFirstStmt {
 			if recvAndFirstStmt.firstStmt == cStmt {
-				newCall := NewArgCallExpr("gooracle", "CurrentGoAddValue", []ast.Expr{
+				newCall := NewArgCallExpr(oraclertImportName, "CurrentGoAddValue", []ast.Expr{
 					&ast.Ident{
 						Name: recvAndFirstStmt.recvName,
 						Obj:  recvAndFirstStmt.recvObj,

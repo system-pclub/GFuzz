@@ -21,7 +21,7 @@ func (p *SelEfcmPass) Name() string {
 }
 
 func (p *SelEfcmPass) Run(iCtx *inst.InstContext) error {
-	inst.AddImport(iCtx.FS, iCtx.AstFile, "gooracle", "gooracle")
+	inst.AddImport(iCtx.FS, iCtx.AstFile, oraclertImportName, "gfuzz/pkg/oraclert")
 	currentFSet = iCtx.FS
 	iCtx.AstFile = astutil.Apply(iCtx.AstFile, preOnlySelect, nil).(*ast.File)
 	return nil
@@ -102,7 +102,7 @@ func preOnlySelect(c *astutil.Cursor) bool {
 		newSwitch := &ast.SwitchStmt{
 			Switch: 0,
 			Init:   nil,
-			Tag: NewArgCall("gooracle", "GetSelEfcmSwitchCaseIdx", []ast.Expr{
+			Tag: NewArgCall(oraclertImportName, "GetSelEfcmSwitchCaseIdx", []ast.Expr{
 				&ast.BasicLit{ // first parameter: filename
 					ValuePos: 0,
 					Kind:     token.STRING,
@@ -157,13 +157,13 @@ func preOnlySelect(c *astutil.Cursor) bool {
 				Comm: &ast.ExprStmt{X: &ast.UnaryExpr{
 					OpPos: 0,
 					Op:    token.ARROW,
-					X:     NewArgCall("gooracle", "SelectTimeout", nil),
+					X:     NewArgCall(oraclertImportName, "SelectTimeout", nil),
 				}},
 				Colon: 0,
 				Body: []ast.Stmt{
 					// The first line is a call to gooracle.StoreLastMySwitchChoice(-1)
 					// The second line is a copy of original select
-					&ast.ExprStmt{X: NewArgCall("gooracle", "StoreLastMySwitchChoice", []ast.Expr{&ast.UnaryExpr{
+					&ast.ExprStmt{X: NewArgCall(oraclertImportName, "StoreLastMySwitchChoice", []ast.Expr{&ast.UnaryExpr{
 						OpPos: 0,
 						Op:    token.SUB,
 						X: &ast.BasicLit{
@@ -190,7 +190,7 @@ func preOnlySelect(c *astutil.Cursor) bool {
 			Body: []ast.Stmt{
 				// The first line is a call to gooracle.StoreLastMySwitchChoice(-1)
 				// The second line is a copy of original select
-				&ast.ExprStmt{X: NewArgCall("gooracle", "StoreLastMySwitchChoice", []ast.Expr{&ast.UnaryExpr{
+				&ast.ExprStmt{X: NewArgCall(oraclertImportName, "StoreLastMySwitchChoice", []ast.Expr{&ast.UnaryExpr{
 					OpPos: 0,
 					Op:    token.SUB,
 					X: &ast.BasicLit{

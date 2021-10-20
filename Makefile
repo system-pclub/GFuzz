@@ -10,10 +10,10 @@ all: bin/inst bin/fuzzer
 tidy:
 	go mod tidy
 
-bin/inst: tidy
+bin/inst: 
 	go build -o bin/inst -ldflags $(BIN_INST_LD_FLAGS) gfuzz/cmd/inst
 
-bin/fuzzer: tidy
+bin/fuzzer: 
 	go build -o bin/fuzzer -ldflags $(BIN_FUZZER_LD_FLAGS) gfuzz/cmd/fuzzer
 
 test:
