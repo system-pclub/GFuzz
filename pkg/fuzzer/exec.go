@@ -6,6 +6,7 @@ import (
 	"fmt"
 	fexec "gfuzz/pkg/fuzz/exec"
 	"gfuzz/pkg/fuzzer/bug"
+	ortCfg "gfuzz/pkg/oraclert/config"
 	ortEnv "gfuzz/pkg/oraclert/env"
 	ortOut "gfuzz/pkg/oraclert/output"
 	"io/ioutil"
@@ -27,7 +28,7 @@ func Run(ctx context.Context, input *fexec.Input) (*fexec.Output, error) {
 		return nil, err
 	}
 
-	gfInputFp, err := input.GetInputFilePath()
+	ortCfgFp, err := input.GetOrtConfigFilePath()
 	if err != nil {
 		return nil, err
 	}
@@ -36,17 +37,17 @@ func Run(ctx context.Context, input *fexec.Input) (*fexec.Output, error) {
 	if err != nil {
 		return nil, err
 	}
-	gfRtOutputFp, err := input.GetOracleRtOutputFilePath()
+	ortOutputFp, err := input.GetOrtOutputFilePath()
 	if err != nil {
 		return nil, err
 	}
 
 	// Create the input file into disk
-	iBytes, err := fexec.Serialize(input)
+	iBytes, err := ortCfg.Serialize(input.OracleRtConfig)
 	if err != nil {
 		return nil, err
 	}
-	err = os.WriteFile(gfInputFp, iBytes, os.ModePerm)
+	err = os.WriteFile(ortCfgFp, iBytes, os.ModePerm)
 	if err != nil {
 		return nil, err
 	}
@@ -62,9 +63,9 @@ func Run(ctx context.Context, input *fexec.Input) (*fexec.Output, error) {
 
 	// setting up environment variables
 	env := os.Environ()
-	env = append(env, fmt.Sprintf("%s=%s", ortEnv.ORACLERT_CONFIG_FILE, gfInputFp))
+	env = append(env, fmt.Sprintf("%s=%s", ortEnv.ORACLERT_CONFIG_FILE, ortCfgFp))
 	env = append(env, fmt.Sprintf("%s=%s", ortEnv.ORACLERT_STDOUT_FILE, gfOutputFp))
-	env = append(env, fmt.Sprintf("%s=%s", ortEnv.ORACLERT_OUTPUT_FILE, gfRtOutputFp))
+	env = append(env, fmt.Sprintf("%s=%s", ortEnv.ORACLERT_OUTPUT_FILE, ortOutputFp))
 
 	cmd.Env = env
 
@@ -91,15 +92,15 @@ func Run(ctx context.Context, input *fexec.Input) (*fexec.Output, error) {
 	}
 
 	// Read oracle runtime output
-	ortOutBytes, err := ioutil.ReadFile(gfRtOutputFp)
+	ortOutBytes, err := ioutil.ReadFile(ortOutputFp)
 	var ortOutput *ortOut.Output
 	if err != nil {
-		logger.Printf("[input %s][ignored] cannot read file %s: %v", input.ID, gfRtOutputFp, err)
+		logger.Printf("[input %s][ignored] cannot read file %s: %v", input.ID, ortOutputFp, err)
 
 	} else {
 		ortOutput, err = ortOut.Deserialize(ortOutBytes)
 		if err != nil {
-			logger.Printf("[input %s][ignored] failed to parse file %s: %v", input.ID, gfRtOutputFp, err)
+			logger.Printf("[input %s][ignored] failed to parse file %s: %v", input.ID, ortOutputFp, err)
 		}
 	}
 

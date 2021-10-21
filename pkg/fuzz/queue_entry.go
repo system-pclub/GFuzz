@@ -21,6 +21,9 @@ func newQueueEntry(exec gexec.Executable) *QueueEntry {
 		Exec:      exec,
 		Stage:     InitStage,
 		BestScore: 0,
+		OracleRtConfig: &config.Config{
+			RecordSelect: true,
+		},
 	}
 }
 

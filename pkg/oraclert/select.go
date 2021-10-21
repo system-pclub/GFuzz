@@ -7,8 +7,11 @@ import (
 )
 
 // GetSelEfcmCaseIdx will be instrumented to each select in target program.
-func GetSelEfcmSwitchCaseIdx(selectID string) int {
+func GetSelEfcmSwitchCaseIdx(filename string, origLine string, origCases int) int {
 	atomic.AddUint32(&getSelEfcmCount, 1)
+	runtime.StoreLastMySwitchSelectNumCase(origCases)
+	runtime.StoreLastMySwitchLineNum(origLine)
+	selectID := filename + ":" + origLine
 	idx := efcmStrat.GetCase(selectID)
 	if idx != -1 {
 		runtime.StoreLastMySwitchChoice(idx)

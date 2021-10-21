@@ -29,6 +29,11 @@ func (p *ChRecPass) Deps() []string {
 }
 
 func instChOps(c *astutil.Cursor) bool {
+	defer func() {
+		if r := recover(); r != nil { // This is allowed. If we insert node into nodes not in slice, we will meet a panic
+			// For example, we may identified a receive in select and wanted to insert a function call before it, then this function will panic
+		}
+	}()
 	switch concrete := c.Node().(type) {
 
 	// channel send operation

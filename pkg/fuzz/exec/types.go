@@ -30,16 +30,16 @@ type Output struct {
 	IsTimeout      bool
 }
 
-func (i *Input) GetInputFilePath() (string, error) {
-	return filepath.Abs(path.Join(i.OutputDir, "input"))
+func (i *Input) GetOrtConfigFilePath() (string, error) {
+	return filepath.Abs(path.Join(i.OutputDir, "ort_config"))
 }
 
 func (i *Input) GetOutputFilePath() (string, error) {
 	return filepath.Abs(path.Join(i.OutputDir, "stdout"))
 }
 
-func (i *Input) GetOracleRtOutputFilePath() (string, error) {
-	return filepath.Abs(path.Join(i.OutputDir, "output"))
+func (i *Input) GetOrtOutputFilePath() (string, error) {
+	return filepath.Abs(path.Join(i.OutputDir, "ort_output"))
 }
 
 func Serialize(l *Input) ([]byte, error) {

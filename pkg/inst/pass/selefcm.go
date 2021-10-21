@@ -103,11 +103,17 @@ func preOnlySelect(c *astutil.Cursor) bool {
 			Switch: 0,
 			Init:   nil,
 			Tag: NewArgCall(oraclertImportName, "GetSelEfcmSwitchCaseIdx", []ast.Expr{
-				&ast.BasicLit{ // first parameter: filename
+				&ast.BasicLit{ // first parameter: filename:linenumber
 					ValuePos: 0,
 					Kind:     token.STRING,
-					Value:    fmt.Sprintf("\"%s:%d\"", positionOriSelect.Filename, positionOriSelect.Line),
-				}, &ast.BasicLit{
+					Value:    fmt.Sprintf("\"%s\"", positionOriSelect.Filename),
+				},
+				&ast.BasicLit{ // second parameter: linenumber of original select
+					ValuePos: 0,
+					Kind:     token.STRING,
+					Value:    fmt.Sprintf("\"%s\"", strconv.Itoa(positionOriSelect.Line)),
+				},
+				&ast.BasicLit{
 					ValuePos: 0,
 					Kind:     token.INT,
 					Value:    strconv.Itoa(len(oriSelect.VecCommClause)),
@@ -157,7 +163,7 @@ func preOnlySelect(c *astutil.Cursor) bool {
 				Comm: &ast.ExprStmt{X: &ast.UnaryExpr{
 					OpPos: 0,
 					Op:    token.ARROW,
-					X:     NewArgCall(oraclertImportName, "SelectTimeout", nil),
+					X:     NewArgCall(oraclertImportName, "SelEfcmTimeout", nil),
 				}},
 				Colon: 0,
 				Body: []ast.Stmt{
