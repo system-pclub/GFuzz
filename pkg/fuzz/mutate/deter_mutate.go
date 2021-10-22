@@ -16,6 +16,7 @@ func (d *DeterMutateStrategy) Mutate(g *gexecfuzz.GExecFuzz, curr *config.Config
 	for _, sel := range o.Selects {
 		for i := 0; i < int(sel.Cases); i++ {
 			cfg := curr.Copy()
+			cfg.SelEfcm.SelTimeout = 400
 			cfg.SelEfcm.Efcms = append(cfg.SelEfcm.Efcms, selefcm.SelEfcm{
 				ID:   sel.ID,
 				Case: i,

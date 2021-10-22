@@ -24,7 +24,8 @@ func newExecInput(fc *Context, g *gexecfuzz.GExecFuzz,
 }
 
 func NewInitExecInput(fc *Context, g *gexecfuzz.GExecFuzz) *exec.Input {
-	return newExecInput(fc, g, config.NewConfig(), exec.InitStage)
+	ortCfg := config.NewConfig()
+	return newExecInput(fc, g, ortCfg, exec.InitStage)
 }
 
 // HandleFuzzQueryEntry will handle a single queue entry

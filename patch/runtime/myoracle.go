@@ -60,11 +60,7 @@ var MuMapChToChanInfo mutex
 
 //var DefaultCaseChanInfo = &ChanInfo{}
 
-var strSDKPath string = gogetenv("GOROOT")
-
-func PrintSDK() {
-	println(strSDKPath)
-}
+var strSDKPath string = GOROOT()
 
 // Initialize a new ChanInfo with a given channel
 func NewChanInfo(ch *hchan) *ChanInfo {
@@ -80,7 +76,7 @@ func NewChanInfo(ch *hchan) *ChanInfo {
 		IntFlagFoundBug: 0,
 		SpecialFlag:     0,
 	}
-	if BoolPrintDebugInfo {
+	if BoolDebug {
 		println("===Debug Info:")
 		println("\tMake of a new channel. The creation site is:", strLoc)
 		println("\tSDK path is:", strSDKPath, "\tBoolMakeNotInSDK is:", newChInfo.BoolInSDK)

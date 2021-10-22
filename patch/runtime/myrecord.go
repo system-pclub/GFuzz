@@ -33,8 +33,6 @@ var GlobalLastLoc uint32 = uint32(12345)
 var TupleRecord [MaxRecordElem]uint32
 var ChCount uint16
 
-var BoolPrintDebugInfo bool = false
-
 // When a channel is made, create new id, new ChanRecord
 func RecordChMake(capBuf int, c *hchan) {
 
@@ -69,12 +67,12 @@ func RecordChOp(c *hchan) {
 	}
 	if BoolRecordSDK == false {
 		if c.chInfo.BoolInSDK == false {
-			if BoolPrintDebugInfo {
+			if BoolDebug {
 				println("For the channel", c.chInfo.StrDebug, ", we don't record its operation")
 			}
 			return
 		}
-		if BoolPrintDebugInfo {
+		if BoolDebug {
 			println("For the channel", c.chInfo.StrDebug, ", we recorded its operation")
 		}
 	}

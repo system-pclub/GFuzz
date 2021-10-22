@@ -137,12 +137,11 @@ func init() {
 
 var BoolDebug = false
 
-
 var MuBlockEntry mutex
 var MapBlockEntry map[*BlockEntry]struct{} = make(map[*BlockEntry]struct{})
 
 type BlockEntry struct {
-	VecPrim []PrimInfo
+	VecPrim       []PrimInfo
 	StrOpPosition string
 	CurrentGoInfo *GoInfo
 }
