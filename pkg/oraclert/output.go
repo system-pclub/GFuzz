@@ -34,7 +34,7 @@ func GenerateOracleRtOutput(config *config.Config) *output.Output {
 		Tuples:   getTuples(),
 		Ops:      getOps(),
 	}
-	if config.RecordSelect {
+	if config.DumpSelects {
 		output.Selects = getSelects()
 	}
 

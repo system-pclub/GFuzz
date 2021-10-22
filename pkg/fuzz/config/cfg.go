@@ -1,9 +1,6 @@
-package fuzz
-
-import "gfuzz/pkg/fuzz/mutate"
+package config
 
 type Config struct {
-	MutateStrategy          mutate.RtConfigMutateStrategy
 	FuzzerSelectDelayVector []int
 	TargetGoModDir          string // Directory contains Go Mod file
 	TargetTestFunc          string // Optional, if you only want to run single test instead of whole tests, regex also accept (will be the argument of go test -run)

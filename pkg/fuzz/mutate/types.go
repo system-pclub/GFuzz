@@ -1,7 +1,11 @@
 package mutate
 
-import "gfuzz/pkg/oraclert/config"
+import (
+	"gfuzz/pkg/fuzz/gexecfuzz"
+	"gfuzz/pkg/oraclert/config"
+	"gfuzz/pkg/oraclert/output"
+)
 
-type RtConfigMutateStrategy interface {
-	Mutate(old *config.Config) (*config.Config, error)
+type OrtConfigMutateStrategy interface {
+	Mutate(g *gexecfuzz.GExecFuzz, curr *config.Config, o *output.Output) ([]*config.Config, error)
 }

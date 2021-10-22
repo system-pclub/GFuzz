@@ -1,8 +1,10 @@
 package fuzz
 
 import (
-	"container/list"
-	"gfuzz/pkg/exec"
+	"gfuzz/pkg/fuzz/config"
+	"gfuzz/pkg/fuzz/exec"
+	"gfuzz/pkg/fuzz/gexecfuzz"
+	"gfuzz/pkg/gexec"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -10,10 +12,13 @@ import (
 
 // Context record all necessary information for help fuzzer to prioritize input and record process.
 type Context struct {
-	q            *list.List    // list of QueueEntry
-	prev         *list.Element // previous element returned by NextQueueEntry
-	lock         sync.RWMutex  // lock for Context
-	cfg          *Config
+	fm map[string]*gexecfuzz.GExecFuzz // map of gexec ID and GExecFuzz
+
+	lock sync.RWMutex   // lock for Context
+	cfg  *config.Config // fuzz configuration
+
+	hdl Handler // handle each fuzz execution
+
 	mainRecord   *Record
 	recordHashes map[string]struct{}
 	autoIncID    uint32
@@ -31,18 +36,26 @@ type Context struct {
 }
 
 // NewContext returns a new FuzzerContext
-func NewContext(execs []exec.Executable, cfg *Config) *Context {
-	q := list.New()
+func NewContext(
+	execs []gexec.Executable,
+	cfg *config.Config,
+	hdl Handler,
+) *Context {
+	fm := make(map[string]*gexecfuzz.GExecFuzz)
+
+	// Create QueueEntry for each Go executable(gexec)
 	for _, e := range execs {
-		q.PushBack(newQueueEntry(e))
+		entry := gexecfuzz.NewGExecFuzz(e)
+		fm[e.String()] = entry
 	}
 	return &Context{
-		q:              q,
+		fm:             fm,
 		cfg:            cfg,
 		mainRecord:     EmptyRecord(),
 		recordHashes:   make(map[string]struct{}),
 		timeoutTargets: make(map[string]uint32),
 		startAt:        time.Now(),
+		hdl:            hdl,
 	}
 }
 
@@ -52,6 +65,18 @@ func (c *Context) IncNumOfRun() {
 
 func (c *Context) IncNumOfBugsFound(num uint64) {
 	atomic.AddUint64(&c.numOfBugsFound, num)
+}
+
+func (c *Context) GetQueueEntryByGExecID(gexecID string) *gexecfuzz.GExecFuzz {
+	return c.fm[gexecID]
+}
+
+func (c *Context) EachGExecFuzz(f func(*gexecfuzz.GExecFuzz)) {
+	c.lock.RLock()
+	defer c.lock.RUnlock()
+	for _, g := range c.fm {
+		f(g)
+	}
 }
 
 func (c *Context) HasBugID(id string) bool {
@@ -68,21 +93,11 @@ func (c *Context) AddBugID(bugID string, inputID string) {
 }
 
 func (c *Context) GetAutoIncGlobalID() uint32 {
-	c.lock.Lock()
-	defer c.lock.Unlock()
-	c.autoIncID += 1
-	return c.autoIncID
+	return atomic.AddUint32(&c.autoIncID, 1)
 }
 
-func (c *Context) NextQueueEntry() *QueueEntry {
-	c.lock.Lock()
-	defer c.lock.Unlock()
-	if c.prev == nil || c.prev.Next() == nil {
-		c.prev = c.q.Front()
-	} else {
-		c.prev = c.prev.Next()
-	}
-	return c.prev.Value.(*QueueEntry)
+func (c *Context) HandleExec(input *exec.Input, output *exec.Output) ([]*exec.Input, error) {
+	return c.hdl.Handle(c, input, output)
 }
 
 // func (c *Context) UpdateTargetMaxCaseCov(target string, caseCov float32) {

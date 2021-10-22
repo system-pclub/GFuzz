@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"gfuzz/pkg/exec"
-	"gfuzz/pkg/fuzz"
+	"gfuzz/pkg/fuzz/config"
 	"gfuzz/pkg/fuzzer"
 	gLog "gfuzz/pkg/fuzzer/log"
+	"gfuzz/pkg/gexec"
 	"log"
 	"os"
 	"path/filepath"
@@ -48,22 +48,22 @@ func main() {
 
 	log.Printf("GFuzz Version: %s Build: %s", Version, Build)
 
-	var execs []exec.Executable
+	var execs []gexec.Executable
 	var err error
 	if opts.TestBinGlobs != nil {
-		execs, err = exec.ListExecutablesFromTestBinGlobs(opts.TestBinGlobs)
+		execs, err = gexec.ListExecutablesFromTestBinGlobs(opts.TestBinGlobs)
 		if err != nil {
 			log.Println("ListExecutablesFromTestBinGlobs", err)
 		}
 	} else if opts.GoModDir != "" {
-		execs, err = exec.ListExecutablesFromGoModule(opts.GoModDir)
+		execs, err = gexec.ListExecutablesFromGoModule(opts.GoModDir)
 		if err != nil {
 			log.Println("ListExecutablesFromGoModule", err)
 		}
 	}
 
 	// prepare fuzzing configuration
-	config := fuzz.NewConfig()
+	config := config.NewConfig()
 	config.OutputDir, err = filepath.Abs(opts.OutputDir)
 	if err != nil {
 		log.Fatal("filepath.Abs", err)

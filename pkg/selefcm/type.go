@@ -20,3 +20,15 @@ type SelEfcmConfig struct {
 	SelTimeout int       `json:"sel_timeout"`
 	Efcms      []SelEfcm `json:"efcms"`
 }
+
+func (s *SelEfcmConfig) Copy() *SelEfcmConfig {
+	var efcms []SelEfcm
+
+	for _, efcm := range s.Efcms {
+		efcms = append(efcms, efcm)
+	}
+	return &SelEfcmConfig{
+		SelTimeout: s.SelTimeout,
+		Efcms:      efcms,
+	}
+}

@@ -1,12 +1,12 @@
 package fuzzer
 
 import (
-	"gfuzz/pkg/exec"
+	"gfuzz/pkg/gexec"
 	"math/rand"
 	"time"
 )
 
-func shuffle(vals []exec.Executable) {
+func shuffle(vals []gexec.Executable) {
 	r := rand.New(rand.NewSource(time.Now().Unix()))
 
 	for n := len(vals); n > 0; n-- {

@@ -2,11 +2,28 @@ package exec
 
 import (
 	"encoding/json"
-	gExec "gfuzz/pkg/exec"
+	"gfuzz/pkg/gexec"
 	"gfuzz/pkg/oraclert/config"
 	"gfuzz/pkg/oraclert/output"
 	"path"
 	"path/filepath"
+)
+
+// Stage indicates how we treat/response to an input and corresponding output
+type Stage string
+
+const (
+	// InitStage simply run the empty without any mutation
+	InitStage Stage = "init"
+
+	// DeterStage is to create input by tweak select choice one by one
+	DeterStage Stage = "deter"
+
+	// CalibStage choose an input from queue to run (prepare for rand)
+	CalibStage Stage = "calib"
+
+	// RandStage randomly mutate select choice
+	RandStage Stage = "rand"
 )
 
 // Input contains all information about a single execution
@@ -17,10 +34,11 @@ type Input struct {
 	// OracleRtConfig is the configuration for the oracle runtime.
 	OracleRtConfig *config.Config
 	// Exec is the command to trigger a program with oracle runtime.
-	Exec gExec.Executable
-	// OutputDir is the output directory
-	// for this execution
+	Exec gexec.Executable
+	// OutputDir is the output directory for this execution
 	OutputDir string
+
+	Stage Stage
 }
 
 // Output contains all useful information after a single execution
