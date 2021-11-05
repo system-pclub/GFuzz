@@ -31,6 +31,7 @@ func Main(execs []gexec.Executable, config *config.Config) {
 	go func() {
 		fc.EachGExecFuzz(func(g *gexecfuzz.GExecFuzz) {
 			inputCh <- fuzz.NewInitExecInput(fc, g)
+			log.Printf("init %s", g)
 		})
 	}()
 

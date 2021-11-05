@@ -17,10 +17,10 @@ var opts struct {
 	} `positional-arg-name:"globs" positional-args:"yes"`
 	Version         bool `long:"version" description:"Print version and exit"`
 	IgnoreSyntaxErr bool `long:"ignore-syntax-err"`
+	Parallel        int  `long:"parallel" default:"5"`
 }
 
 func parseFlags() {
-
 	if _, err := flags.Parse(&opts); err != nil {
 		switch flagsErr := err.(type) {
 		case flags.ErrorType:
@@ -32,5 +32,4 @@ func parseFlags() {
 			os.Exit(1)
 		}
 	}
-
 }

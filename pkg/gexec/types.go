@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os/exec"
+	"path"
 )
 
 // Executable represents a target that can be triggered by the fuzzer.
@@ -56,7 +57,9 @@ func (g *GoPkgTest) GetCmd(ctx context.Context) (*exec.Cmd, error) {
 }
 
 func (g *GoPkgTest) String() string {
-	return fmt.Sprintf("%s-%s", g.Package, g.Func)
+	// abc.com/def => def
+	basePkg := path.Base(g.Package)
+	return fmt.Sprintf("%s-%s", basePkg, g.Func)
 }
 
 type Bin string

@@ -6,10 +6,9 @@ import (
 	"gfuzz/pkg/inst/pass"
 	"gfuzz/pkg/inst/stats"
 	"gfuzz/pkg/utils/fs"
-	"gfuzz/pkg/utils/gofmt"
-	"io/ioutil"
 	"log"
 	"os"
+	"sync"
 )
 
 var (
@@ -83,42 +82,30 @@ func main() {
 
 	// handle go source files
 	// TODO: use goroutine to accelerate
-	for _, src := range goSrcFiles {
-		iCtx, err := inst.NewInstContext(src)
-		if err != nil {
-			log.Print(err)
-			continue
-		}
-
-		err = inst.Run(iCtx, reg, passes)
-		if err != nil {
-			log.Print(err)
-			continue
-		}
-
-		var dst string
-		if opts.Out != "" {
-			dst = opts.Out
-		} else {
-			// dump AST in-place
-			dst = iCtx.File
-
-		}
-		err = inst.DumpAstFile(iCtx.FS, iCtx.AstFile, dst)
-		if err != nil {
-			log.Print(err)
-			continue
-		}
-
-		// check if output is valid, revert if error happened
-		if gofmt.HasSyntaxError(dst) {
-			if opts.IgnoreSyntaxErr {
-				ioutil.WriteFile(dst, iCtx.OriginalContent, 0666)
-			} else {
-				log.Panicf("syntax error found at file '%s'", dst)
+	var wg sync.WaitGroup
+	toInstSrcCh := make(chan string, opts.Parallel)
+	for i := 1; i <= int(opts.Parallel); i++ {
+		wg.Add(1)
+		go func() {
+			for src := range toInstSrcCh {
+				err := HandleSrcFile(src, reg, passes)
+				if err != nil {
+					log.Println(src, err)
+				}
 			}
-		}
+
+			wg.Done()
+
+		}()
 	}
+
+	for _, src := range goSrcFiles {
+		toInstSrcCh <- src
+	}
+
+	close(toInstSrcCh)
+
+	wg.Wait()
 
 	// handle output
 	if opts.StatsOut != "" {

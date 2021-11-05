@@ -1,9 +1,15 @@
 package inst
 
+import (
+	"go/ast"
+
+	"golang.org/x/tools/go/ast/astutil"
+)
+
 // runPasses executes given passes with provided instrumentation context
 func runPasses(iCtx *InstContext, passes []InstPass) error {
 	for _, p := range passes {
-		err := p.Run(iCtx)
+		err := RunPass(p, iCtx)
 		if err != nil {
 			return err
 		}
@@ -22,4 +28,9 @@ func Run(iCtx *InstContext, r *PassRegistry, passNames []string) error {
 		passes = append(passes, pass)
 	}
 	return runPasses(iCtx, passes)
+}
+
+func RunPass(p InstPass, iCtx *InstContext) error {
+	iCtx.AstFile = astutil.Apply(iCtx.AstFile, p.GetPreApply(iCtx), p.GetPostApply(iCtx)).(*ast.File)
+	return nil
 }
