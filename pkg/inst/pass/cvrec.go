@@ -16,6 +16,18 @@ func (p *CvRecPass) Name() string {
 	return "cvrec"
 }
 
+func (p *CvRecPass) Before(iCtx *inst.InstContext) {
+	iCtx.SetMetadata(MetadataKeyRequiredOrtImport, false)
+}
+
+func (p *CvRecPass) After(iCtx *inst.InstContext) {
+	needOracleRtImportItf, _ := iCtx.GetMetadata(MetadataKeyRequiredOrtImport)
+	needOracleRtImport := needOracleRtImportItf.(bool)
+	if needOracleRtImport {
+		inst.AddImport(iCtx.FS, iCtx.AstFile, oraclertImportName, oraclertImportPath)
+	}
+}
+
 func (p *CvRecPass) Deps() []string {
 	return nil
 }
@@ -25,7 +37,6 @@ func (p *CvRecPass) GetPostApply(iCtx *inst.InstContext) func(*astutil.Cursor) b
 }
 
 func (p *CvRecPass) GetPreApply(iCtx *inst.InstContext) func(*astutil.Cursor) bool {
-	var needOracleRtImport bool
 	return func(c *astutil.Cursor) bool {
 		switch concrete := c.Node().(type) {
 		case *ast.ExprStmt:
@@ -57,14 +68,11 @@ func (p *CvRecPass) GetPreApply(iCtx *inst.InstContext) func(*astutil.Cursor) bo
 						}})
 						c.InsertBefore(newCall)
 						addRecord(strconv.Itoa(intID) + ":trad" + op)
-						needOracleRtImport = true
+						iCtx.SetMetadata(MetadataKeyRequiredOrtImport, true)
 					}
 				}
 
 			}
-		}
-		if needOracleRtImport {
-			inst.AddImport(iCtx.FS, iCtx.AstFile, oraclertImportName, oraclertImportPath)
 		}
 
 		return true

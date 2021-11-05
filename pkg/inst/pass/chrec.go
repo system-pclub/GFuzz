@@ -23,12 +23,23 @@ func (p *ChRecPass) Deps() []string {
 	return nil
 }
 
+func (p *ChRecPass) Before(iCtx *inst.InstContext) {
+	iCtx.SetMetadata(MetadataKeyRequiredOrtImport, false)
+}
+
+func (p *ChRecPass) After(iCtx *inst.InstContext) {
+	needOracleRtImportItf, _ := iCtx.GetMetadata(MetadataKeyRequiredOrtImport)
+	needOracleRtImport := needOracleRtImportItf.(bool)
+	if needOracleRtImport {
+		inst.AddImport(iCtx.FS, iCtx.AstFile, oraclertImportName, oraclertImportPath)
+	}
+}
+
 func (p *ChRecPass) GetPostApply(iCtx *inst.InstContext) func(*astutil.Cursor) bool {
 	return nil
 }
 
 func (p *ChRecPass) GetPreApply(iCtx *inst.InstContext) func(*astutil.Cursor) bool {
-	var needOracleRtImport bool
 	return func(c *astutil.Cursor) bool {
 		defer func() {
 			if r := recover(); r != nil { // This is allowed. If we insert node into nodes not in slice, we will meet a panic
@@ -50,8 +61,10 @@ func (p *ChRecPass) GetPreApply(iCtx *inst.InstContext) func(*astutil.Cursor) bo
 				Value:    strconv.Itoa(intID),
 			}})
 			c.InsertBefore(newCall) // Insert the call to store this operation's type and ID into goroutine local storage
+			println("ChRecPass InsertBefore StoreOpInfo")
+
 			addRecord(strconv.Itoa(intID) + ":chsend")
-			needOracleRtImport = true
+			iCtx.SetMetadata(MetadataKeyRequiredOrtImport, true)
 
 		// channel make operation
 		case *ast.AssignStmt:
@@ -71,7 +84,7 @@ func (p *ChRecPass) GetPreApply(iCtx *inst.InstContext) func(*astutil.Cursor) bo
 										}})
 									c.InsertAfter(newCall)
 									addRecord(strconv.Itoa(intID) + ":chmake")
-									needOracleRtImport = true
+									iCtx.SetMetadata(MetadataKeyRequiredOrtImport, true)
 								}
 							}
 						}
@@ -96,7 +109,7 @@ func (p *ChRecPass) GetPreApply(iCtx *inst.InstContext) func(*astutil.Cursor) bo
 					c.InsertBefore(newCall)
 					addRecord(strconv.Itoa(intID) + ":chrecv")
 
-					needOracleRtImport = true
+					iCtx.SetMetadata(MetadataKeyRequiredOrtImport, true)
 				}
 			} else if callExpr, ok := concrete.X.(*ast.CallExpr); ok { // like `close(ch)` or `mu.Lock()`
 				if funcIdent, ok := callExpr.Fun.(*ast.Ident); ok { // like `close(ch)`
@@ -114,14 +127,10 @@ func (p *ChRecPass) GetPreApply(iCtx *inst.InstContext) func(*astutil.Cursor) bo
 						}})
 						c.InsertBefore(newCall)
 						addRecord(strconv.Itoa(intID) + ":chclose")
-						needOracleRtImport = true
+						iCtx.SetMetadata(MetadataKeyRequiredOrtImport, true)
 					}
 				}
 			}
-		}
-
-		if needOracleRtImport {
-			inst.AddImport(iCtx.FS, iCtx.AstFile, oraclertImportName, oraclertImportPath)
 		}
 
 		return true

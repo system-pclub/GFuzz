@@ -1,7 +1,7 @@
 package selefcm
 
 import (
-	"gfuzz/pkg/oraclert"
+	oraclert "gfuzz/pkg/oraclert"
 	"sync"
 	"time"
 )
@@ -9,12 +9,12 @@ import (
 func SelectWithCh() {
 	ch1 := make(chan int)
 	ch2 := make(chan struct{})
-	switch oraclert.GetSelEfcmSwitchCaseIdx("/workspaces/GFuzz/_examples/inst/selefcm/before.go:12", 2) {
+	switch oraclert.GetSelEfcmSwitchCaseIdx("/workspaces/GFuzz/_examples/inst/selefcm/before.go", "12", 2) {
 	case 0:
 		select {
 		case <-ch1:
 			println("ch1!")
-		case <-oraclert.SelectTimeout():
+		case <-oraclert.SelEfcmTimeout():
 			oraclert.StoreLastMySwitchChoice(-1)
 			select {
 			case <-ch1:
@@ -27,7 +27,7 @@ func SelectWithCh() {
 		select {
 		case <-ch2:
 			println("ch2")
-		case <-oraclert.SelectTimeout():
+		case <-oraclert.SelEfcmTimeout():
 			oraclert.StoreLastMySwitchChoice(-1)
 			select {
 			case <-ch1:
@@ -50,12 +50,12 @@ func SelectWithCh() {
 func SelectWithDefault() {
 	ch1 := make(chan int)
 	ch2 := make(chan struct{})
-	switch oraclert.GetSelEfcmSwitchCaseIdx("/workspaces/GFuzz/_examples/inst/selefcm/before.go:24", 3) {
+	switch oraclert.GetSelEfcmSwitchCaseIdx("/workspaces/GFuzz/_examples/inst/selefcm/before.go", "24", 3) {
 	case 0:
 		select {
 		case <-ch1:
 			println("ch1!")
-		case <-oraclert.SelectTimeout():
+		case <-oraclert.SelEfcmTimeout():
 			oraclert.StoreLastMySwitchChoice(-1)
 			select {
 			case <-ch1:
@@ -70,7 +70,7 @@ func SelectWithDefault() {
 		select {
 		case <-ch2:
 			println("ch2")
-		case <-oraclert.SelectTimeout():
+		case <-oraclert.SelEfcmTimeout():
 			oraclert.StoreLastMySwitchChoice(-1)
 			select {
 			case <-ch1:
@@ -97,12 +97,12 @@ func SelectWithDefault() {
 func SelectWithTimeout() {
 	ch1 := make(chan int)
 	ch2 := make(chan struct{})
-	switch oraclert.GetSelEfcmSwitchCaseIdx("/workspaces/GFuzz/_examples/inst/selefcm/before.go:38", 3) {
+	switch oraclert.GetSelEfcmSwitchCaseIdx("/workspaces/GFuzz/_examples/inst/selefcm/before.go", "38", 3) {
 	case 0:
 		select {
 		case <-ch1:
 			println("ch1!")
-		case <-oraclert.SelectTimeout():
+		case <-oraclert.SelEfcmTimeout():
 			oraclert.StoreLastMySwitchChoice(-1)
 			select {
 			case <-ch1:
@@ -120,7 +120,7 @@ func SelectWithTimeout() {
 		select {
 		case <-ch2:
 			println("ch2")
-		case <-oraclert.SelectTimeout():
+		case <-oraclert.SelEfcmTimeout():
 			oraclert.StoreLastMySwitchChoice(-1)
 			select {
 			case <-ch1:
@@ -135,7 +135,7 @@ func SelectWithTimeout() {
 		select {
 		case <-time.After(10):
 			println("timeout")
-		case <-oraclert.SelectTimeout():
+		case <-oraclert.SelEfcmTimeout():
 			oraclert.StoreLastMySwitchChoice(-1)
 			select {
 			case <-ch1:
@@ -175,14 +175,14 @@ func (t *token) assignTokenToUser() { //Goroutine1
 }
 func (k *keeper) run() { //Goroutine2
 	ticker := time.NewTicker()
-	switch oraclert.GetSelEfcmSwitchCaseIdx("/workspaces/GFuzz/_examples/inst/selefcm/before.go:65", 2) {
+	switch oraclert.GetSelEfcmSwitchCaseIdx("/workspaces/GFuzz/_examples/inst/selefcm/before.go", "65", 2) {
 
 	// t is created before
 	case 0:
 		select {
 		case <-k.ch:
 			println("hey, I got selected")
-		case <-oraclert.SelectTimeout():
+		case <-oraclert.SelEfcmTimeout():
 			oraclert.StoreLastMySwitchChoice(-1)
 			select {
 			case <-k.ch:
@@ -195,7 +195,7 @@ func (k *keeper) run() { //Goroutine2
 		select {
 		case <-ticker:
 			k.deleteTokenFunc(t)
-		case <-oraclert.SelectTimeout():
+		case <-oraclert.SelEfcmTimeout():
 			oraclert.StoreLastMySwitchChoice(-1)
 			select {
 			case <-k.ch:

@@ -31,6 +31,8 @@ func Run(iCtx *InstContext, r *PassRegistry, passNames []string) error {
 }
 
 func RunPass(p InstPass, iCtx *InstContext) error {
+	p.Before(iCtx)
 	iCtx.AstFile = astutil.Apply(iCtx.AstFile, p.GetPreApply(iCtx), p.GetPostApply(iCtx)).(*ast.File)
+	p.After(iCtx)
 	return nil
 }

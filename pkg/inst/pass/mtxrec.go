@@ -15,6 +15,17 @@ type MtxRecPass struct{}
 func (p *MtxRecPass) Name() string {
 	return "mtxrec"
 }
+func (p *MtxRecPass) Before(iCtx *inst.InstContext) {
+	iCtx.SetMetadata(MetadataKeyRequiredOrtImport, false)
+}
+
+func (p *MtxRecPass) After(iCtx *inst.InstContext) {
+	needOracleRtImportItf, _ := iCtx.GetMetadata(MetadataKeyRequiredOrtImport)
+	needOracleRtImport := needOracleRtImportItf.(bool)
+	if needOracleRtImport {
+		inst.AddImport(iCtx.FS, iCtx.AstFile, oraclertImportName, oraclertImportPath)
+	}
+}
 
 func (p *MtxRecPass) Deps() []string {
 	return nil
@@ -25,7 +36,6 @@ func (p *MtxRecPass) GetPostApply(iCtx *inst.InstContext) func(*astutil.Cursor) 
 }
 
 func (p *MtxRecPass) GetPreApply(iCtx *inst.InstContext) func(*astutil.Cursor) bool {
-	var needOracleRtImport bool
 	return func(c *astutil.Cursor) bool {
 		switch concrete := c.Node().(type) {
 		case *ast.ExprStmt:
@@ -59,16 +69,13 @@ func (p *MtxRecPass) GetPreApply(iCtx *inst.InstContext) func(*astutil.Cursor) b
 						}})
 						c.InsertBefore(newCall)
 						addRecord(strconv.Itoa(intID) + ":trad" + op)
-						needOracleRtImport = true
+						iCtx.SetMetadata(MetadataKeyRequiredOrtImport, true)
 					}
 				}
 
 			}
 		}
 
-		if needOracleRtImport {
-			inst.AddImport(iCtx.FS, iCtx.AstFile, oraclertImportName, oraclertImportPath)
-		}
 		return true
 	}
 }

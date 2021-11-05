@@ -15,6 +15,17 @@ type WgRecPass struct{}
 func (p *WgRecPass) Name() string {
 	return "wgrec"
 }
+func (p *WgRecPass) Before(iCtx *inst.InstContext) {
+	iCtx.SetMetadata(MetadataKeyRequiredOrtImport, false)
+}
+
+func (p *WgRecPass) After(iCtx *inst.InstContext) {
+	needOracleRtImportItf, _ := iCtx.GetMetadata(MetadataKeyRequiredOrtImport)
+	needOracleRtImport := needOracleRtImportItf.(bool)
+	if needOracleRtImport {
+		inst.AddImport(iCtx.FS, iCtx.AstFile, oraclertImportName, oraclertImportPath)
+	}
+}
 
 func (p *WgRecPass) Deps() []string {
 	return nil
@@ -25,9 +36,6 @@ func (p *WgRecPass) GetPostApply(iCtx *inst.InstContext) func(*astutil.Cursor) b
 }
 
 func (p *WgRecPass) GetPreApply(iCtx *inst.InstContext) func(*astutil.Cursor) bool {
-	var (
-		needOracleRtImport bool
-	)
 
 	return func(c *astutil.Cursor) bool {
 		switch concrete := c.Node().(type) {
@@ -60,15 +68,11 @@ func (p *WgRecPass) GetPreApply(iCtx *inst.InstContext) func(*astutil.Cursor) bo
 						}})
 						c.InsertBefore(newCall)
 						addRecord(strconv.Itoa(intID) + ":trad" + op)
-						needOracleRtImport = true
+						iCtx.SetMetadata(MetadataKeyRequiredOrtImport, true)
 					}
 				}
 
 			}
-		}
-
-		if needOracleRtImport {
-			inst.AddImport(iCtx.FS, iCtx.AstFile, oraclertImportName, oraclertImportPath)
 		}
 
 		return true

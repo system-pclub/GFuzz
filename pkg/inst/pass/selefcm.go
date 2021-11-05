@@ -20,6 +20,18 @@ func (p *SelEfcmPass) Name() string {
 	return "selefcm"
 }
 
+func (p *SelEfcmPass) Before(iCtx *inst.InstContext) {
+	iCtx.SetMetadata(MetadataKeyRequiredOrtImport, false)
+}
+
+func (p *SelEfcmPass) After(iCtx *inst.InstContext) {
+	needOracleRtImportItf, _ := iCtx.GetMetadata(MetadataKeyRequiredOrtImport)
+	needOracleRtImport := needOracleRtImportItf.(bool)
+	if needOracleRtImport {
+		inst.AddImport(iCtx.FS, iCtx.AstFile, oraclertImportName, oraclertImportPath)
+	}
+}
+
 func (p *SelEfcmPass) Deps() []string {
 	return nil
 }
@@ -30,8 +42,7 @@ func (p *SelEfcmPass) GetPostApply(iCtx *inst.InstContext) func(*astutil.Cursor)
 
 func (p *SelEfcmPass) GetPreApply(iCtx *inst.InstContext) func(*astutil.Cursor) bool {
 	var (
-		needOracleRtImport bool
-		numOfSelects       uint32
+		numOfSelects uint32
 	)
 
 	return func(c *astutil.Cursor) bool {
@@ -95,7 +106,7 @@ func (p *SelEfcmPass) GetPreApply(iCtx *inst.InstContext) func(*astutil.Cursor) 
 					Rbrace: 0,
 				},
 			}
-			needOracleRtImport = true
+			iCtx.SetMetadata(MetadataKeyRequiredOrtImport, true)
 
 			vecCaseClause := []ast.Stmt{}
 			// The number of switch case is (the number of non-default select cases + 1)
@@ -154,7 +165,7 @@ func (p *SelEfcmPass) GetPreApply(iCtx *inst.InstContext) func(*astutil.Cursor) 
 						copySelect(oriSelect.StmtSelect)},
 				}
 				newSelect.Body.List = append(newSelect.Body.List, firstSelectCase, secondSelectCase)
-				needOracleRtImport = true
+				iCtx.SetMetadata(MetadataKeyRequiredOrtImport, true)
 
 				newCaseClause.Body = []ast.Stmt{newSelect}
 
@@ -181,7 +192,7 @@ func (p *SelEfcmPass) GetPreApply(iCtx *inst.InstContext) func(*astutil.Cursor) 
 					}})},
 					copySelect(oriSelect.StmtSelect)},
 			}
-			needOracleRtImport = true
+			iCtx.SetMetadata(MetadataKeyRequiredOrtImport, true)
 			vecCaseClause = append(vecCaseClause, newCaseClauseDefault)
 
 			newSwitch.Body.List = vecCaseClause
@@ -194,11 +205,6 @@ func (p *SelEfcmPass) GetPreApply(iCtx *inst.InstContext) func(*astutil.Cursor) 
 
 		default:
 		}
-
-		if needOracleRtImport {
-			inst.AddImport(iCtx.FS, iCtx.AstFile, oraclertImportName, oraclertImportPath)
-		}
-
 		return true
 	}
 

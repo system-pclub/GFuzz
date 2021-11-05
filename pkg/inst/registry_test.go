@@ -16,6 +16,12 @@ func (p *MockPass) Deps() []string {
 	return nil
 }
 
+func (p *MockPass) Before(*InstContext) {
+}
+
+func (p *MockPass) After(*InstContext) {
+}
+
 func (p *MockPass) GetPreApply(*InstContext) func(*astutil.Cursor) bool {
 	return nil
 }

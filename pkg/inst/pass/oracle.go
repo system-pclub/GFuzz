@@ -16,6 +16,17 @@ func (p *OraclePass) Name() string {
 	return "oracle"
 }
 
+func (p *OraclePass) Before(iCtx *inst.InstContext) {
+	iCtx.SetMetadata(MetadataKeyRequiredOrtImport, false)
+}
+
+func (p *OraclePass) After(iCtx *inst.InstContext) {
+	needOracleRtImportItf, _ := iCtx.GetMetadata(MetadataKeyRequiredOrtImport)
+	needOracleRtImport := needOracleRtImportItf.(bool)
+	if needOracleRtImport {
+		inst.AddImport(iCtx.FS, iCtx.AstFile, oraclertImportName, oraclertImportPath)
+	}
+}
 func (p *OraclePass) Deps() []string {
 	return nil
 }
@@ -25,7 +36,6 @@ func (p *OraclePass) GetPostApply(iCtx *inst.InstContext) func(*astutil.Cursor) 
 }
 
 func (p *OraclePass) GetPreApply(iCtx *inst.InstContext) func(*astutil.Cursor) bool {
-	var needOracleRtImport bool
 	var additionalNode ast.Stmt
 	var vecRecvAndFirstStmt []*RecvAndFirstStmt
 
@@ -127,9 +137,6 @@ func (p *OraclePass) GetPreApply(iCtx *inst.InstContext) func(*astutil.Cursor) b
 			}
 
 		default:
-		}
-		if needOracleRtImport {
-			inst.AddImport(iCtx.FS, iCtx.AstFile, oraclertImportName, oraclertImportPath)
 		}
 		return true
 	}
