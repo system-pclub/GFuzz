@@ -75,6 +75,7 @@ func (p *OraclePass) GetPreApply(iCtx *inst.InstContext) func(*astutil.Cursor) b
 				NewArgCall(oraclertImportName, "BeforeRun", nil),
 			}
 			c.InsertBefore(newAssign)
+			iCtx.SetMetadata(MetadataKeyRequiredOrtImport, true)
 
 			newAfterTestCall := NewArgCall(oraclertImportName, "AfterRun", []ast.Expr{
 				newIdent,
@@ -106,6 +107,8 @@ func (p *OraclePass) GetPreApply(iCtx *inst.InstContext) func(*astutil.Cursor) b
 						},
 					})
 					c.InsertBefore(newCall)
+					iCtx.SetMetadata(MetadataKeyRequiredOrtImport, true)
+
 				}
 			}
 		}

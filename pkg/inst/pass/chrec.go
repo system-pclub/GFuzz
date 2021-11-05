@@ -61,8 +61,6 @@ func (p *ChRecPass) GetPreApply(iCtx *inst.InstContext) func(*astutil.Cursor) bo
 				Value:    strconv.Itoa(intID),
 			}})
 			c.InsertBefore(newCall) // Insert the call to store this operation's type and ID into goroutine local storage
-			println("ChRecPass InsertBefore StoreOpInfo")
-
 			addRecord(strconv.Itoa(intID) + ":chsend")
 			iCtx.SetMetadata(MetadataKeyRequiredOrtImport, true)
 
