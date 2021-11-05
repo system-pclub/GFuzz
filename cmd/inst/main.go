@@ -6,6 +6,8 @@ import (
 	"gfuzz/pkg/inst/pass"
 	"gfuzz/pkg/inst/stats"
 	"gfuzz/pkg/utils/fs"
+	"gfuzz/pkg/utils/gofmt"
+	"io/ioutil"
 	"log"
 	"os"
 )
@@ -94,15 +96,27 @@ func main() {
 			continue
 		}
 
+		var dst string
 		if opts.Out != "" {
-			err = inst.DumpAstFile(iCtx.FS, iCtx.AstFile, opts.Out)
+			dst = opts.Out
 		} else {
 			// dump AST in-place
-			err = inst.DumpAstFile(iCtx.FS, iCtx.AstFile, iCtx.File)
+			dst = iCtx.File
+
 		}
+		err = inst.DumpAstFile(iCtx.FS, iCtx.AstFile, dst)
 		if err != nil {
 			log.Print(err)
 			continue
+		}
+
+		// check if output is valid, revert if error happened
+		if gofmt.HasSyntaxError(dst) {
+			if opts.IgnoreSyntaxErr {
+				ioutil.WriteFile(dst, iCtx.OriginalContent, 0666)
+			} else {
+				log.Panicf("syntax error found at file '%s'", dst)
+			}
 		}
 	}
 

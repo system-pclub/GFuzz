@@ -524,9 +524,6 @@ func ReportBug(mapCS map[PrimInfo]struct{}) {
 	}
 	lock(&MuReportBug)
 	print("-----New Blocking Bug:\n")
-	const size = 64 << 10
-	buf := make([]byte, size)
-	buf = buf[:Stack(buf, false)]
 	print("---Primitive location:\n")
 	for primInfo, _ := range mapCS {
 		print(primInfo.StringDebug() + "\n")
@@ -536,8 +533,9 @@ func ReportBug(mapCS map[PrimInfo]struct{}) {
 	for primInfo, _ := range mapCS {
 		print(FnPointer2String(primInfo) + "\n")
 	}
-	print("---Stack:\n", string(buf), "\n")
+	//print("---Stack:\n", string(buf), "\n")
 	print("-----End Bug\n")
+
 	unlock(&MuReportBug)
 }
 

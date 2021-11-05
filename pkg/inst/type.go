@@ -7,9 +7,10 @@ import (
 
 // InstContext contains all information needed to instrument one single Golang source code.
 type InstContext struct {
-	File    string
-	FS      *token.FileSet
-	AstFile *ast.File
+	File            string
+	OriginalContent []byte
+	FS              *token.FileSet
+	AstFile         *ast.File
 }
 
 // InstPass shapes the pass used for instrumenting a single Golang source code

@@ -217,7 +217,7 @@ func CheckBugRun(entry *OracleEntry) {
 }
 
 func CheckBugLate() {
-	time.Sleep(45 * time.Second) // Before the deadline we set for unit test in fuzzer/run.go, check once again
+	time.Sleep(30 * time.Second) // Before the deadline we set for unit test in fuzzer/run.go, check once again
 
 	fmt.Printf("Check bugs after 45 seconds\n")
 
@@ -265,6 +265,11 @@ func CheckBugLate() {
 
 		w.WriteString(str)
 		w.WriteString(runtime.StrWithdraw)
+		w.WriteString("---Stack:\n")
+		const size = 64 << 10
+		buf := make([]byte, size)
+		buf = buf[:runtime.Stack(buf, true)]
+		w.Write(buf)
 	}
 
 	// print record
@@ -353,7 +358,7 @@ func AfterRunFuzz(entry *OracleEntry) {
 	}
 
 	CheckBugEnd(entry)
-
+	runtime.DumpAllStack()
 }
 
 // Only enables oracle
