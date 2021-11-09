@@ -8,6 +8,7 @@ import (
 	"gfuzz/pkg/utils/fs"
 	"log"
 	"os"
+	"runtime/pprof"
 	"sync"
 )
 
@@ -19,6 +20,16 @@ var (
 func main() {
 
 	parseFlags()
+
+	if opts.CPUProfile != "" {
+		f, err := os.Create(opts.CPUProfile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
+
+	}
 
 	if opts.Version {
 		fmt.Printf("GFuzz Version: %s Build: %s", Version, Build)
@@ -83,7 +94,7 @@ func main() {
 	// handle go source files
 	// TODO: use goroutine to accelerate
 	var wg sync.WaitGroup
-	toInstSrcCh := make(chan string, opts.Parallel)
+	toInstSrcCh := make(chan string)
 	for i := 1; i <= int(opts.Parallel); i++ {
 		wg.Add(1)
 		go func() {

@@ -18,8 +18,6 @@ func startWorkers(parallel int, worker func(context.Context)) {
 
 		// Start worker
 		go func(workerID int) {
-			logger := getWorkerLogger(ctx)
-			logger.Printf("started")
 			defer wg.Done()
 			worker(ctx)
 		}(i)

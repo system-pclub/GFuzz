@@ -26,7 +26,7 @@ func Main(execs []gexec.Executable, config *config.Config) {
 	shuffle(execs)
 
 	fc := fuzz.NewContext(execs, config, &fuzz.HandlerImpl{})
-	inputCh := make(chan *exec.Input, config.MaxParallel)
+	inputCh := make(chan *exec.Input)
 
 	go func() {
 		fc.EachGExecFuzz(func(g *gexecfuzz.GExecFuzz) {
@@ -47,13 +47,14 @@ func queueEntryWorker(ctx context.Context, fc *fuzz.Context, ch chan *exec.Input
 	for {
 		select {
 		case i := <-ch:
+			logger.Printf("start %s", i.ID)
 			o, err := Run(ctx, i)
 			if err != nil {
-				logger.Printf("[input %s] %s", i.ID, err)
+				logger.Printf("%s: %s", i.ID, err)
 			}
 			newInputs, err := fc.HandleExec(i, o)
 			if err != nil {
-				logger.Printf("[input %s] %s", i.ID, err)
+				logger.Printf("%s: %s", i.ID, err)
 			}
 
 			go func() {
