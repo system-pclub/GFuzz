@@ -37,7 +37,7 @@ var ChCount uint16
 func RecordChMake(capBuf int, c *hchan) {
 
 	if BoolRecordSDK == false {
-		if c.chInfo.BoolInSDK == false {
+		if c.chInfo.BoolInSDK == true {
 			return
 		}
 	}
@@ -46,7 +46,7 @@ func RecordChMake(capBuf int, c *hchan) {
 	ChCount++
 
 	newChRecord := &ChanRecord{
-		StrCreation: c.chInfo.StrDebug,
+		StrCreation: c.chInfo.StringDebug(),
 		Closed:      false,
 		NotClosed:   true,
 		CapBuf:      uint16(capBuf),
@@ -66,14 +66,8 @@ func RecordChOp(c *hchan) {
 		return
 	}
 	if BoolRecordSDK == false {
-		if c.chInfo.BoolInSDK == false {
-			if BoolDebug {
-				println("For the channel", c.chInfo.StrDebug, ", we don't record its operation")
-			}
+		if c.chInfo.BoolInSDK == true {
 			return
-		}
-		if BoolDebug {
-			println("For the channel", c.chInfo.StrDebug, ", we recorded its operation")
 		}
 	}
 

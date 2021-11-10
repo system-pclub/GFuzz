@@ -217,9 +217,9 @@ func CheckBugRun(entry *OracleEntry) {
 }
 
 func CheckBugLate() {
-	time.Sleep(30 * time.Second) // Before the deadline we set for unit test in fuzzer/run.go, check once again
+	time.Sleep(20 * time.Second) // Before the deadline we set for unit test in fuzzer/run.go, check once again
 
-	fmt.Printf("Check bugs after 45 seconds\n")
+	fmt.Printf("Check bugs after 20 seconds\n")
 
 	for {
 		runtime.LockCheckEntry()

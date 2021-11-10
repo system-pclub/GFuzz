@@ -22,6 +22,9 @@ func (h *HandlerImpl) Handle(fc *Context, i *exec.Input, o *exec.Output) ([]*exe
 	case exec.RandStage:
 		// we are handling the output from the input with rand stage
 		return handleRandStageInput(fc, i, o)
+	case exec.ReplayStage:
+		// no need to handle replay
+		return nil, nil
 	default:
 		return nil, fmt.Errorf("unexpected stage: %s", i.Stage)
 	}
@@ -31,7 +34,10 @@ func handleInitStageInput(fc *Context, i *exec.Input, o *exec.Output) ([]*exec.I
 	fc.lock.Lock()
 	defer fc.lock.Unlock()
 	g := fc.GetQueueEntryByGExecID(i.Exec.String())
-
+	execID, err := GetExecIDFromInputID(i.ID)
+	if err != nil {
+		return nil, err
+	}
 	var deterInputs []*exec.Input
 	var mts mutate.OrtConfigMutateStrategy = &mutate.DeterMutateStrategy{}
 
@@ -41,7 +47,7 @@ func handleInitStageInput(fc *Context, i *exec.Input, o *exec.Output) ([]*exec.I
 	}
 
 	for _, cfg := range cfgs {
-		deterInputs = append(deterInputs, newExecInput(fc, g, cfg, exec.DeterStage))
+		deterInputs = append(deterInputs, NewExecInput(fc.GetAutoIncGlobalID(), execID, fc.cfg.OutputDir, g.Exec, cfg, exec.DeterStage))
 	}
 
 	return deterInputs, nil
@@ -51,8 +57,12 @@ func handleDeterStageInput(fc *Context, i *exec.Input, o *exec.Output) ([]*exec.
 	fc.lock.Lock()
 	defer fc.lock.Unlock()
 	g := fc.GetQueueEntryByGExecID(i.Exec.String())
+	execID, err := GetExecIDFromInputID(i.ID)
+	if err != nil {
+		return nil, err
+	}
 	return []*exec.Input{
-		newExecInput(fc, g, i.OracleRtConfig, exec.CalibStage),
+		NewExecInput(fc.GetAutoIncGlobalID(), execID, fc.cfg.OutputDir, g.Exec, i.OracleRtConfig, exec.DeterStage),
 	}, nil
 }
 

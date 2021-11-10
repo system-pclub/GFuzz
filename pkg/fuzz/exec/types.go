@@ -24,6 +24,9 @@ const (
 
 	// RandStage randomly mutate select choice
 	RandStage Stage = "rand"
+
+	// Run with custom/pre-prepared oracle runtime configuration
+	ReplayStage Stage = "replay"
 )
 
 // Input contains all information about a single execution

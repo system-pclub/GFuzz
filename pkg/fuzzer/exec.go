@@ -53,7 +53,9 @@ func Run(ctx context.Context, input *fexec.Input) (*fexec.Output, error) {
 	}
 
 	// prepare timeout context
-	cmdCtx, cancel := context.WithTimeout(ctx, time.Duration(3)*time.Minute)
+	// cmd will have 30 seconds timeout, 30 seconds more is for go test to compile/find correct
+	// test to run if no package is given
+	cmdCtx, cancel := context.WithTimeout(ctx, time.Duration(1)*time.Minute)
 	defer cancel()
 
 	cmd, err := input.Exec.GetCmd(cmdCtx)
@@ -66,7 +68,7 @@ func Run(ctx context.Context, input *fexec.Input) (*fexec.Output, error) {
 	env = append(env, fmt.Sprintf("%s=%s", ortEnv.ORACLERT_CONFIG_FILE, ortCfgFp))
 	env = append(env, fmt.Sprintf("%s=%s", ortEnv.ORACLERT_STDOUT_FILE, gfOutputFp))
 	env = append(env, fmt.Sprintf("%s=%s", ortEnv.ORACLERT_OUTPUT_FILE, ortOutputFp))
-
+	env = append(env, fmt.Sprintf("%s=%s", "ORACLERT_DEBUG", "1"))
 	cmd.Env = env
 
 	// redirect stdout to the file

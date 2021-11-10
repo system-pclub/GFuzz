@@ -11,9 +11,11 @@ var opts struct {
 	// Fuzzing Target
 
 	GoModDir     string   `long:"goModDir" description:"Directory contains go.mod"`
-	TestFuncs    []string `long:"testFunc" description:"Only run specific test functions in the tests"`
-	TestBinGlobs []string `long:"testBin" description:"A list of globs for Go test bins."`
-
+	TestFunc     string   `long:"func" description:"Only run specific test function in the test"`
+	TestPkg      string   `long:"pkg" description:"Only run test functions in the specific package"`
+	TestBin      string   `long:"testbin" description:"A list of globs for Go test bins."`
+	TestBinGlobs []string `long:"bins" description:"A list of globs for Go test bins."`
+	Ortconfig    string   `long:"ortconfig" description:"Only run once with given ortconfig"`
 	// Fuzzer
 
 	OutputDir string `long:"outputDir" description:"Directory for fuzzing output"`

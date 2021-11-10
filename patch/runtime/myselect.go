@@ -25,6 +25,12 @@ func StoreSelectInput(intNumCase, intChosenCase int) {
 	}
 }
 
+func ProcessSelectInfo(handler func(map[string]SelectInfo)) {
+	lock(&MuFirstInput)
+	handler(MapSelectInfo)
+	unlock(&MuFirstInput)
+}
+
 func NewSelectInputFromRuntime(intNumCase, intPrioCase int, intLayerCallee int) SelectInfo {
 	// if A contains select, select calls StoreSelectInput, StoreSelectInput calls this function, then intLayerCallee is 3
 	const size = 64 << 10

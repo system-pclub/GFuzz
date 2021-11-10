@@ -7,13 +7,20 @@ import (
 	"gfuzz/pkg/fuzz/exec"
 	"gfuzz/pkg/fuzz/gexecfuzz"
 	"gfuzz/pkg/gexec"
+	ortconfig "gfuzz/pkg/oraclert/config"
 	"log"
 	"os"
 	"time"
 )
 
+func Replay(fctx *fuzz.Context, ge gexec.Executable, config *config.Config, rtConfig *ortconfig.Config) {
+	ctx := context.Background()
+	i := fuzz.NewExecInput(fctx.GetAutoIncGlobalID(), 0, config.OutputDir, ge, rtConfig, exec.ReplayStage)
+	Run(ctx, i)
+}
+
 // Main starts fuzzing with a given list of executables and configuration
-func Main(execs []gexec.Executable, config *config.Config) {
+func Main(fctx *fuzz.Context, execs []gexec.Executable, config *config.Config) {
 	if len(execs) == 0 {
 		log.Println("no executables found, exit.")
 		os.Exit(0)
@@ -23,20 +30,17 @@ func Main(execs []gexec.Executable, config *config.Config) {
 		log.Printf("found executable: %s", e)
 	}
 
-	shuffle(execs)
-
-	fc := fuzz.NewContext(execs, config, &fuzz.HandlerImpl{})
 	inputCh := make(chan *exec.Input)
 
 	go func() {
-		fc.EachGExecFuzz(func(g *gexecfuzz.GExecFuzz) {
-			inputCh <- fuzz.NewInitExecInput(fc, g)
+		fctx.EachGExecFuzz(func(g *gexecfuzz.GExecFuzz) {
+			inputCh <- fuzz.NewInitExecInput(fctx, g.Exec)
 			log.Printf("init %s", g)
 		})
 	}()
 
 	startWorkers(config.MaxParallel, func(ctx context.Context) {
-		queueEntryWorker(ctx, fc, inputCh)
+		queueEntryWorker(ctx, fctx, inputCh)
 	})
 
 }
@@ -44,6 +48,7 @@ func Main(execs []gexec.Executable, config *config.Config) {
 // queueEntryWorker handles a queue entry receives from channel
 func queueEntryWorker(ctx context.Context, fc *fuzz.Context, ch chan *exec.Input) {
 	logger := getWorkerLogger(ctx)
+
 	for {
 		select {
 		case i := <-ch:

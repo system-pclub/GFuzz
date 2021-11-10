@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func shuffle(vals []gexec.Executable) {
+func Shuffle(vals []gexec.Executable) {
 	r := rand.New(rand.NewSource(time.Now().Unix()))
 
 	for n := len(vals); n > 0; n-- {

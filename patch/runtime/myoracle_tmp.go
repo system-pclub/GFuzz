@@ -135,7 +135,7 @@ func init() {
 	//MapInput = make(map[string]SelectInput)
 }
 
-var BoolDebug = false
+var BoolDebug = gogetenv("ORACLERT_DEBUG") == "1"
 
 var MuBlockEntry mutex
 var MapBlockEntry map[*BlockEntry]struct{} = make(map[*BlockEntry]struct{})

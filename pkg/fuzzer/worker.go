@@ -14,10 +14,10 @@ func startWorkers(parallel int, worker func(context.Context)) {
 	var wg sync.WaitGroup
 	for i := 1; i <= parallel; i++ {
 		wg.Add(1)
-		ctx := newWorkerContext(strconv.Itoa(i))
 
 		// Start worker
 		go func(workerID int) {
+			ctx := newWorkerContext(strconv.Itoa(workerID))
 			defer wg.Done()
 			worker(ctx)
 		}(i)
@@ -33,7 +33,11 @@ func newWorkerContext(workerID string) context.Context {
 }
 
 func getWorkerID(context context.Context) string {
-	return context.Value(CTX_KEY_WORKER_ID).(string)
+	val := context.Value(CTX_KEY_WORKER_ID)
+	if val == nil {
+		return "0"
+	}
+	return val.(string)
 }
 
 func getWorkerLogger(context context.Context) *log.Logger {

@@ -72,14 +72,14 @@ func NewChanInfo(ch *hchan) *ChanInfo {
 		MapRefGoroutine: make(map[*GoInfo]struct{}),
 		StrDebug:        strLoc,
 		OKToCheck:       false,
-		BoolInSDK:       Index(strLoc, strSDKPath) < 0,
+		BoolInSDK:       Index(strLoc, strSDKPath) >= 0,
 		IntFlagFoundBug: 0,
 		SpecialFlag:     0,
 	}
 	if BoolDebug {
 		println("===Debug Info:")
-		println("\tMake of a new channel. The creation site is:", strLoc)
-		println("\tSDK path is:", strSDKPath, "\tBoolMakeNotInSDK is:", newChInfo.BoolInSDK)
+		println("\tMake of a new channel. The creation site is:", strLoc, ch)
+		println("\tSDK path is:", strSDKPath, "\tInSDK ", newChInfo.BoolInSDK)
 	}
 	AddRefGoroutine(newChInfo, CurrentGoInfo())
 
@@ -254,6 +254,9 @@ func DequeueCheckEntry() *CheckEntry {
 }
 
 func EnqueueCheckEntry(CS []PrimInfo) *CheckEntry {
+	defer func() {
+		println("EnqueueCheckEntry finished ")
+	}()
 	lock(&MuCheckEntry)
 
 	if len(CS) == 1 {
@@ -316,7 +319,9 @@ func CheckBlockBug(CS []PrimInfo) (finished bool) {
 	mapCS := make(map[PrimInfo]struct{})
 	mapGS := make(map[*GoInfo]struct{}) // all goroutines that hold reference to primitives in mapCS
 	finished = false
-
+	defer func() {
+		println("finish CheckBlockBug")
+	}()
 	if BoolDebug {
 		print("Checking primtives:")
 		for _, chI := range CS {

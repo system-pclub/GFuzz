@@ -74,19 +74,23 @@ func getTuples() map[uint32]uint32 {
 // getSelects returns all selected cases during the runtime
 func getSelects() []output.SelectRecord {
 	var selects []output.SelectRecord
-	for _, selectInput := range runtime.MapSelectInfo {
-		// filename:linenum:totalCaseNum:chooseCaseNum
-		strFileName := selectInput.StrFileName
-		if indexEnter := strings.Index(strFileName, "\n"); indexEnter > -1 {
-			strFileName = strFileName[:indexEnter]
-		}
-		id := fmt.Sprintf("%s:%s", strFileName, selectInput.StrLineNum)
-		selects = append(selects, output.SelectRecord{
-			ID:     id,
-			Cases:  uint(selectInput.IntNumCase),
-			Chosen: uint(selectInput.IntPrioCase),
-		})
 
-	}
+	runtime.ProcessSelectInfo(func(selectInfo map[string]runtime.SelectInfo) {
+		for _, selectInput := range selectInfo {
+			// filename:linenum:totalCaseNum:chooseCaseNum
+			strFileName := selectInput.StrFileName
+			if indexEnter := strings.Index(strFileName, "\n"); indexEnter > -1 {
+				strFileName = strFileName[:indexEnter]
+			}
+			id := fmt.Sprintf("%s:%s", strFileName, selectInput.StrLineNum)
+			selects = append(selects, output.SelectRecord{
+				ID:     id,
+				Cases:  uint(selectInput.IntNumCase),
+				Chosen: uint(selectInput.IntPrioCase),
+			})
+
+		}
+	})
+
 	return selects
 }

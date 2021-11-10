@@ -3,29 +3,39 @@ package fuzz
 import (
 	"fmt"
 	"gfuzz/pkg/fuzz/exec"
-	"gfuzz/pkg/fuzz/gexecfuzz"
+	"gfuzz/pkg/gexec"
 	"gfuzz/pkg/oraclert/config"
 	"path"
+	"strconv"
+	"strings"
 )
 
 // newExecInput should be the only way to create exec.Input
-func newExecInput(fc *Context, g *gexecfuzz.GExecFuzz,
+func NewExecInput(ID uint32, fromID uint32, outputDir string, ge gexec.Executable,
 	rtConfig *config.Config, stage exec.Stage) *exec.Input {
-	globalID := fc.GetAutoIncGlobalID()
-	inputID := fmt.Sprintf("%d-%s-%s", globalID, stage, g.String())
-	dir := path.Join(fc.cfg.OutputDir, "exec", inputID)
+	inputID := fmt.Sprintf("%d-%s-%s-%d", ID, stage, ge.String(), fromID)
+	dir := path.Join(outputDir, "exec", inputID)
 	return &exec.Input{
 		ID:             inputID,
-		Exec:           g.Exec,
+		Exec:           ge,
 		OracleRtConfig: rtConfig,
 		OutputDir:      dir,
 		Stage:          stage,
 	}
 }
 
-func NewInitExecInput(fc *Context, g *gexecfuzz.GExecFuzz) *exec.Input {
+func GetExecIDFromInputID(inputID string) (uint32, error) {
+	id, err := strconv.Atoi(strings.Split(inputID, "-")[0])
+	if err != nil {
+		return 0, err
+	}
+	return uint32(id), nil
+}
+
+func NewInitExecInput(fc *Context, ge gexec.Executable) *exec.Input {
 	ortCfg := config.NewConfig()
-	return newExecInput(fc, g, ortCfg, exec.InitStage)
+	globalID := fc.GetAutoIncGlobalID()
+	return NewExecInput(globalID, 0, fc.cfg.OutputDir, ge, ortCfg, exec.InitStage)
 }
 
 // HandleFuzzQueryEntry will handle a single queue entry

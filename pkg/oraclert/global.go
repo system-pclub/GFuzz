@@ -1,6 +1,7 @@
 package oraclert
 
 import (
+	"fmt"
 	"gfuzz/pkg/oraclert/config"
 	"gfuzz/pkg/oraclert/env"
 	"gfuzz/pkg/selefcm"
@@ -38,9 +39,9 @@ func init() {
 			efcmStrat = selefcm.NewSelectCaseInOrder(ortConfig.SelEfcm.Efcms)
 			selTimeout = ortConfig.SelEfcm.SelTimeout
 		} else {
-			println(err)
+			fmt.Println(err)
 		}
 	} else {
-		println(err)
+		fmt.Println(err)
 	}
 }
