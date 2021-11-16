@@ -1,17 +1,17 @@
 package wgrec
 
 import (
-	gooracle "gooracle"
+	oraclert "gfuzz/pkg/oraclert"
 	"sync"
 )
 
 func Hello() {
 	wg := sync.WaitGroup{}
-	gooracle.StoreOpInfo("Add", 0)
+	oraclert.StoreOpInfo("Add", 1)
 
 	wg.Add(1)
-	gooracle.StoreOpInfo("Wait", 1)
+	oraclert.StoreOpInfo("Wait", 2)
 	wg.Wait()
-	gooracle.StoreOpInfo("Done", 2)
+	oraclert.StoreOpInfo("Done", 3)
 	wg.Done()
 }

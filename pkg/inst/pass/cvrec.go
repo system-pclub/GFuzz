@@ -16,52 +16,65 @@ func (p *CvRecPass) Name() string {
 	return "cvrec"
 }
 
-func (p *CvRecPass) Run(iCtx *inst.InstContext) error {
-	inst.AddImport(iCtx.FS, iCtx.AstFile, "gooracle", "gooracle")
-	iCtx.AstFile = astutil.Apply(iCtx.AstFile, instCvOps, nil).(*ast.File)
-	return nil
+func (p *CvRecPass) Before(iCtx *inst.InstContext) {
+	iCtx.SetMetadata(MetadataKeyRequiredOrtImport, false)
+}
+
+func (p *CvRecPass) After(iCtx *inst.InstContext) {
+	needOracleRtImportItf, _ := iCtx.GetMetadata(MetadataKeyRequiredOrtImport)
+	needOracleRtImport := needOracleRtImportItf.(bool)
+	if needOracleRtImport {
+		inst.AddImport(iCtx.FS, iCtx.AstFile, oraclertImportName, oraclertImportPath)
+	}
 }
 
 func (p *CvRecPass) Deps() []string {
 	return nil
 }
 
-func instCvOps(c *astutil.Cursor) bool {
-	switch concrete := c.Node().(type) {
-	case *ast.ExprStmt:
-		if callExpr, ok := concrete.X.(*ast.CallExpr); ok {
-			if selectorExpr, ok := callExpr.Fun.(*ast.SelectorExpr); ok { // like `mu.Lock()`
-				var matched bool = true
-				var op string
-				switch selectorExpr.Sel.Name {
-				case "Broadcast":
-					op = "Broadcast"
-				case "Signal":
-					op = "Signal"
-				case "Wait":
-					op = "Wait"
-				default:
-					matched = false
+func (p *CvRecPass) GetPostApply(iCtx *inst.InstContext) func(*astutil.Cursor) bool {
+	return nil
+}
+
+func (p *CvRecPass) GetPreApply(iCtx *inst.InstContext) func(*astutil.Cursor) bool {
+	return func(c *astutil.Cursor) bool {
+		switch concrete := c.Node().(type) {
+		case *ast.ExprStmt:
+			if callExpr, ok := concrete.X.(*ast.CallExpr); ok {
+				if selectorExpr, ok := callExpr.Fun.(*ast.SelectorExpr); ok { // like `mu.Lock()`
+					var matched bool = true
+					var op string
+					switch selectorExpr.Sel.Name {
+					case "Broadcast":
+						op = "Broadcast"
+					case "Signal":
+						op = "Signal"
+					case "Wait":
+						op = "Wait"
+					default:
+						matched = false
+					}
+
+					if matched {
+						intID := int(getNewOpID())
+						newCall := NewArgCallExpr(oraclertImportName, "StoreOpInfo", []ast.Expr{&ast.BasicLit{
+							ValuePos: 0,
+							Kind:     token.STRING,
+							Value:    "\"" + op + "\"",
+						}, &ast.BasicLit{
+							ValuePos: 0,
+							Kind:     token.INT,
+							Value:    strconv.Itoa(intID),
+						}})
+						c.InsertBefore(newCall)
+						addRecord(strconv.Itoa(intID) + ":trad" + op)
+						iCtx.SetMetadata(MetadataKeyRequiredOrtImport, true)
+					}
 				}
 
-				if matched {
-					intID := int(Uint16OpID)
-					newCall := NewArgCallExpr("gooracle", "StoreOpInfo", []ast.Expr{&ast.BasicLit{
-						ValuePos: 0,
-						Kind:     token.STRING,
-						Value:    "\"" + op + "\"",
-					}, &ast.BasicLit{
-						ValuePos: 0,
-						Kind:     token.INT,
-						Value:    strconv.Itoa(intID),
-					}})
-					c.InsertBefore(newCall)
-					records = append(records, strconv.Itoa(intID)+":trad"+op)
-					Uint16OpID++
-				}
 			}
-
 		}
+
+		return true
 	}
-	return true
 }

@@ -1,6 +1,10 @@
 package inst
 
-import "testing"
+import (
+	"testing"
+
+	"golang.org/x/tools/go/ast/astutil"
+)
 
 type MockPass struct{}
 
@@ -8,11 +12,21 @@ func (p *MockPass) Name() string {
 	return "mock"
 }
 
-func (p *MockPass) Run(iCtx *InstContext) error {
+func (p *MockPass) Deps() []string {
 	return nil
 }
 
-func (p *MockPass) Deps() []string {
+func (p *MockPass) Before(*InstContext) {
+}
+
+func (p *MockPass) After(*InstContext) {
+}
+
+func (p *MockPass) GetPreApply(*InstContext) func(*astutil.Cursor) bool {
+	return nil
+}
+
+func (p *MockPass) GetPostApply(*InstContext) func(*astutil.Cursor) bool {
 	return nil
 }
 

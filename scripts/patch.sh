@@ -10,7 +10,10 @@ cp patch/runtime/select.go $RUNTIME/select.go
 cp patch/runtime/chan.go $RUNTIME/chan.go
 cp patch/runtime/runtime2.go $RUNTIME/runtime2.go
 cp patch/runtime/proc.go $RUNTIME/proc.go
-cp -r pkg/gooracle $GOROOT_SRC
+
+mkdir -p $GOROOT_SRC/gfuzz/pkg
+cp -r pkg/oraclert $GOROOT_SRC/gfuzz/pkg
+cp -r pkg/selefcm $GOROOT_SRC/gfuzz/pkg
 cp -r patch/time $GOROOT_SRC
 cp -r patch/sync $GOROOT_SRC
 cp patch/reflect/value.go $GOROOT_SRC/reflect/value.go

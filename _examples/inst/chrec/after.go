@@ -1,17 +1,17 @@
 package chrec
 
-import gooracle "gooracle"
+import oraclert "gfuzz/pkg/oraclert"
 
 func Hello() {
 	ch := make(chan int)
-	gooracle.StoreChMakeInfo(ch, 0)
-	gooracle.StoreOpInfo("Send", 1)
+	oraclert.StoreChMakeInfo(ch, 1)
+	oraclert.StoreOpInfo("Send", 2)
 
 	ch <- 1
-	gooracle.StoreOpInfo("Recv", 2)
+	oraclert.StoreOpInfo("Recv", 3)
 
 	<-ch
-	gooracle.StoreOpInfo("Close", 3)
+	oraclert.StoreOpInfo("Close", 4)
 
 	close(ch)
 }

@@ -4,17 +4,15 @@ import "sync/atomic"
 
 var MapSelectInfo map[string]SelectInfo // useful only when RecordSelectChoice is true
 //var MapInput map[string]SelectInfo // useful only when RecordSelectChoice is false
-var RecordSelectChoice bool = false
+var RecordSelectChoice bool = true // by default is true, we need to collect if new select has been found
 var MuFirstInput mutex
 var Uint32SelectCount uint32
 var BoolSelectCount bool
 
-
-
 type SelectInfo struct {
 	StrFileName string
-	StrLineNum string
-	IntNumCase int
+	StrLineNum  string
+	IntNumCase  int
 	IntPrioCase int
 }
 
@@ -22,9 +20,15 @@ func StoreSelectInput(intNumCase, intChosenCase int) {
 	newSelectInput := NewSelectInputFromRuntime(intNumCase, intChosenCase, 3)
 	if newSelectInput.IntNumCase != 0 { // IntNumCase would be 0 if this select is not instrumented (e.g., in SDK) and we can't mutate it
 		lock(&MuFirstInput)
-		MapSelectInfo[newSelectInput.StrFileName + ":" + newSelectInput.StrLineNum] = newSelectInput
+		MapSelectInfo[newSelectInput.StrFileName+":"+newSelectInput.StrLineNum] = newSelectInput
 		unlock(&MuFirstInput)
 	}
+}
+
+func ProcessSelectInfo(handler func(map[string]SelectInfo)) {
+	lock(&MuFirstInput)
+	handler(MapSelectInfo)
+	unlock(&MuFirstInput)
 }
 
 func NewSelectInputFromRuntime(intNumCase, intPrioCase int, intLayerCallee int) SelectInfo {
@@ -38,7 +42,7 @@ func NewSelectInputFromRuntime(intNumCase, intPrioCase int, intLayerCallee int) 
 		return SelectInfo{}
 	}
 	selectInput := SelectInfo{
-		StrFileName: stackSingleGo.VecFuncFile[intLayerCallee - 1], // where is the select
+		StrFileName: stackSingleGo.VecFuncFile[intLayerCallee-1], // where is the select
 		StrLineNum:  LastMySwitchLineNum(),
 		IntNumCase:  LastMySwitchOriSelectNumCase(),
 		IntPrioCase: -1,

@@ -1,6 +1,7 @@
 package pass
 
 import (
+	"fmt"
 	"gfuzz/pkg/inst"
 	"go/ast"
 	"go/token"
@@ -19,24 +20,195 @@ func (p *SelEfcmPass) Name() string {
 	return "selefcm"
 }
 
-func (p *SelEfcmPass) Run(iCtx *inst.InstContext) error {
-	inst.AddImport(iCtx.FS, iCtx.AstFile, "gooracle", "gooracle")
-	currentFSet = iCtx.FS
-	iCtx.AstFile = astutil.Apply(iCtx.AstFile, preOnlySelect, nil).(*ast.File)
-	return nil
+func (p *SelEfcmPass) Before(iCtx *inst.InstContext) {
+	iCtx.SetMetadata(MetadataKeyRequiredOrtImport, false)
+}
+
+func (p *SelEfcmPass) After(iCtx *inst.InstContext) {
+	needOracleRtImportItf, _ := iCtx.GetMetadata(MetadataKeyRequiredOrtImport)
+	needOracleRtImport := needOracleRtImportItf.(bool)
+	if needOracleRtImport {
+		inst.AddImport(iCtx.FS, iCtx.AstFile, oraclertImportName, oraclertImportPath)
+	}
 }
 
 func (p *SelEfcmPass) Deps() []string {
 	return nil
 }
 
-var (
-	currentFSet      *token.FileSet
-	Uint16OpID       uint16
-	recordOutputFile string
-	records          []string
-	numOfSelects     uint32
-)
+func (p *SelEfcmPass) GetPostApply(iCtx *inst.InstContext) func(*astutil.Cursor) bool {
+	return nil
+}
+
+func (p *SelEfcmPass) GetPreApply(iCtx *inst.InstContext) func(*astutil.Cursor) bool {
+	var (
+		numOfSelects uint32
+	)
+
+	return func(c *astutil.Cursor) bool {
+		defer func() {
+			if r := recover(); r != nil { // This is allowed. If we insert node into nodes not in slice, we will meet a panic
+				// For example, we may identified a receive in select and wanted to insert a function call before it, then this function will panic
+
+				//fmt.Printf("Recover in pre(): c.Name(): %s\n", c.Name())
+				//position := currentFSet.Position(c.Node().Pos())
+				//position.Filename, _ = filepath.Abs(position.Filename)
+				//fmt.Printf("\tLocation: %s\n", position.Filename + ":" + strconv.Itoa(position.Line))
+			}
+		}()
+
+		switch concrete := c.Node().(type) {
+
+		case *ast.SelectStmt:
+			numOfSelects += 1
+			positionOriSelect := iCtx.FS.Position(concrete.Select)
+			positionOriSelect.Filename, _ = filepath.Abs(positionOriSelect.Filename)
+
+			// store the original select
+			oriSelect := SelectStruct{
+				StmtSelect:    concrete,
+				VecCommClause: nil,
+				VecOp:         nil,
+				VecBody:       nil,
+			}
+			for _, stmtCommClause := range concrete.Body.List {
+				commClause, _ := stmtCommClause.(*ast.CommClause)
+				oriSelect.VecCommClause = append(oriSelect.VecCommClause, commClause)
+				oriSelect.VecOp = append(oriSelect.VecOp, commClause.Comm)
+				vecContent := []ast.Stmt{}
+				vecContent = append(vecContent, commClause.Body...)
+				oriSelect.VecBody = append(oriSelect.VecBody, vecContent)
+			}
+
+			// create a switch
+			newSwitch := &ast.SwitchStmt{
+				Switch: 0,
+				Init:   nil,
+				Tag: NewArgCall(oraclertImportName, "GetSelEfcmSwitchCaseIdx", []ast.Expr{
+					&ast.BasicLit{ // first parameter: filename:linenumber
+						ValuePos: 0,
+						Kind:     token.STRING,
+						Value:    fmt.Sprintf("\"%s\"", positionOriSelect.Filename),
+					},
+					&ast.BasicLit{ // second parameter: linenumber of original select
+						ValuePos: 0,
+						Kind:     token.STRING,
+						Value:    fmt.Sprintf("\"%s\"", strconv.Itoa(positionOriSelect.Line)),
+					},
+					&ast.BasicLit{
+						ValuePos: 0,
+						Kind:     token.INT,
+						Value:    strconv.Itoa(len(oriSelect.VecCommClause)),
+					}}),
+				Body: &ast.BlockStmt{
+					Lbrace: 0,
+					List:   nil,
+					Rbrace: 0,
+				},
+			}
+			iCtx.SetMetadata(MetadataKeyRequiredOrtImport, true)
+
+			vecCaseClause := []ast.Stmt{}
+			// The number of switch case is (the number of non-default select cases + 1)
+			for i, stmtOp := range oriSelect.VecOp {
+
+				// if the case's expression is nil, it means this case is a default. We don't intrument this case
+				// but we instrument other cases
+				if stmtOp == nil {
+					continue
+				}
+
+				newCaseClause := &ast.CaseClause{
+					Case:  0,
+					List:  nil,
+					Colon: 0,
+					Body:  nil,
+				}
+				newBasicLit := &ast.BasicLit{
+					ValuePos: 0,
+					Kind:     token.INT,
+					Value:    strconv.Itoa(i),
+				}
+				newCaseClause.List = []ast.Expr{newBasicLit}
+
+				// the case's content is one select statement
+				newSelect := &ast.SelectStmt{
+					Select: 0,
+					Body:   &ast.BlockStmt{},
+				}
+				firstSelectCase := &ast.CommClause{
+					Case:  0,
+					Comm:  oriSelect.VecOp[i],
+					Colon: 0,
+					Body:  copyStmtBody(oriSelect.VecBody[i]),
+				}
+				secondSelectCase := &ast.CommClause{
+					Case: 0,
+					Comm: &ast.ExprStmt{X: &ast.UnaryExpr{
+						OpPos: 0,
+						Op:    token.ARROW,
+						X:     NewArgCall(oraclertImportName, "SelEfcmTimeout", nil),
+					}},
+					Colon: 0,
+					Body: []ast.Stmt{
+						// The first line is a call to gooracle.StoreLastMySwitchChoice(-1)
+						// The second line is a copy of original select
+						&ast.ExprStmt{X: NewArgCall(oraclertImportName, "StoreLastMySwitchChoice", []ast.Expr{&ast.UnaryExpr{
+							OpPos: 0,
+							Op:    token.SUB,
+							X: &ast.BasicLit{
+								ValuePos: 0,
+								Kind:     token.INT,
+								Value:    "1",
+							},
+						}})},
+						copySelect(oriSelect.StmtSelect)},
+				}
+				newSelect.Body.List = append(newSelect.Body.List, firstSelectCase, secondSelectCase)
+				iCtx.SetMetadata(MetadataKeyRequiredOrtImport, true)
+
+				newCaseClause.Body = []ast.Stmt{newSelect}
+
+				// add the created case to vector
+				vecCaseClause = append(vecCaseClause, newCaseClause)
+			}
+
+			// add one default case to switch
+			newCaseClauseDefault := &ast.CaseClause{
+				Case:  0,
+				List:  nil,
+				Colon: 0,
+				Body: []ast.Stmt{
+					// The first line is a call to gooracle.StoreLastMySwitchChoice(-1)
+					// The second line is a copy of original select
+					&ast.ExprStmt{X: NewArgCall(oraclertImportName, "StoreLastMySwitchChoice", []ast.Expr{&ast.UnaryExpr{
+						OpPos: 0,
+						Op:    token.SUB,
+						X: &ast.BasicLit{
+							ValuePos: 0,
+							Kind:     token.INT,
+							Value:    "1",
+						},
+					}})},
+					copySelect(oriSelect.StmtSelect)},
+			}
+			iCtx.SetMetadata(MetadataKeyRequiredOrtImport, true)
+			vecCaseClause = append(vecCaseClause, newCaseClauseDefault)
+
+			newSwitch.Body.List = vecCaseClause
+
+			// Insert the new switch before the select
+			c.InsertBefore(newSwitch)
+
+			// Delete the original select
+			c.Delete()
+
+		default:
+		}
+		return true
+	}
+
+}
 
 var sliceStrNoInstr = []string{
 	"src/runtime",
@@ -58,168 +230,6 @@ type RecvAndFirstStmt struct {
 	recvName  string
 	firstStmt ast.Stmt
 	recvObj   *ast.Object
-}
-
-var vecRecvAndFirstStmt []*RecvAndFirstStmt
-
-func preOnlySelect(c *astutil.Cursor) bool {
-	defer func() {
-		if r := recover(); r != nil { // This is allowed. If we insert node into nodes not in slice, we will meet a panic
-			// For example, we may identified a receive in select and wanted to insert a function call before it, then this function will panic
-
-			//fmt.Printf("Recover in pre(): c.Name(): %s\n", c.Name())
-			//position := currentFSet.Position(c.Node().Pos())
-			//position.Filename, _ = filepath.Abs(position.Filename)
-			//fmt.Printf("\tLocation: %s\n", position.Filename + ":" + strconv.Itoa(position.Line))
-		}
-	}()
-
-	switch concrete := c.Node().(type) {
-
-	case *ast.SelectStmt:
-		numOfSelects += 1
-		positionOriSelect := currentFSet.Position(concrete.Select)
-		positionOriSelect.Filename, _ = filepath.Abs(positionOriSelect.Filename)
-
-		// store the original select
-		oriSelect := SelectStruct{
-			StmtSelect:    concrete,
-			VecCommClause: nil,
-			VecOp:         nil,
-			VecBody:       nil,
-		}
-		for _, stmtCommClause := range concrete.Body.List {
-			commClause, _ := stmtCommClause.(*ast.CommClause)
-			oriSelect.VecCommClause = append(oriSelect.VecCommClause, commClause)
-			oriSelect.VecOp = append(oriSelect.VecOp, commClause.Comm)
-			vecContent := []ast.Stmt{}
-			for _, stmt := range commClause.Body {
-				vecContent = append(vecContent, stmt)
-			}
-			oriSelect.VecBody = append(oriSelect.VecBody, vecContent)
-		}
-
-		// create a switch
-		newSwitch := &ast.SwitchStmt{
-			Switch: 0,
-			Init:   nil,
-			Tag: NewArgCall("gooracle", "ReadSelect", []ast.Expr{
-				&ast.BasicLit{ // first parameter: filename
-					ValuePos: 0,
-					Kind:     token.STRING,
-					Value:    "\"" + positionOriSelect.Filename + "\"",
-				}, &ast.BasicLit{ // second parameter: linenumber of original select
-					ValuePos: 0,
-					Kind:     token.INT,
-					Value:    strconv.Itoa(positionOriSelect.Line),
-				}, &ast.BasicLit{
-					ValuePos: 0,
-					Kind:     token.INT,
-					Value:    strconv.Itoa(len(oriSelect.VecCommClause)),
-				}}),
-			Body: &ast.BlockStmt{
-				Lbrace: 0,
-				List:   nil,
-				Rbrace: 0,
-			},
-		}
-		vecCaseClause := []ast.Stmt{}
-		// The number of switch case is (the number of non-default select cases + 1)
-		for i, stmtOp := range oriSelect.VecOp {
-
-			// if the case's expression is nil, it means this case is a default. We don't intrument this case
-			// but we instrument other cases
-			if stmtOp == nil {
-				continue
-			}
-
-			newCaseClause := &ast.CaseClause{
-				Case:  0,
-				List:  nil,
-				Colon: 0,
-				Body:  nil,
-			}
-			newBasicLit := &ast.BasicLit{
-				ValuePos: 0,
-				Kind:     token.INT,
-				Value:    strconv.Itoa(i),
-			}
-			newCaseClause.List = []ast.Expr{newBasicLit}
-
-			// the case's content is one select statement
-			newSelect := &ast.SelectStmt{
-				Select: 0,
-				Body:   &ast.BlockStmt{},
-			}
-			firstSelectCase := &ast.CommClause{
-				Case:  0,
-				Comm:  oriSelect.VecOp[i],
-				Colon: 0,
-				Body:  copyStmtBody(oriSelect.VecBody[i]),
-			}
-			secondSelectCase := &ast.CommClause{
-				Case: 0,
-				Comm: &ast.ExprStmt{X: &ast.UnaryExpr{
-					OpPos: 0,
-					Op:    token.ARROW,
-					X:     NewArgCall("gooracle", "SelectTimeout", nil),
-				}},
-				Colon: 0,
-				Body: []ast.Stmt{
-					// The first line is a call to gooracle.StoreLastMySwitchChoice(-1)
-					// The second line is a copy of original select
-					&ast.ExprStmt{X: NewArgCall("gooracle", "StoreLastMySwitchChoice", []ast.Expr{&ast.UnaryExpr{
-						OpPos: 0,
-						Op:    token.SUB,
-						X: &ast.BasicLit{
-							ValuePos: 0,
-							Kind:     token.INT,
-							Value:    "1",
-						},
-					}})},
-					copySelect(oriSelect.StmtSelect)},
-			}
-			newSelect.Body.List = append(newSelect.Body.List, firstSelectCase, secondSelectCase)
-
-			newCaseClause.Body = []ast.Stmt{newSelect}
-
-			// add the created case to vector
-			vecCaseClause = append(vecCaseClause, newCaseClause)
-		}
-
-		// add one default case to switch
-		newCaseClauseDefault := &ast.CaseClause{
-			Case:  0,
-			List:  nil,
-			Colon: 0,
-			Body: []ast.Stmt{
-				// The first line is a call to gooracle.StoreLastMySwitchChoice(-1)
-				// The second line is a copy of original select
-				&ast.ExprStmt{X: NewArgCall("gooracle", "StoreLastMySwitchChoice", []ast.Expr{&ast.UnaryExpr{
-					OpPos: 0,
-					Op:    token.SUB,
-					X: &ast.BasicLit{
-						ValuePos: 0,
-						Kind:     token.INT,
-						Value:    "1",
-					},
-				}})},
-				copySelect(oriSelect.StmtSelect)},
-		}
-		vecCaseClause = append(vecCaseClause, newCaseClauseDefault)
-
-		newSwitch.Body.List = vecCaseClause
-
-		// Insert the new switch before the select
-		c.InsertBefore(newSwitch)
-
-		// Delete the original select
-		c.Delete()
-
-	default:
-	}
-
-	return true
 }
 
 type SelectStruct struct {

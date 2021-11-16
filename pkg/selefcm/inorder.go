@@ -1,8 +1,6 @@
 package selefcm
 
 import (
-	"runtime"
-	"strconv"
 	"sync/atomic"
 )
 
@@ -15,22 +13,23 @@ type SelectCaseInOrder struct {
 }
 
 type SelectCaseRecorder struct {
-	inputs       []runtime.SelectInfo
-	lastInputIdx int32
+	// A list of enforcements for same select ID
+	efcms []SelEfcm
+	// Last returned element whose index in efcms array
+	lastEfcmIdx int32
 }
 
 // NewSelectCaseInOrder creates a SelectCaseInOrder by given list of inputs.
-func NewSelectCaseInOrder(inputs []runtime.SelectInfo) *SelectCaseInOrder {
+func NewSelectCaseInOrder(efcms []SelEfcm) *SelectCaseInOrder {
 	var id2Cr map[string]*SelectCaseRecorder = make(map[string]*SelectCaseRecorder)
-	for _, input := range inputs {
-		selectID := input.StrFileName + ":" + input.StrLineNum
-		if _, exist := id2Cr[selectID]; !exist {
-			id2Cr[selectID] = &SelectCaseRecorder{
-				inputs:       []runtime.SelectInfo{input},
-				lastInputIdx: -1,
+	for _, efcm := range efcms {
+		if _, exist := id2Cr[efcm.ID]; !exist {
+			id2Cr[efcm.ID] = &SelectCaseRecorder{
+				efcms:       []SelEfcm{efcm},
+				lastEfcmIdx: -1,
 			}
 		} else {
-			id2Cr[selectID].inputs = append(id2Cr[selectID].inputs, input)
+			id2Cr[efcm.ID].efcms = append(id2Cr[efcm.ID].efcms, efcm)
 		}
 	}
 	return &SelectCaseInOrder{
@@ -39,9 +38,7 @@ func NewSelectCaseInOrder(inputs []runtime.SelectInfo) *SelectCaseInOrder {
 }
 
 // GetCase return the case index application should choose in that select
-func (s *SelectCaseInOrder) GetCase(filename string, line, numOfCases int) int {
-	lineStr := strconv.Itoa(line)
-	selectID := filename + ":" + lineStr
+func (s *SelectCaseInOrder) GetCase(selectID string) int {
 	cr, exist := s.id2Cr[selectID]
 	if !exist {
 		return -1
@@ -50,13 +47,13 @@ func (s *SelectCaseInOrder) GetCase(filename string, line, numOfCases int) int {
 
 	// lock-free update lastInputIdx
 	for {
-		oldIdx := atomic.LoadInt32(&cr.lastInputIdx)
-		newIdx = (oldIdx + 1) % int32(len(cr.inputs))
-		res := atomic.CompareAndSwapInt32(&cr.lastInputIdx, oldIdx, newIdx)
+		oldIdx := atomic.LoadInt32(&cr.lastEfcmIdx)
+		newIdx = (oldIdx + 1) % int32(len(cr.efcms))
+		res := atomic.CompareAndSwapInt32(&cr.lastEfcmIdx, oldIdx, newIdx)
 		if res {
 			break
 		}
 	}
 
-	return cr.inputs[newIdx].IntPrioCase
+	return cr.efcms[newIdx].Case
 }

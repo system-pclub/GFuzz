@@ -19,8 +19,10 @@ func NewInstContext(goSrcFile string) (*InstContext, error) {
 		return nil, err
 	}
 	return &InstContext{
-		File:    goSrcFile,
-		FS:      fs,
-		AstFile: ast,
+		File:            goSrcFile,
+		OriginalContent: oldSource,
+		FS:              fs,
+		AstFile:         ast,
+		Metadata:        make(map[string]interface{}),
 	}, nil
 }

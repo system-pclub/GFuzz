@@ -1,0 +1,22 @@
+root@9dc8de2c7cad:/workspaces/GFuzz# go tool pprof bin/inst inst.prof 
+File: inst
+Type: cpu
+Time: Nov 9, 2021 at 4:36pm (UTC)
+Duration: 8.62mins, Total samples = 1.46mins (16.97%)
+Entering interactive mode (type "help" for commands, "o" for options)
+(pprof) top10
+Showing nodes accounting for 64.83s, 73.87% of 87.76s total
+Dropped 558 nodes (cum <= 0.44s)
+Showing top 10 nodes out of 159
+      flat  flat%   sum%        cum   cum%
+    42.85s 48.83% 48.83%     49.95s 56.92%  syscall.Syscall
+     7.04s  8.02% 56.85%      7.04s  8.02%  runtime.futex
+     4.05s  4.61% 61.46%      4.05s  4.61%  runtime.nanotime
+     2.30s  2.62% 64.08%      4.75s  5.41%  runtime.pcvalue
+     1.82s  2.07% 66.16%      3.84s  4.38%  runtime.scanobject
+     1.67s  1.90% 68.06%      2.04s  2.32%  runtime.step
+     1.49s  1.70% 69.76%      7.16s  8.16%  runtime.gentraceback
+     1.28s  1.46% 71.22%      4.44s  5.06%  runtime.mallocgc
+     1.22s  1.39% 72.61%      1.22s  1.39%  runtime.madvise
+     1.11s  1.26% 73.87%      1.11s  1.26%  runtime.epollwait
+(pprof)

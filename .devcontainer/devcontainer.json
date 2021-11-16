@@ -1,0 +1,4 @@
+{
+    "image": "gfuzz:dev",
+    "extensions": ["golang.go"],
+}

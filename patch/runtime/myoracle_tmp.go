@@ -135,14 +135,13 @@ func init() {
 	//MapInput = make(map[string]SelectInput)
 }
 
-var BoolDebug = false
-
+var BoolDebug = gogetenv("ORACLERT_DEBUG") == "1"
 
 var MuBlockEntry mutex
 var MapBlockEntry map[*BlockEntry]struct{} = make(map[*BlockEntry]struct{})
 
 type BlockEntry struct {
-	VecPrim []PrimInfo
+	VecPrim       []PrimInfo
 	StrOpPosition string
 	CurrentGoInfo *GoInfo
 }
@@ -204,6 +203,17 @@ func Monitor(prim PrimInfo) {
 
 var MuWithdraw mutex
 var StrWithdraw string
+var DumpedAllStack bool = false
+
+func DumpAllStack() {
+	if !DumpedAllStack {
+		const size = 64 << 10
+		buf := make([]byte, size)
+		buf = buf[:Stack(buf, true)]
+		print("---Stack:\n", string(buf), "\n")
+		DumpedAllStack = true
+	}
+}
 
 func CheckBlockEntry() (strReturn string, foundBug bool) {
 	strReturn = ""
@@ -231,8 +241,10 @@ func CheckBlockEntry() (strReturn string, foundBug bool) {
 			strReturn += FnPointer2String(prim) + "\n"
 		}
 		strReturn += "-----End Bug\n"
+
 		unlock(&MuReportBug)
 	}
+
 	unlock(&MuBlockEntry)
 	return
 }

@@ -1,15 +1,40 @@
 package main
 
 import (
+	"fmt"
 	"gfuzz/pkg/inst"
 	"gfuzz/pkg/inst/pass"
+	"gfuzz/pkg/inst/stats"
+	"gfuzz/pkg/utils/fs"
 	"log"
 	"os"
+	"runtime/pprof"
+	"sync"
+)
+
+var (
+	Version string
+	Build   string
 )
 
 func main() {
 
 	parseFlags()
+
+	if opts.CPUProfile != "" {
+		f, err := os.Create(opts.CPUProfile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
+
+	}
+
+	if opts.Version {
+		fmt.Printf("GFuzz Version: %s Build: %s", Version, Build)
+		os.Exit(0)
+	}
 
 	reg := inst.NewPassRegistry()
 
@@ -26,6 +51,7 @@ func main() {
 	if len(opts.Passes) > 0 {
 		passes = opts.Passes
 	} else {
+		// default to run all passes if no pass(s) is/are given
 		passes = reg.ListOfPassNames()
 	}
 
@@ -34,7 +60,7 @@ func main() {
 
 	if len(opts.Args.Globs) > 0 {
 		for _, g := range opts.Args.Globs {
-			files, err := listGoSrcByGlob(g)
+			files, err := fs.ListFilesByGlob(g)
 			if err != nil {
 				log.Panic(err)
 			}
@@ -67,28 +93,36 @@ func main() {
 
 	// handle go source files
 	// TODO: use goroutine to accelerate
+	var wg sync.WaitGroup
+	toInstSrcCh := make(chan string)
+	for i := 1; i <= int(opts.Parallel); i++ {
+		wg.Add(1)
+		go func() {
+			for src := range toInstSrcCh {
+				err := HandleSrcFile(src, reg, passes)
+				if err != nil {
+					log.Println(src, err)
+				}
+			}
+
+			wg.Done()
+
+		}()
+	}
+
 	for _, src := range goSrcFiles {
-		iCtx, err := inst.NewInstContext(src)
-		if err != nil {
-			log.Print(err)
-			continue
-		}
+		toInstSrcCh <- src
+	}
 
-		err = inst.Run(iCtx, reg, passes)
-		if err != nil {
-			log.Print(err)
-			continue
-		}
+	close(toInstSrcCh)
 
-		if opts.Out != "" {
-			err = inst.DumpAstFile(iCtx.FS, iCtx.AstFile, opts.Out)
-		} else {
-			// dump AST in-place
-			err = inst.DumpAstFile(iCtx.FS, iCtx.AstFile, iCtx.File)
-		}
+	wg.Wait()
+
+	// handle output
+	if opts.StatsOut != "" {
+		err := stats.ToFile(opts.StatsOut)
 		if err != nil {
-			log.Print(err)
-			continue
+			log.Fatalf("writing stats to %s: %s", opts.StatsOut, err)
 		}
 	}
 }
