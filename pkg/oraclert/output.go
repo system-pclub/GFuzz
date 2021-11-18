@@ -6,6 +6,7 @@ import (
 	"gfuzz/pkg/oraclert/output"
 	"os"
 	"runtime"
+	"sort"
 	"strings"
 )
 
@@ -91,6 +92,8 @@ func getSelects() []output.SelectRecord {
 
 		}
 	})
+
+	sort.Sort(output.BySelectID(selects))
 
 	return selects
 }
