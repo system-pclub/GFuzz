@@ -254,9 +254,7 @@ func DequeueCheckEntry() *CheckEntry {
 }
 
 func EnqueueCheckEntry(CS []PrimInfo) *CheckEntry {
-	defer func() {
-		println("EnqueueCheckEntry finished ")
-	}()
+
 	lock(&MuCheckEntry)
 
 	if len(CS) == 1 {

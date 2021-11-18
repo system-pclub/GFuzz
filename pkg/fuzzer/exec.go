@@ -68,7 +68,6 @@ func Run(ctx context.Context, input *api.Input) (*api.Output, error) {
 	env = append(env, fmt.Sprintf("%s=%s", ortEnv.ORACLERT_CONFIG_FILE, ortCfgFp))
 	env = append(env, fmt.Sprintf("%s=%s", ortEnv.ORACLERT_STDOUT_FILE, gfOutputFp))
 	env = append(env, fmt.Sprintf("%s=%s", ortEnv.ORACLERT_OUTPUT_FILE, ortOutputFp))
-	env = append(env, fmt.Sprintf("%s=%s", "ORACLERT_DEBUG", "1"))
 	cmd.Env = env
 
 	// redirect stdout to the file
@@ -134,14 +133,42 @@ func Run(ctx context.Context, input *api.Input) (*api.Output, error) {
 }
 
 // HandleExec is called immediately after running execution.
-func HandleExec(i *api.Input, o *api.Output, fctx *api.Context, scorer api.ScoreStrategy) error {
-	score, err := scorer.Score(i, o)
+// It should take care of following things:
+// 1. update/add interest input
+// 2. check if any unique bugs found
+func HandleExec(ctx context.Context, i *api.Input, o *api.Output, fctx *api.Context, interestHdl api.InterestHandler) error {
+	logger := getWorkerLogger(ctx)
+
+	// 1. update/add interest input
+	if i.Stage == api.InitStage {
+		// if input is init, since init stage by default is interested input, so no need to check interest
+		// simply update output and
+		ii := fctx.Interests.Find(i)
+		ii.Output = o
+		return nil
+	}
+	isInteresed, err := interestHdl.IsInterested(i, o)
 	if err != nil {
 		return nil
 	}
-	isInteresed := score > scorer.InterestScore()
 	if isInteresed {
 		fctx.Interests.Add(api.NewExecutedInterestInput(i, o))
 	}
+
+	// 2. check if any unique bugs found
+	// Check any unique bugs found
+	numOfBugs := 0
+	for _, bugID := range o.BugIDs {
+		if !fctx.HasBugID(bugID) {
+			stdout, _ := i.GetOutputFilePath()
+			fctx.AddBugID(bugID, stdout)
+			numOfBugs += 1
+		}
+	}
+
+	if numOfBugs != 0 {
+		logger.Printf("found %d unique bug(s)\n", numOfBugs)
+	}
+
 	return nil
 }

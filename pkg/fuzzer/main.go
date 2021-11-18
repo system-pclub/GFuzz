@@ -9,7 +9,6 @@ import (
 	ortconfig "gfuzz/pkg/oraclert/config"
 	"log"
 	"os"
-	"time"
 )
 
 // Reply run the fuzzing with given oracle runtime configuration and given executable
@@ -37,23 +36,27 @@ func Main(fctx *api.Context, execs []gexec.Executable, config *config.Config,
 		fctx.Interests.Add(api.NewUnexecutedInterestInput(i))
 	})
 
+	triggerLoopCh := make(chan struct{})
 	// endless loop to handle interested inputs
 	go func() {
 		for {
-			// handle interested inputs one by one
-			fctx.Interests.Each(interestHdl)
+			select {
+			case <-triggerLoopCh:
+				// handle interested inputs one by one
+				fctx.Interests.Each(interestHdl)
+			}
 		}
 	}()
 
 	// start a group of workers to handle fuzz execution in parallel
 	startWorkers(config.MaxParallel, func(ctx context.Context) {
-		execWorker(ctx, fctx, scorer)
+		execWorker(ctx, fctx, interestHdl, triggerLoopCh)
 	})
 
 }
 
 // execWorker handles a execution inputs from channel
-func execWorker(ctx context.Context, fc *api.Context, scorer api.ScoreStrategy) {
+func execWorker(ctx context.Context, fc *api.Context, interestHdl api.InterestHandler, triggerLoopCh chan struct{}) {
 	logger := getWorkerLogger(ctx)
 
 	for {
@@ -64,13 +67,13 @@ func execWorker(ctx context.Context, fc *api.Context, scorer api.ScoreStrategy) 
 			if err != nil {
 				logger.Printf("%s: %s", i.ID, err)
 			}
-			err = HandleExec(i, o, fc, scorer)
+			fc.IncNumOfRun()
+			err = HandleExec(ctx, i, o, fc, interestHdl)
 			if err != nil {
 				logger.Printf("%s: %s", i.ID, err)
 			}
-		case <-time.After(2 * time.Minute):
-			logger.Printf("Timeout. Exited.")
-			return
+		case triggerLoopCh <- struct{}{}:
+
 		}
 	}
 }

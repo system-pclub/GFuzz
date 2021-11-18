@@ -4,15 +4,14 @@ package api
 type ScoreStrategy interface {
 	// Score will score an exec input
 	Score(i *Input, o *Output) (int, error)
-	// InterestScore will return the a score. If exec input whose score above the returned value, this input will be added into interested exec input list
-	InterestScore() int
 }
 
 // InterestInput is created if the input is interested(identify by score strategy) or it is init stage input
 type InterestInput struct {
-	Executed bool
-	Input    *Input
-	Output   *Output // Output will be nil if executed is false
+	Executed   bool
+	HandledCnt uint32
+	Input      *Input
+	Output     *Output // Output will be nil if executed is false
 }
 
 // InterestHandler is used to handle InterestInput in following:
@@ -20,4 +19,6 @@ type InterestInput struct {
 type InterestHandler interface {
 	// HandleInterest will be called when handling
 	HandleInterest(i *InterestInput) error
+	// IsInterested will decide if this execution should be added into interest list
+	IsInterested(i *Input, o *Output) (bool, error)
 }

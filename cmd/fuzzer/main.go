@@ -8,6 +8,7 @@ import (
 	"gfuzz/pkg/fuzz/score"
 	"gfuzz/pkg/fuzzer"
 	gLog "gfuzz/pkg/fuzzer/log"
+	"gfuzz/pkg/fuzzer/terminal"
 	"gfuzz/pkg/gexec"
 	ortconfig "gfuzz/pkg/oraclert/config"
 	"io/ioutil"
@@ -32,11 +33,7 @@ func main() {
 	}
 
 	if opts.OutputDir == "" {
-		log.Fatal("--outputDir is required")
-	}
-
-	if opts.InstStats == "" {
-		log.Fatal("--instStats is required")
+		log.Fatal("--out is required")
 	}
 
 	if _, err := os.Stat(opts.OutputDir); os.IsNotExist(err) {
@@ -47,10 +44,10 @@ func main() {
 	}
 
 	if opts.GoModDir == "" && opts.TestBinGlobs == nil {
-		log.Fatal("Either --goModDir or --testBin is required")
+		log.Fatal("Either --gomod or --testbin is required")
 	}
 
-	gLog.SetupLogger(filepath.Join(opts.OutputDir, GFUZZ_LOG_FILE))
+	gLog.SetupLogger(filepath.Join(opts.OutputDir, GFUZZ_LOG_FILE), true)
 
 	log.Printf("GFuzz Version: %s Build: %s", Version, Build)
 
@@ -118,5 +115,9 @@ func main() {
 	}
 
 	// start fuzzing
+	gLog.DisableStdoutLog()
+	reportCh := make(chan *terminal.TerminalReport)
+	go terminal.Render(reportCh)
+	go terminal.Feed(reportCh, fctx)
 	fuzzer.Main(fctx, execs, config, interestHdl, scorer)
 }

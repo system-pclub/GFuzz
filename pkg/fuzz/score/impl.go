@@ -17,7 +17,3 @@ func NewScoreStrategyImpl(fctx *api.Context) api.ScoreStrategy {
 func (s *ScoreStrategyImpl) Score(i *api.Input, o *api.Output) (int, error) {
 	return 101, nil
 }
-
-func (s *ScoreStrategyImpl) InterestScore() int {
-	return 100
-}

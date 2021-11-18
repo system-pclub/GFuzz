@@ -17,18 +17,37 @@ func NewInterestHandlerImpl(fctx *api.Context) api.InterestHandler {
 		fctx: fctx,
 	}
 }
+func (h *InterestHandlerImpl) IsInterested(i *api.Input, o *api.Output) (bool, error) {
+
+	return false, nil
+}
 func (h *InterestHandlerImpl) HandleInterest(i *api.InterestInput) error {
+	i.HandledCnt += 1
 	// if interested input has not been executed, execute first
 	if !i.Executed {
+		i.Executed = true
 		h.fctx.ExecInputCh <- i.Input
+		return nil
+	}
+
+	if i.Output == nil {
+		// if executed is true but output is nil
+		// it could be still in channel pending to run
 		return nil
 	}
 
 	// if interested input has been executed, then try to mutate and send to execution according to its stage
 	switch i.Input.Stage {
 	case api.InitStage:
+		if i.HandledCnt == 1 {
+			// if handle init first time, treat it as normal init stage
+			return handleInitStageInput(h.fctx, i.Input, i.Output)
+
+		} else {
+			// if not the first time, treat it as random
+			return handleRandStageInput(h.fctx, i.Input, i.Output)
+		}
 		// we are handling the output from the input with init stage
-		return handleInitStageInput(h.fctx, i.Input, i.Output)
 	case api.DeterStage:
 		// we are handling the output from the input with deter stage
 		return handleDeterStageInput(h.fctx, i.Input, i.Output)
