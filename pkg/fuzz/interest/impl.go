@@ -5,6 +5,7 @@ import (
 	"gfuzz/pkg/fuzz/api"
 	"gfuzz/pkg/fuzz/mutate"
 	"gfuzz/pkg/utils/hash"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -19,7 +20,18 @@ func NewInterestHandlerImpl(fctx *api.Context) api.InterestHandler {
 	}
 }
 func (h *InterestHandlerImpl) IsInterested(i *api.Input, o *api.Output) (bool, error) {
-	ortCfgHash := hash.AsSha256(o.OracleRtOutput)
+
+	oTupleCopy := make(map[uint32]uint32)
+	for k, v := range o.OracleRtOutput.Tuples {
+		log2element := uint32(math.Log2(float64(v)))
+		if log2element > 0 {
+			oTupleCopy[k] = log2element
+		} else {
+			oTupleCopy[k] = 0
+		}
+	}
+	ortCfgHash := hash.AsSha256(oTupleCopy)
+
 	if h.fctx.UpdateOrtOutputHash(ortCfgHash) {
 		return true, nil
 	}
