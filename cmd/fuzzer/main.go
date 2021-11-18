@@ -8,7 +8,6 @@ import (
 	"gfuzz/pkg/fuzz/score"
 	"gfuzz/pkg/fuzzer"
 	gLog "gfuzz/pkg/fuzzer/log"
-	"gfuzz/pkg/fuzzer/terminal"
 	"gfuzz/pkg/gexec"
 	ortconfig "gfuzz/pkg/oraclert/config"
 	"io/ioutil"
@@ -61,42 +60,44 @@ func main() {
 
 	// prepare fuzz targets
 	var execs []gexec.Executable
-	if opts.TestFunc != "" {
-		if opts.TestPkg == "" && opts.TestBin == "" {
-			log.Panicln("if --func is given, either --pkg or --testbin is also required")
-		}
-		if opts.TestPkg != "" {
-			execs = append(execs, &gexec.GoPkgTest{
-				Func:     opts.TestFunc,
-				Package:  opts.TestPkg,
-				GoModDir: opts.GoModDir,
-			})
-		} else {
-			execs = append(execs, &gexec.GoBinTest{
-				Func: opts.TestFunc,
-				Bin:  opts.TestBin,
-			})
-		}
-
-	} else if opts.TestPkg != "" {
-		execs, err = gexec.ListExecutablesInPackage(opts.GoModDir, opts.TestPkg)
-		if err != nil {
-			log.Printf("ListExecutablesInPackage: %s", err)
-		}
-	} else if opts.TestBinGlobs != nil {
+	if opts.TestBinGlobs != nil {
+		log.Printf("list test bin executables from %v", opts.TestBinGlobs)
 		execs, err = gexec.ListExecutablesFromTestBinGlobs(opts.TestBinGlobs)
 		if err != nil {
 			log.Printf("ListExecutablesFromTestBinGlobs: %s", err)
 		}
 	} else if opts.GoModDir != "" {
+		log.Printf("list test pkg executables from %v", opts.TestBinGlobs)
 		execs, err = gexec.ListExecutablesFromGoModule(opts.GoModDir)
 		if err != nil {
 			log.Printf("ListExecutablesFromGoModule: %s", err)
 		}
 	}
 
-	fuzzer.Shuffle(execs)
-	fctx := api.NewContext(execs, config)
+	// filter fuzz targets by func or package if provided
+	var filteredExecs []gexec.Executable
+	for _, e := range execs {
+
+		switch v := e.(type) {
+		case *gexec.GoBinTest:
+			if opts.TestFunc != "" && opts.TestFunc != v.Func {
+				continue
+			}
+		case *gexec.GoPkgTest:
+			if opts.TestFunc != "" && opts.TestFunc != v.Func {
+				continue
+			}
+
+			if opts.TestPkg != "" && opts.TestPkg != v.Package {
+				continue
+			}
+		}
+
+		filteredExecs = append(filteredExecs, e)
+	}
+
+	fuzzer.Shuffle(filteredExecs)
+	fctx := api.NewContext(filteredExecs, config)
 
 	var scorer api.ScoreStrategy = score.NewScoreStrategyImpl(fctx)
 	var interestHdl api.InterestHandler = interest.NewInterestHandlerImpl(fctx)
@@ -110,14 +111,14 @@ func main() {
 		if err != nil {
 			fmt.Errorf("parse %s: %s", opts.Ortconfig, err)
 		}
-		fuzzer.Replay(fctx, execs[0], config, ortconfig)
+		fuzzer.Replay(fctx, filteredExecs[0], config, ortconfig)
 		return
 	}
 
 	// start fuzzing
-	gLog.DisableStdoutLog()
-	reportCh := make(chan *terminal.TerminalReport)
-	go terminal.Render(reportCh)
-	go terminal.Feed(reportCh, fctx)
-	fuzzer.Main(fctx, execs, config, interestHdl, scorer)
+	// gLog.DisableStdoutLog()
+	// reportCh := make(chan *terminal.TerminalReport)
+	// go terminal.Render(reportCh)
+	// go terminal.Feed(reportCh, fctx)
+	fuzzer.Main(fctx, filteredExecs, config, interestHdl, scorer)
 }

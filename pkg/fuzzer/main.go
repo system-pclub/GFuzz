@@ -73,7 +73,7 @@ func execWorker(ctx context.Context, fc *api.Context, interestHdl api.InterestHa
 				logger.Printf("%s: %s", i.ID, err)
 			}
 		case triggerLoopCh <- struct{}{}:
-
+			logger.Printf("triggered loop")
 		}
 	}
 }

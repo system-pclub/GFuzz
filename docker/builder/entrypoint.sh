@@ -3,11 +3,11 @@ OUTPUT_DIR=/builder
 
 # build native part
 cd /repos/grpc-go
-exclude_paths="(abi)|(fuzzer)|(integration)" /gofuzz/scripts/gen-test-bins.sh $OUTPUT_DIR/grpc/native
+exclude_paths="(abi)|(fuzzer)|(integration)" /gfuzz/scripts/gen-testbins.sh $OUTPUT_DIR/grpc/native
 
 
 # instrument runtime, code and do instrumentation part
-/gfuzz/scripts/patch-go-runtime.sh
+/gfuzz/scripts/patch.sh
 cd /repos/grpc-go
-/gfuzz/bin/inst .
-exclude_paths="(abi)|(fuzzer)|(integration)" /gofuzz/scripts/gen-test-bins.sh $OUTPUT_DIR/grpc/inst
+/gfuzz/bin/inst --dir .
+exclude_paths="(abi)|(fuzzer)|(integration)" /gfuzz/scripts/gen-testbins.sh $OUTPUT_DIR/grpc/inst

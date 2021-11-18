@@ -3,12 +3,9 @@ package terminal
 import (
 	"fmt"
 	"gfuzz/pkg/fuzz/api"
-	"log"
 	"os"
+	"text/tabwriter"
 	"time"
-
-	ui "github.com/gizak/termui/v3"
-	"github.com/gizak/termui/v3/widgets"
 )
 
 type TerminalReport struct {
@@ -19,40 +16,22 @@ type TerminalReport struct {
 
 func (t *TerminalReport) GetTerminalRows() []string {
 	return []string{
-		fmt.Sprintf("# of Runs: %d", t.Runs),
-		fmt.Sprintf("# of Bugs: %d", t.Bugs),
-		fmt.Sprintf("Duration: %f minute(s)", t.Duration.Minutes()),
+		fmt.Sprintf("# of Runs:\t%d", t.Runs),
+		fmt.Sprintf("# of Bugs:\t%d", t.Bugs),
+		fmt.Sprintf("Duration:\t%f min(s)", t.Duration.Minutes()),
 	}
 }
 
 func Render(ch chan *TerminalReport) {
-	if err := ui.Init(); err != nil {
-		log.Fatalf("failed to initialize terminal UI: %v", err)
-	}
-	defer ui.Close()
-	ui.Clear()
-
-	l := widgets.NewList()
-	l.Title = "GFuzz"
-	l.TextStyle = ui.NewStyle(ui.ColorYellow)
-	l.WrapText = false
-	l.SetRect(0, 0, 25, 8)
-	uiEvents := ui.PollEvents()
-
-	go func() {
-		for {
-			e := <-uiEvents
-			switch e.ID {
-			case "q", "<C-c>":
-				ui.Close()
-				os.Exit(0)
-			}
-		}
-	}()
+	w := tabwriter.NewWriter(os.Stdout, 1, 1, 1, ' ', 0)
 
 	for report := range ch {
-		l.Rows = report.GetTerminalRows()
-		ui.Render(l)
+		fmt.Print("\033[H\033[2J")
+		for _, row := range report.GetTerminalRows() {
+			fmt.Fprintln(w, row)
+		}
+		w.Flush()
+
 	}
 }
 

@@ -10,10 +10,11 @@ WORKDIR /gfuzz
 COPY patch ./patch
 COPY scripts ./scripts
 COPY pkg ./pkg
+COPY cmd ./cmd
 COPY docker/fuzzer-git/entrypoint.sh docker/fuzzer-git/entrypoint.sh
-
-# build inst and fuzzer
-RUN make all
+COPY go.mod go.sum Makefile VERSION ./
+RUN make tidy
+RUN BUILD=docker make
 
 RUN git clone ${GIT_URL} /fuzz/target
 RUN cd /fuzz/target \

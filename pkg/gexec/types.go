@@ -32,7 +32,8 @@ func (g *GoBinTest) GetCmd(ctx context.Context) (*exec.Cmd, error) {
 }
 
 func (g *GoBinTest) String() string {
-	return fmt.Sprintf("%s-%s", g.Bin, g.Func)
+	filename := path.Base(g.Bin)
+	return fmt.Sprintf("%s-%s", filename, g.Func)
 }
 
 type GoPkgTest struct {

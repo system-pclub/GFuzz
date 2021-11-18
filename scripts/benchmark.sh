@@ -1,4 +1,5 @@
 #!/bin/bash -e
+cd "$(dirname "$0")"/.. 
 
 # Examples:
 # $ ./benchmark.sh custom --dir /builder/grpc/native --mode native

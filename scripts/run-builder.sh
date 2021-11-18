@@ -1,3 +1,6 @@
+#!/bin/bash -e
+cd "$(dirname "$0")"/.. 
+
 # This script will automatically generate the corresponding test binary files(with and without instrumented go runtime) to the ./tmp/builder
 
 docker build -f docker/builder/Dockerfile -t gfuzzbuilder:latest .

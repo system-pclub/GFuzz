@@ -1,8 +1,17 @@
 #!/bin/bash -e
 cd "$(dirname "$0")"
 
-TARGET_GO_MOD_DIR=$1
-OUTPUT_DIR=$2
+NEED_INST=$1
+GOMOD_DIR=$2
+OUT_DIR=$3
+shift 3
+
+if [ "$NEED_INST" = true ]; then
+    /gfuzz/bin/inst --dir $GOMOD_DIR
+fi
 
 # Start fuzzing
-/gfuzz/bin/fuzzer --gomod $TARGET_GO_MOD_DIR --out $OUTPUT_DIR $@
+/gfuzz/bin/fuzzer \
+--gomod $GOMOD_DIR \
+--out $OUT_DIR \
+$@

@@ -13,8 +13,7 @@ var opts struct {
 	GoModDir     string   `long:"gomod" description:"Directory contains go.mod"`
 	TestFunc     string   `long:"func" description:"Only run specific test function in the test"`
 	TestPkg      string   `long:"pkg" description:"Only run test functions in the specific package"`
-	TestBin      string   `long:"testbin" description:"A list of globs for Go test bins."`
-	TestBinGlobs []string `long:"bins" description:"A list of globs for Go test bins."`
+	TestBinGlobs []string `long:"bin" description:"A list of globs for Go test bins."`
 	Ortconfig    string   `long:"ortconfig" description:"Only run once with given ortconfig"`
 	// Fuzzer
 

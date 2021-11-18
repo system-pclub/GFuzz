@@ -182,5 +182,6 @@ Help Options:
 
 ## Executable `bin/fuzzer`
 ```
+Usage:
 
 ```
