@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gfuzz/pkg/fuzz/api"
 	"gfuzz/pkg/fuzz/mutate"
+	"gfuzz/pkg/utils/hash"
 	"strconv"
 	"strings"
 )
@@ -18,7 +19,10 @@ func NewInterestHandlerImpl(fctx *api.Context) api.InterestHandler {
 	}
 }
 func (h *InterestHandlerImpl) IsInterested(i *api.Input, o *api.Output) (bool, error) {
-
+	ortCfgHash := hash.AsSha256(o.OracleRtOutput)
+	if h.fctx.UpdateOrtOutputHash(ortCfgHash) {
+		return true, nil
+	}
 	return false, nil
 }
 func (h *InterestHandlerImpl) HandleInterest(i *api.InterestInput) error {
@@ -99,18 +103,45 @@ func handleDeterStageInput(fctx *api.Context, i *api.Input, o *api.Output) error
 		return err
 	}
 
-	input := api.NewExecInput(fctx.GetAutoIncGlobalID(), execID, fctx.Cfg.OutputDir, g.Exec, i.OracleRtConfig, api.DeterStage)
+	input := api.NewExecInput(fctx.GetAutoIncGlobalID(), execID, fctx.Cfg.OutputDir, g.Exec, i.OracleRtConfig, api.CalibStage)
 	fctx.ExecInputCh <- input
 	return nil
 }
 
-func handleCalibStageInput(fc *api.Context, i *api.Input, o *api.Output) error {
-	// g := fc.GetQueueEntryByGExecID(i.api.String())
+func handleCalibStageInput(fctx *api.Context, i *api.Input, o *api.Output) error {
+	g := fctx.GetQueueEntryByGExecID(i.Exec.String())
+	execID, err := getExecIDFromInputID(i.ID)
+	if err != nil {
+		return err
+	}
+
+	input := api.NewExecInput(fctx.GetAutoIncGlobalID(), execID, fctx.Cfg.OutputDir, g.Exec, i.OracleRtConfig, api.RandStage)
+	fctx.ExecInputCh <- input
 	return nil
 }
 
-func handleRandStageInput(fc *api.Context, i *api.Input, o *api.Output) error {
-	// g := fc.GetQueueEntryByGExecID(i.api.String())
+func handleRandStageInput(fctx *api.Context, i *api.Input, o *api.Output) error {
+	g := fctx.GetQueueEntryByGExecID(i.Exec.String())
+	execID, err := getExecIDFromInputID(i.ID)
+	if err != nil {
+		return err
+	}
+	var randInputs []*api.Input
+	var mts mutate.OrtConfigMutateStrategy = &mutate.RandomMutateStrategy{}
+
+	cfgs, err := mts.Mutate(g, i.OracleRtConfig, o.OracleRtOutput)
+	if err != nil {
+		return err
+	}
+
+	for _, cfg := range cfgs {
+		randInputs = append(randInputs, api.NewExecInput(fctx.GetAutoIncGlobalID(), execID, fctx.Cfg.OutputDir, g.Exec, cfg, api.DeterStage))
+	}
+
+	for _, input := range randInputs {
+		fctx.ExecInputCh <- input
+	}
+
 	return nil
 }
 

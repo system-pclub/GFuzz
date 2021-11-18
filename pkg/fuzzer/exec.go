@@ -9,6 +9,7 @@ import (
 	ortCfg "gfuzz/pkg/oraclert/config"
 	ortEnv "gfuzz/pkg/oraclert/env"
 	ortOut "gfuzz/pkg/oraclert/output"
+	"gfuzz/pkg/utils/hash"
 	"io/ioutil"
 	"log"
 	"os"
@@ -142,9 +143,10 @@ func HandleExec(ctx context.Context, i *api.Input, o *api.Output, fctx *api.Cont
 	// 1. update/add interest input
 	if i.Stage == api.InitStage {
 		// if input is init, since init stage by default is interested input, so no need to check interest
-		// simply update output and
+		// simply update output and hash
 		ii := fctx.Interests.Find(i)
 		ii.Output = o
+		fctx.UpdateOrtOutputHash(hash.AsSha256(o.OracleRtOutput))
 		return nil
 	}
 	isInteresed, err := interestHdl.IsInterested(i, o)

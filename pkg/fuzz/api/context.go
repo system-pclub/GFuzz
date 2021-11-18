@@ -11,12 +11,12 @@ import (
 
 // Context record all necessary information for help fuzzer to prioritize input and record process.
 type Context struct {
-	ExecInputCh       chan *Input                     // channel for worker to get execute input
-	fm                map[string]*gexecfuzz.GExecFuzz // map of gexec ID and GExecFuzz
-	lock              sync.RWMutex                    // lock for Context
-	Cfg               *config.Config                  // fuzz configuration
-	Interests         InterestList                    // interested inputs
-	oracleRtCfgHashes map[string]struct{}             // Hashes for oracle runtime configuration. So that it can check if an oracle runtime configuration has been generated or not.
+	ExecInputCh          chan *Input                     // channel for worker to get execute input
+	fm                   map[string]*gexecfuzz.GExecFuzz // map of gexec ID and GExecFuzz
+	lock                 sync.RWMutex                    // lock for Context
+	Cfg                  *config.Config                  // fuzz configuration
+	Interests            InterestList                    // interested inputs
+	oracleRtOutputHashes map[string]struct{}             // Hashes for oracle runtime configuration. So that it can check if an oracle runtime configuration has been generated or not.
 
 	autoIncID    uint32            // autoIncID is for unique execution run each time
 	bugs2InputID map[string]string // Bugs
@@ -43,12 +43,12 @@ func NewContext(
 		fm[e.String()] = entry
 	}
 	return &Context{
-		ExecInputCh:       make(chan *Input),
-		fm:                fm,
-		Cfg:               cfg,
-		oracleRtCfgHashes: make(map[string]struct{}),
-		timeoutTargets:    make(map[string]uint32),
-		startAt:           time.Now(),
+		ExecInputCh:          make(chan *Input),
+		fm:                   fm,
+		Cfg:                  cfg,
+		oracleRtOutputHashes: make(map[string]struct{}),
+		timeoutTargets:       make(map[string]uint32),
+		startAt:              time.Now(),
 	}
 }
 
@@ -106,4 +106,13 @@ func (c *Context) RecordTargetTimeoutOnce(target string) {
 	defer c.lock.Unlock()
 
 	c.timeoutTargets[target] += 1
+}
+
+// UpdateOrtOutputHash will update hash record if not exist. It returns true if it is successfully updated, false otherwise
+func (c *Context) UpdateOrtOutputHash(h string) bool {
+	if _, exist := c.oracleRtOutputHashes[h]; !exist {
+		c.oracleRtOutputHashes[h] = struct{}{}
+		return true
+	}
+	return false
 }
