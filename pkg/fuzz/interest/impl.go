@@ -21,6 +21,11 @@ func NewInterestHandlerImpl(fctx *api.Context) api.InterestHandler {
 }
 func (h *InterestHandlerImpl) IsInterested(i *api.Input, o *api.Output) (bool, error) {
 
+	if h.fctx.Cfg.IsIgnoreFeedback == true {
+		// if isIgnoreFeedback is true, we treat every feedback as interesting and directly return.
+		return true, nil
+	}
+
 	oTupleCopy := make(map[uint32]uint32)
 	for k, v := range o.OracleRtOutput.Tuples {
 		log2element := uint32(math.Log2(float64(v)))

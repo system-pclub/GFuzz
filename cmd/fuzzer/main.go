@@ -57,7 +57,9 @@ func main() {
 	if err != nil {
 		log.Fatal("filepath.Abs", err)
 	}
+
 	config.MaxParallel = opts.Parallel
+	config.IsIgnoreFeedback = opts.IsIgnoreFeedback
 
 	// prepare fuzz targets
 	var execs []gexec.Executable

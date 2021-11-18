@@ -29,6 +29,8 @@ var opts struct {
 	ScoreSdk     bool `long:"scoreSdk" description:"Recording/scoring if channel comes from Go SDK"`
 	ScoreAllPrim bool `long:"scoreAllPrim" description:"Recording/scoring other primitives like Mutex together with channel"`
 	TimeDivideBy int  `long:"timeDivideBy" description:"Durations in time/sleep.go will be divided by this int number"`
+
+	IsIgnoreFeedback bool `long:"isIgnoreFeedback" description:"Is ignoring the feedback, and save every mutated seed into the fuzzing queue" default:"false"`
 }
 
 func parseFlags() {
