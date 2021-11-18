@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
-	"gfuzz/pkg/fuzz"
+	"gfuzz/pkg/fuzz/api"
 	"gfuzz/pkg/fuzz/config"
+	"gfuzz/pkg/fuzz/interest"
+	"gfuzz/pkg/fuzz/score"
 	"gfuzz/pkg/fuzzer"
 	gLog "gfuzz/pkg/fuzzer/log"
 	"gfuzz/pkg/gexec"
@@ -97,8 +99,10 @@ func main() {
 	}
 
 	fuzzer.Shuffle(execs)
+	fctx := api.NewContext(execs, config)
 
-	fctx := fuzz.NewContext(execs, config, &fuzz.HandlerImpl{})
+	var scorer api.ScoreStrategy = score.NewScoreStrategyImpl(fctx)
+	var interestHdl api.InterestHandler = interest.NewInterestHandlerImpl(fctx)
 
 	if opts.Ortconfig != "" {
 		ortcfgbytes, err := ioutil.ReadFile(opts.Ortconfig)
@@ -114,5 +118,5 @@ func main() {
 	}
 
 	// start fuzzing
-	fuzzer.Main(fctx, execs, config)
+	fuzzer.Main(fctx, execs, config, interestHdl, scorer)
 }

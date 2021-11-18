@@ -2,9 +2,8 @@ package fuzzer
 
 import (
 	"context"
-	"gfuzz/pkg/fuzz"
+	"gfuzz/pkg/fuzz/api"
 	"gfuzz/pkg/fuzz/config"
-	"gfuzz/pkg/fuzz/exec"
 	"gfuzz/pkg/fuzz/gexecfuzz"
 	"gfuzz/pkg/gexec"
 	ortconfig "gfuzz/pkg/oraclert/config"
@@ -13,14 +12,16 @@ import (
 	"time"
 )
 
-func Replay(fctx *fuzz.Context, ge gexec.Executable, config *config.Config, rtConfig *ortconfig.Config) {
+// Reply run the fuzzing with given oracle runtime configuration and given executable
+func Replay(fctx *api.Context, ge gexec.Executable, config *config.Config, rtConfig *ortconfig.Config) {
 	ctx := context.Background()
-	i := fuzz.NewExecInput(fctx.GetAutoIncGlobalID(), 0, config.OutputDir, ge, rtConfig, exec.ReplayStage)
+	i := api.NewExecInput(fctx.GetAutoIncGlobalID(), 0, config.OutputDir, ge, rtConfig, api.ReplayStage)
 	Run(ctx, i)
 }
 
 // Main starts fuzzing with a given list of executables and configuration
-func Main(fctx *fuzz.Context, execs []gexec.Executable, config *config.Config) {
+func Main(fctx *api.Context, execs []gexec.Executable, config *config.Config,
+	interestHdl api.InterestHandler, scorer api.ScoreStrategy) {
 	if len(execs) == 0 {
 		log.Println("no executables found, exit.")
 		os.Exit(0)
@@ -30,44 +31,43 @@ func Main(fctx *fuzz.Context, execs []gexec.Executable, config *config.Config) {
 		log.Printf("found executable: %s", e)
 	}
 
-	inputCh := make(chan *exec.Input)
+	// initialize interested inputs by generating init stage input for each executables
+	fctx.EachGExecFuzz(func(g *gexecfuzz.GExecFuzz) {
+		i := api.NewInitExecInput(fctx, g.Exec)
+		fctx.Interests.Add(api.NewUnexecutedInterestInput(i))
+	})
 
+	// endless loop to handle interested inputs
 	go func() {
-		fctx.EachGExecFuzz(func(g *gexecfuzz.GExecFuzz) {
-			inputCh <- fuzz.NewInitExecInput(fctx, g.Exec)
-			log.Printf("init %s", g)
-		})
+		for {
+			// handle interested inputs one by one
+			fctx.Interests.Each(interestHdl)
+		}
 	}()
 
+	// start a group of workers to handle fuzz execution in parallel
 	startWorkers(config.MaxParallel, func(ctx context.Context) {
-		queueEntryWorker(ctx, fctx, inputCh)
+		execWorker(ctx, fctx, scorer)
 	})
 
 }
 
-// queueEntryWorker handles a queue entry receives from channel
-func queueEntryWorker(ctx context.Context, fc *fuzz.Context, ch chan *exec.Input) {
+// execWorker handles a execution inputs from channel
+func execWorker(ctx context.Context, fc *api.Context, scorer api.ScoreStrategy) {
 	logger := getWorkerLogger(ctx)
 
 	for {
 		select {
-		case i := <-ch:
+		case i := <-fc.ExecInputCh:
 			logger.Printf("start %s", i.ID)
 			o, err := Run(ctx, i)
 			if err != nil {
 				logger.Printf("%s: %s", i.ID, err)
 			}
-			newInputs, err := fc.HandleExec(i, o)
+			err = HandleExec(i, o, fc, scorer)
 			if err != nil {
 				logger.Printf("%s: %s", i.ID, err)
 			}
-
-			go func() {
-				for _, i := range newInputs {
-					ch <- i
-				}
-			}()
-
 		case <-time.After(2 * time.Minute):
 			logger.Printf("Timeout. Exited.")
 			return

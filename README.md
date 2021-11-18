@@ -6,14 +6,23 @@ Fuzzing concurrent Go programs
     - [GFuzz Fuzzer](#gfuzz-fuzzer)
     - [GFuzz Oracle](#gfuzz-oracle)
   - [Packages](#packages)
-    - [pkg/gooracle](#pkggooracle)
+    - [pkg/oraclert](#pkgoraclert)
     - [pkg/selefcm (select enforcement)](#pkgselefcm-select-enforcement)
     - [pkg/inst (instrumentation)](#pkginst-instrumentation)
+    - [pkg/fuzz](#pkgfuzz)
+    - [pkg/fuzzer](#pkgfuzzer)
+    - [pkg/gexec](#pkggexec)
+    - [pkg/inst](#pkginst)
+    - [pkg/stats](#pkgstats)
+    - [pkg/utils/**](#pkgutils)
     - [pkg/inst/pass (built-in passes)](#pkginstpass-built-in-passes)
   - [Dev](#dev)
     - [Prerequistes](#prerequistes)
     - [Build](#build)
+    - [Useful Scripts](#useful-scripts)
+      - [Manually Run a Test/Program after Instrumentation](#manually-run-a-testprogram-after-instrumentation)
   - [Executable `bin/inst`](#executable-bininst)
+  - [Executable `bin/fuzzer`](#executable-binfuzzer)
 
 
 
@@ -30,9 +39,9 @@ and golang package `runtime` patched in advance.
 
 ## Packages
 
-### pkg/gooracle
+### pkg/oraclert
 
-Package `gooracle` is part of GFuzz Oracle. This package requires patched golang environment to work properly. It provides
+Package `oraclert` is part of GFuzz Oracle. This package requires patched golang environment to work properly. It provides
 1. Detecting blocking/non-blocking issue happened during application runtime.
 
 ### pkg/selefcm (select enforcement)
@@ -43,6 +52,29 @@ Package `selefcm` provides a list of strategies for application to choose proper
 
 Package `inst` provides modifying golang source code framework and utilities. It provides `InstPass` interface to easily write your own pass to instrument/modify/analysis golang source code.
 
+### pkg/fuzz
+
+Package `fuzz` provides 
+
+### pkg/fuzzer
+
+Package `fuzzer` provides 
+
+### pkg/gexec
+
+Package `gexec` provides 
+
+### pkg/inst
+
+Package `inst` provides 
+
+### pkg/stats
+
+Package `stats` provides 
+
+### pkg/utils/**
+
+Packages under `utils/**` provides 
 
 ### pkg/inst/pass (built-in passes)
 
@@ -120,6 +152,18 @@ $ ./script/dev.sh
 $ make
 ```
 
+### Useful Scripts
+
+#### Manually Run a Test/Program after Instrumentation
+```
+# For example, after instrument the gRPC code base by bin/inst, we can manully trigger a test in patched go runtime environment.
+# Usually it is run in Docker so that patched go runtime will not effect your local environment.
+
+export ORACLERT_CONFIG_FILE=/workspaces/GFuzz/tmp/grpc-go/ort_config
+export ORACLERT_OUTPUT_FILE=/workspaces/GFuzz/tmp/grpc-go/ort_outputs
+go test -run=TestGRPCLBStatsUnaryFailedToSend google.golang.org/grpc/balancer/grpclb
+```
+
 ## Executable `bin/inst`
 
 ```
@@ -134,4 +178,9 @@ Application Options:
 
 Help Options:
   -h, --help   Show this help message
+```
+
+## Executable `bin/fuzzer`
+```
+
 ```

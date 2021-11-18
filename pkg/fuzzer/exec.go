@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	fexec "gfuzz/pkg/fuzz/exec"
+	"gfuzz/pkg/fuzz/api"
 	"gfuzz/pkg/fuzzer/bug"
 	ortCfg "gfuzz/pkg/oraclert/config"
 	ortEnv "gfuzz/pkg/oraclert/env"
@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-func Run(ctx context.Context, input *fexec.Input) (*fexec.Output, error) {
+func Run(ctx context.Context, input *api.Input) (*api.Output, error) {
 
 	logger := getWorkerLogger(ctx)
 
@@ -124,11 +124,24 @@ func Run(ctx context.Context, input *fexec.Input) (*fexec.Output, error) {
 		}
 	}
 
-	execOutput := &fexec.Output{
+	execOutput := &api.Output{
 		BugIDs:         bugIDs,
 		IsTimeout:      timeout,
 		OracleRtOutput: ortOutput,
 	}
 
 	return execOutput, nil
+}
+
+// HandleExec is called immediately after running execution.
+func HandleExec(i *api.Input, o *api.Output, fctx *api.Context, scorer api.ScoreStrategy) error {
+	score, err := scorer.Score(i, o)
+	if err != nil {
+		return nil
+	}
+	isInteresed := score > scorer.InterestScore()
+	if isInteresed {
+		fctx.Interests.Add(api.NewExecutedInterestInput(i, o))
+	}
+	return nil
 }

@@ -1,8 +1,7 @@
-package fuzz
+package api
 
 import (
 	"gfuzz/pkg/fuzz/config"
-	"gfuzz/pkg/fuzz/exec"
 	"gfuzz/pkg/fuzz/gexecfuzz"
 	"gfuzz/pkg/gexec"
 	"sync"
@@ -12,16 +11,16 @@ import (
 
 // Context record all necessary information for help fuzzer to prioritize input and record process.
 type Context struct {
-	fm map[string]*gexecfuzz.GExecFuzz // map of gexec ID and GExecFuzz
+	ExecInputCh chan *Input
+	fm          map[string]*gexecfuzz.GExecFuzz // map of gexec ID and GExecFuzz
 
 	lock sync.RWMutex   // lock for Context
-	cfg  *config.Config // fuzz configuration
+	Cfg  *config.Config // fuzz configuration
 
-	hdl Handler // handle each fuzz execution
-
-	mainRecord   *Record
+	Interests    InterestList // interested inputs
 	recordHashes map[string]struct{}
-	autoIncID    uint32
+	// autoIncID is for unique execution run each time
+	autoIncID uint32
 	// Bugs
 	bugs2InputID map[string]string
 
@@ -39,7 +38,6 @@ type Context struct {
 func NewContext(
 	execs []gexec.Executable,
 	cfg *config.Config,
-	hdl Handler,
 ) *Context {
 	fm := make(map[string]*gexecfuzz.GExecFuzz)
 
@@ -49,13 +47,12 @@ func NewContext(
 		fm[e.String()] = entry
 	}
 	return &Context{
+		ExecInputCh:    make(chan *Input),
 		fm:             fm,
-		cfg:            cfg,
-		mainRecord:     EmptyRecord(),
+		Cfg:            cfg,
 		recordHashes:   make(map[string]struct{}),
 		timeoutTargets: make(map[string]uint32),
 		startAt:        time.Now(),
-		hdl:            hdl,
 	}
 }
 
@@ -68,6 +65,8 @@ func (c *Context) IncNumOfBugsFound(num uint64) {
 }
 
 func (c *Context) GetQueueEntryByGExecID(gexecID string) *gexecfuzz.GExecFuzz {
+	c.lock.RLock()
+	defer c.lock.RUnlock()
 	return c.fm[gexecID]
 }
 
@@ -94,10 +93,6 @@ func (c *Context) AddBugID(bugID string, inputID string) {
 
 func (c *Context) GetAutoIncGlobalID() uint32 {
 	return atomic.AddUint32(&c.autoIncID, 1)
-}
-
-func (c *Context) HandleExec(input *exec.Input, output *exec.Output) ([]*exec.Input, error) {
-	return c.hdl.Handle(c, input, output)
 }
 
 // func (c *Context) UpdateTargetMaxCaseCov(target string, caseCov float32) {
