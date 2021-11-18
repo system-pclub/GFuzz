@@ -1,7 +1,6 @@
 package api
 
 import (
-	"log"
 	"sync"
 )
 
@@ -35,7 +34,6 @@ func (i *InterestList) Each(handler InterestHandler) {
 	defer i.rw.RUnlock()
 
 	for _, input := range currInterestedInputs {
-		log.Printf("handle interest: %s\n", input.Input.ID)
 		handler.HandleInterest(input)
 	}
 }
