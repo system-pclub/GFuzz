@@ -14,6 +14,7 @@ type Config struct {
 	TargetTestBin           string // used given binary file(compiled binary of all tests) to trigger test run instead of `go test`
 	GoRoot                  string
 	TimeDivide              int // Durations in time package will be divided by this int number
+	IsIgnoreFeedback		bool // Is ignoring the feedback, and save every mutated seed into the fuzzing queue
 }
 
 func NewConfig() *Config {
