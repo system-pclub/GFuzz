@@ -89,7 +89,7 @@ func ListExecutablesInPackage(goModDir string, pkg string) ([]Executable, error)
 	goTests := make([]Executable, 0, len(testFuncs))
 	for _, testFunc := range testFuncs {
 		goTests = append(goTests, &GoPkgTest{
-			Func:     "^" + testFunc + "$",
+			Func:     testFunc,
 			Package:  pkg,
 			GoModDir: goModDir,
 		})

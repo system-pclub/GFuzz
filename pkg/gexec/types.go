@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os/exec"
 	"path"
+	"strings"
 )
 
 // Executable represents a target that can be triggered by the fuzzer.
@@ -27,8 +28,24 @@ type GoBinTest struct {
 	Bin string
 }
 
+// strictGoTestRun will insert ^ at the front and $ at the end if they not present
+func strictGoTestRun(run string) string {
+	var final string
+	if !strings.HasPrefix(run, "^") {
+		final = "^" + run
+	} else {
+		final = run
+	}
+
+	if !strings.HasSuffix(final, "$") {
+		final = final + "$"
+	}
+	return final
+}
+
 func (g *GoBinTest) GetCmd(ctx context.Context) (*exec.Cmd, error) {
-	return exec.CommandContext(ctx, g.Bin, "-test.timeout", "30s", "-test.count=1", "-test.parallel=1", "-test.v", "-test.run", g.Func), nil
+	final := strictGoTestRun(g.Func)
+	return exec.CommandContext(ctx, g.Bin, "-test.timeout", "30s", "-test.count=1", "-test.parallel=1", "-test.v", "-test.run", final), nil
 }
 
 func (g *GoBinTest) String() string {
@@ -52,7 +69,9 @@ func (g *GoPkgTest) GetCmd(ctx context.Context) (*exec.Cmd, error) {
 	if pkg == "" {
 		pkg = "./..."
 	}
-	cmd := exec.CommandContext(ctx, "go", "test", "-timeout=30s", "-count=1", "-v", "-run", g.Func, pkg)
+	final := strictGoTestRun(g.Func)
+
+	cmd := exec.CommandContext(ctx, "go", "test", "-timeout=30s", "-count=1", "-v", "-run", final, pkg)
 	cmd.Dir = g.GoModDir
 	return cmd, nil
 }
