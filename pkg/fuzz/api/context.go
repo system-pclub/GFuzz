@@ -47,6 +47,7 @@ func NewContext(
 		fm:                   fm,
 		Cfg:                  cfg,
 		oracleRtOutputHashes: make(map[string]struct{}),
+		bugs2InputID:         make(map[string]string),
 		timeoutTargets:       make(map[string]uint32),
 		startAt:              time.Now(),
 	}
