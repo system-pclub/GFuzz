@@ -4,7 +4,7 @@ RUN apt update && apt install -y python3
 WORKDIR /gfuzz
 # copy source files to docker
 COPY patch ./patch
-COPY pkg/oraclert ./pkg/oraclert
+COPY pkg ./pkg
 COPY scripts ./scripts
 
 # Patch golang runtime in the container
