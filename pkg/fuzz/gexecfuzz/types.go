@@ -20,8 +20,9 @@ type GExecFuzz struct {
 
 func NewGExecFuzz(exec gexec.Executable) *GExecFuzz {
 	return &GExecFuzz{
-		Exec:      exec,
-		BestScore: 0,
+		Exec:       exec,
+		BestScore:  0,
+		OrtSelects: make(map[string]output.SelectRecord),
 	}
 }
 

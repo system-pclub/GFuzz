@@ -139,6 +139,9 @@ func Run(ctx context.Context, input *api.Input) (*api.Output, error) {
 // 2. check if any unique bugs found
 // 3. update if any new select records found
 func HandleExec(ctx context.Context, i *api.Input, o *api.Output, fctx *api.Context, interestHdl api.InterestHandler) error {
+	if o.OracleRtOutput == nil {
+		return fmt.Errorf("cannot handle an exec without oracle runtime output")
+	}
 	logger := getWorkerLogger(ctx)
 
 	// 1. update/add interest input

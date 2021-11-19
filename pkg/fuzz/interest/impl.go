@@ -106,6 +106,9 @@ func handleInitStageInput(fctx *api.Context, i *api.Input, o *api.Output) error 
 	var deterInputs []*api.Input
 	var mts mutate.OrtConfigMutateStrategy = &mutate.DeterMutateStrategy{}
 
+	if o.OracleRtOutput == nil {
+		return nil
+	}
 	cfgs, err := mts.Mutate(g, i.OracleRtConfig, o.OracleRtOutput)
 	if err != nil {
 		return err

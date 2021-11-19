@@ -10,6 +10,9 @@ import (
 type DeterMutateStrategy struct{}
 
 func (d *DeterMutateStrategy) Mutate(g *gexecfuzz.GExecFuzz, curr *config.Config, o *output.Output) ([]*config.Config, error) {
+	if o == nil || o.Selects == nil {
+		return nil, nil
+	}
 	var cfgs []*config.Config
 
 	// loop selects, generate a new config by tweak a different case each time to prioritize
