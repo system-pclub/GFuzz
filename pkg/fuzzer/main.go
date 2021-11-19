@@ -62,6 +62,7 @@ func execWorker(ctx context.Context, fc *api.Context, interestHdl api.InterestHa
 	for {
 		select {
 		case i := <-fc.ExecInputCh:
+			logger.Printf("receive %s", i.ID)
 			o, err := Run(ctx, i)
 			if err != nil {
 				logger.Printf("%s: %s", i.ID, err)
