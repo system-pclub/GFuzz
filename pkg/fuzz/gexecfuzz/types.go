@@ -29,7 +29,7 @@ func (e *GExecFuzz) String() string {
 	return e.Exec.String()
 }
 
-func (e *GExecFuzz) FindUnmetOrtSelect(records []output.SelectRecord) int {
+func (e *GExecFuzz) UpdateSelectRecordsIfNew(records []output.SelectRecord) int {
 	e.m.Lock()
 	defer e.m.Unlock()
 	newSelects := 0

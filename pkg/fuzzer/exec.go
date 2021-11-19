@@ -137,6 +137,7 @@ func Run(ctx context.Context, input *api.Input) (*api.Output, error) {
 // It should take care of following things:
 // 1. update/add interest input
 // 2. check if any unique bugs found
+// 3. update if any new select records found
 func HandleExec(ctx context.Context, i *api.Input, o *api.Output, fctx *api.Context, interestHdl api.InterestHandler) error {
 	logger := getWorkerLogger(ctx)
 
@@ -172,5 +173,14 @@ func HandleExec(ctx context.Context, i *api.Input, o *api.Output, fctx *api.Cont
 		logger.Printf("found %d unique bug(s)\n", numOfBugs)
 	}
 
+	// 3. update if any new select records found
+	entry := fctx.GetQueueEntryByGExecID(i.Exec.String())
+	if entry == nil {
+		return fmt.Errorf("cannot find queue entry for %s", i.Exec.String())
+	}
+	newSelects := entry.UpdateSelectRecordsIfNew(o.OracleRtOutput.Selects)
+	if newSelects != 0 {
+		logger.Printf("found %d new selects", newSelects)
+	}
 	return nil
 }

@@ -43,9 +43,10 @@ func (h *InterestHandlerImpl) IsInterested(i *api.Input, o *api.Output) (bool, e
 	return false, nil
 }
 func (h *InterestHandlerImpl) HandleInterest(i *api.InterestInput) error {
-	i.HandledCnt += 1
+
 	// if interested input has not been executed, execute first
 	if !i.Executed {
+		i.HandledCnt += 1
 		i.Executed = true
 		h.fctx.ExecInputCh <- i.Input
 		return nil
@@ -57,33 +58,41 @@ func (h *InterestHandlerImpl) HandleInterest(i *api.InterestInput) error {
 		return nil
 	}
 
+	var err error
 	// if interested input has been executed, then try to mutate and send to execution according to its stage
 	switch i.Input.Stage {
 	case api.InitStage:
 		if i.HandledCnt == 1 {
 			// if handle init first time, treat it as normal init stage
-			return handleInitStageInput(h.fctx, i.Input, i.Output)
-
+			err = handleInitStageInput(h.fctx, i.Input, i.Output)
 		} else {
 			// if not the first time, treat it as random
-			return handleRandStageInput(h.fctx, i.Input, i.Output)
+			err = handleRandStageInput(h.fctx, i.Input, i.Output)
 		}
 		// we are handling the output from the input with init stage
 	case api.DeterStage:
 		// we are handling the output from the input with deter stage
-		return handleDeterStageInput(h.fctx, i.Input, i.Output)
+		err = handleDeterStageInput(h.fctx, i.Input, i.Output)
 	case api.CalibStage:
 		// we are handling the output from the input with calib stage
-		return handleCalibStageInput(h.fctx, i.Input, i.Output)
+		err = handleCalibStageInput(h.fctx, i.Input, i.Output)
 	case api.RandStage:
 		// we are handling the output from the input with rand stage
-		return handleRandStageInput(h.fctx, i.Input, i.Output)
+		err = handleRandStageInput(h.fctx, i.Input, i.Output)
 	case api.ReplayStage:
 		// no need to handle replay
-		return nil
+
 	default:
-		return fmt.Errorf("unexpected stage: %s", i.Input.Stage)
+		err = fmt.Errorf("unexpected stage: %s", i.Input.Stage)
 	}
+
+	if err != nil {
+		return err
+	}
+
+	i.HandledCnt += 1
+
+	return nil
 
 }
 
