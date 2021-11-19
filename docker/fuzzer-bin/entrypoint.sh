@@ -1,10 +1,11 @@
-#!/bin/bash -e
+#!/bin/bash -xe
 cd "$(dirname "$0")"
 
 OUT_DIR=$1
 shift 1
 
-# Start fuzzing
 /gfuzz/bin/fuzzer \
 --out $OUT_DIR \
 "$@"
+
+

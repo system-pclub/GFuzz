@@ -31,7 +31,7 @@ func (i *InterestList) Each(handler InterestHandler) {
 	i.rw.RLock()
 	currInterestedInputs := make([]*InterestInput, len(i.interestedInputs))
 	copy(currInterestedInputs, i.interestedInputs)
-	defer i.rw.RUnlock()
+	i.rw.RUnlock()
 
 	for _, input := range currInterestedInputs {
 		handler.HandleInterest(input)
