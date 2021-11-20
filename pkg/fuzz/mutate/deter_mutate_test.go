@@ -36,3 +36,36 @@ func TestDeterMutateStrategy(t *testing.T) {
 	}
 
 }
+
+func TestSelectsToEfcms(t *testing.T) {
+	selects := []output.SelectRecord{
+		{
+			ID:     "abc.go:1",
+			Cases:  5,
+			Chosen: 1,
+		},
+		{
+			ID:     "abc.go:2",
+			Cases:  2,
+			Chosen: 0,
+		},
+	}
+
+	efcms := selectsToEfcms(selects)
+
+	if efcms[0].ID != "abc.go:1" {
+		t.Fail()
+	}
+
+	if efcms[0].Case != 1 {
+		t.Fail()
+	}
+
+	if efcms[1].ID != "abc.go:2" {
+		t.Fail()
+	}
+
+	if efcms[1].Case != 0 {
+		t.Fail()
+	}
+}
