@@ -285,3 +285,149 @@ main.main()
 		t.Fail()
 	}
 }
+
+func TestRandomOutput(t *testing.T) {
+	content := `
+	=== RUN   TestPingPong
+    end2end_test.go:3949: Running test in tcp-clear-v1-balancer environment...
+    end2end_test.go:3949: Running test in tcp-tls-v1-balancer environment...
+    end2end_test.go:3949: Running test in tcp-clear environment...
+    end2end_test.go:3949: Running test in tcp-tls environment...
+    end2end_test.go:3949: Running test in handler-tls environment...
+    end2end_test.go:3949: Running test in no-balancer environment...
+-----New Blocking Bug:
+---Primitive location:
+/fuzz/target/picker_wrapper.go:63
+/fuzz/target/clientconn.go:562
+---Primitive pointer:
+0xc000686180
+0xc0004961c0
+-----End Bug
+-----New Blocking Bug:
+---Primitive location:
+/fuzz/target/clientconn.go:562
+/fuzz/target/picker_wrapper.go:63
+---Primitive pointer:
+0xc00031c700
+0xc0004961c0
+-----End Bug
+-----New Blocking Bug:
+---Primitive location:
+/fuzz/target/internal/transport/http2_server.go:213
+/fuzz/target/clientconn.go:562
+---Primitive pointer:
+0xc000604480
+0xc0004961c0
+-----End Bug
+-----New Blocking Bug:
+---Primitive location:
+/fuzz/target/picker_wrapper.go:63
+/fuzz/target/clientconn.go:562
+---Primitive pointer:
+0xc000155a40
+0xc0004961c0
+-----End Bug
+-----New Blocking Bug:
+---Primitive location:
+/fuzz/target/picker_wrapper.go:63
+/fuzz/target/clientconn.go:562
+---Primitive pointer:
+0xc000686a80
+0xc0004961c0
+-----End Bug
+-----New Blocking Bug:
+---Primitive location:
+/fuzz/target/internal/transport/http2_server.go:213
+/fuzz/target/clientconn.go:562
+---Primitive pointer:
+0xc00031ce40
+0xc0004961c0
+-----End Bug
+-----New Blocking Bug:
+---Primitive location:
+/fuzz/target/picker_wrapper.go:63
+/fuzz/target/clientconn.go:562
+---Primitive pointer:
+0xc0004961c0
+0xc000154c40
+-----End Bug
+-----New Blocking Bug:
+---Primitive location:
+/fuzz/target/internal/transport/http2_server.go:213
+/fuzz/target/clientconn.go:562
+---Primitive pointer:
+0xc0006040c0
+0xc0004961c0
+-----End Bug
+-----New Blocking Bug:
+---Primitive location:
+/fuzz/target/clientconn.go:562
+/fuzz/target/picker_wrapper.go:63
+---Primitive pointer:
+0xc00031ca40
+0xc0004961c0
+-----End Bug
+-----New Blocking Bug:
+---Primitive location:
+/fuzz/target/picker_wrapper.go:63
+/fuzz/target/clientconn.go:562
+---Primitive pointer:
+0xc000414880
+0xc0004961c0
+-----End Bug
+-----New Blocking Bug:
+---Primitive location:
+/fuzz/target/clientconn.go:562
+---Primitive pointer:
+0xc0004961c0
+-----End Bug
+-----Withdraw prim:0xc0004961c0
+End of unit test. Check bugs
+---Stack:
+goroutine 6 [running]:
+runtime.DumpAllStack()
+    /usr/local/go/src/runtime/myoracle_tmp.go:212 +0x85
+gfuzz/pkg/oraclert.AfterRunFuzz(0xc000322000)
+    /usr/local/go/src/gfuzz/pkg/oraclert/oracle.go:361 +0x7c
+gfuzz/pkg/oraclert.AfterRun(0xc000322000)
+    /usr/local/go/src/gfuzz/pkg/oraclert/oracle.go:327 +0x4b
+google.golang.org/grpc/test.TestPingPong(0xc00025cc80)
+    /fuzz/target/test/end2end_test.go:3945 +0x10d
+testing.tRunner(0xc00025cc80, 0xb8ae20)
+    /usr/local/go/src/testing/testing.go:1193 +0xef
+created by testing.(*T).Run
+    /usr/local/go/src/testing/testing.go:1238 +0x2b5
+goroutine 1 [chan receive]:
+testing.(*T).Run(0xc00025cc80, 0xb5d888, 0xc, 0xb8ae20, 0x49ad01)
+    /usr/local/go/src/testing/testing.go:1239 +0x2dc
+testing.runTests.func1(0xc00025ca00)
+    /usr/local/go/src/testing/testing.go:1511 +0x78
+testing.tRunner(0xc00025ca00, 0xc0001c3de0)
+    /usr/local/go/src/testing/testing.go:1193 +0xef
+testing.runTests(0xc00000c8d0, 0xfc1da0, 0xcb, 0xcb, 0xc05e32cd150bb46d, 0x6fedbb0aa, 0xfc7660, 0xb5e554)
+    /usr/local/go/src/testing/testing.go:1509 +0x305
+testing.(*M).Run(0xc000275ee0, 0x0)
+    /usr/local/go/src/testing/testing.go:1417 +0x1eb
+main.main()
+    _testmain.go:447 +0x138
+goroutine 18 [sleep]:
+time.Sleep(0x4a817c800)
+    /usr/local/go/src/runtime/time.go:193 +0xd2
+gfuzz/pkg/oraclert.CheckBugLate()
+    /usr/local/go/src/gfuzz/pkg/oraclert/oracle.go:220 +0x5d
+created by gfuzz/pkg/oraclert.CheckBugStart
+    /usr/local/go/src/gfuzz/pkg/oraclert/oracle.go:137 +0x39
+--- PASS: TestPingPong (1.31s)
+PASS
+ok      google.golang.org/grpc/test 1.558s	
+`
+	bugIds, err := GetListOfBugIDFromStdoutContent(content)
+	if err != nil {
+		t.Fail()
+	}
+
+	if len(bugIds) != 0 {
+		t.Fail()
+	}
+
+}
