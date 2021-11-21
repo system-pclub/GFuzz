@@ -43,8 +43,8 @@ func (h *InterestHandlerImpl) IsInterested(i *api.Input, o *api.Output) (bool, e
 }
 func (h *InterestHandlerImpl) HandleInterest(i *api.InterestInput) error {
 
-	// if interested input has not been executed, execute first
-	if !i.Executed {
+	// if init input has not been executed, execute first
+	if i.Input.Stage == api.InitStage && !i.Executed {
 		i.HandledCnt += 1
 		i.Executed = true
 		h.fctx.ExecInputCh <- i.Input
@@ -61,20 +61,30 @@ func (h *InterestHandlerImpl) HandleInterest(i *api.InterestInput) error {
 	// if interested input has been executed, then try to mutate and send to execution according to its stage
 	switch i.Input.Stage {
 	case api.InitStage:
-		if i.HandledCnt == 1 {
-			// if handle init first time, treat it as normal init stage
-			err = handleInitStageInput(h.fctx, i.Input, i.Output)
-		} else {
-			// if not the first time, treat it as random
-			err = handleRandStageInput(h.fctx, i.Input, i.Output)
-		}
 		// we are handling the output from the input with init stage
+
+		//if i.HandledCnt == 1 {
+		//	// if handle init first time, treat it as normal init stage
+		//	err = handleInitStageInput(h.fctx, i.Input, i.Output)
+		//} else {
+		//	// if not the first time, treat it as random
+		//}
+
+		// Yu:: Directly jump to RandStage if we see the init_stage for the second time.
+		// Yu :: The first time of execution should be covered by !i.Executed.
+		err = handleRandStageInput(h.fctx, i.Input, i.Output)
 	case api.DeterStage:
 		// we are handling the output from the input with deter stage
-		err = handleDeterStageInput(h.fctx, i.Input, i.Output)
+		//err = handleDeterStageInput(h.fctx, i.Input, i.Output)
+
+		// Yu:: Should not be seen in the exec. But if seen, treat it as rand.
+		err = handleRandStageInput(h.fctx, i.Input, i.Output)
 	case api.CalibStage:
 		// we are handling the output from the input with calib stage
-		err = handleCalibStageInput(h.fctx, i.Input, i.Output)
+		//err = handleCalibStageInput(h.fctx, i.Input, i.Output)
+
+		// Yu:: Should not be seen in the exec. But if seen, treat it as rand.
+		err = handleRandStageInput(h.fctx, i.Input, i.Output)
 	case api.RandStage:
 		// we are handling the output from the input with rand stage
 		err = handleRandStageInput(h.fctx, i.Input, i.Output)
@@ -97,29 +107,29 @@ func (h *InterestHandlerImpl) HandleInterest(i *api.InterestInput) error {
 
 func handleInitStageInput(fctx *api.Context, i *api.Input, o *api.Output) error {
 
-	g := fctx.GetQueueEntryByGExecID(i.Exec.String())
-	execID, err := getExecIDFromInputID(i.ID)
-	if err != nil {
-		return err
-	}
-	var deterInputs []*api.Input
-	var mts mutate.OrtConfigMutateStrategy = &mutate.DeterMutateStrategy{}
+	//g := fctx.GetQueueEntryByGExecID(i.Exec.String())
+	//execID, err := getExecIDFromInputID(i.ID)
+	//if err != nil {
+	//	return err
+	//}
+	//var deterInputs []*api.Input
+	//var mts mutate.OrtConfigMutateStrategy = &mutate.DeterMutateStrategy{}
+	//
+	//if o.OracleRtOutput == nil {
+	//	return nil
+	//}
+	//cfgs, err := mts.Mutate(g, i.OracleRtConfig, o.OracleRtOutput)
+	//if err != nil {
+	//	return err
+	//}
 
-	if o.OracleRtOutput == nil {
-		return nil
-	}
-	cfgs, err := mts.Mutate(g, i.OracleRtConfig, o.OracleRtOutput)
-	if err != nil {
-		return err
-	}
-
-	for _, cfg := range cfgs {
-		deterInputs = append(deterInputs, api.NewExecInput(fctx.GetAutoIncGlobalID(), execID, fctx.Cfg.OutputDir, g.Exec, cfg, api.DeterStage))
-	}
-
-	for _, input := range deterInputs {
-		fctx.ExecInputCh <- input
-	}
+	//for _, cfg := range cfgs {
+	//	deterInputs = append(deterInputs, api.NewExecInput(fctx.GetAutoIncGlobalID(), execID, fctx.Cfg.OutputDir, g.Exec, cfg, api.DeterStage))
+	//}
+	//
+	//for _, input := range deterInputs {
+	//	fctx.ExecInputCh <- input
+	//}
 
 	return nil
 }
@@ -163,7 +173,7 @@ func handleRandStageInput(fctx *api.Context, i *api.Input, o *api.Output) error 
 	}
 
 	for _, cfg := range cfgs {
-		randInputs = append(randInputs, api.NewExecInput(fctx.GetAutoIncGlobalID(), execID, fctx.Cfg.OutputDir, g.Exec, cfg, api.CalibStage))
+		randInputs = append(randInputs, api.NewExecInput(fctx.GetAutoIncGlobalID(), execID, fctx.Cfg.OutputDir, g.Exec, cfg, api.RandStage))
 	}
 
 	for _, input := range randInputs {
