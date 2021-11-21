@@ -36,7 +36,6 @@ func (h *InterestHandlerImpl) IsInterested(i *api.Input, o *api.Output) (bool, e
 		}
 	}
 	ortCfgHash := hash.AsSha256(oTupleCopy)
-
 	if h.fctx.UpdateOrtOutputHash(ortCfgHash) {
 		return true, nil
 	}
@@ -164,7 +163,7 @@ func handleRandStageInput(fctx *api.Context, i *api.Input, o *api.Output) error 
 	}
 
 	for _, cfg := range cfgs {
-		randInputs = append(randInputs, api.NewExecInput(fctx.GetAutoIncGlobalID(), execID, fctx.Cfg.OutputDir, g.Exec, cfg, api.RandStage))
+		randInputs = append(randInputs, api.NewExecInput(fctx.GetAutoIncGlobalID(), execID, fctx.Cfg.OutputDir, g.Exec, cfg, api.CalibStage))
 	}
 
 	for _, input := range randInputs {

@@ -135,33 +135,16 @@ func Run(ctx context.Context, input *api.Input) (*api.Output, error) {
 
 // HandleExec is called immediately after running execution.
 // It should take care of following things:
-// 1. update/add interest input
-// 2. check if any unique bugs found
-// 3. update if any new select records found
+// 1. check if any unique bugs found
+// 2. update if any new select records found
+// 3. update/add interest input
 func HandleExec(ctx context.Context, i *api.Input, o *api.Output, fctx *api.Context, interestHdl api.InterestHandler) error {
 	if o.OracleRtOutput == nil {
 		return fmt.Errorf("cannot handle an exec without oracle runtime output")
 	}
 	logger := getWorkerLogger(ctx)
 
-	// 1. update/add interest input
-	if i.Stage == api.InitStage {
-		// if input is init, since init stage by default is interested input, so no need to check interest
-		// simply update output and hash
-		ii := fctx.Interests.Find(i)
-		ii.Output = o
-		fctx.UpdateOrtOutputHash(hash.AsSha256(o.OracleRtOutput))
-		return nil
-	}
-	isInteresed, err := interestHdl.IsInterested(i, o)
-	if err != nil {
-		return nil
-	}
-	if isInteresed {
-		fctx.Interests.Add(api.NewExecutedInterestInput(i, o))
-	}
-
-	// 2. check if any unique bugs found
+	// 1. check if any unique bugs found
 	// Check any unique bugs found
 	numOfBugs := 0
 	for _, bugID := range o.BugIDs {
@@ -176,7 +159,7 @@ func HandleExec(ctx context.Context, i *api.Input, o *api.Output, fctx *api.Cont
 		logger.Printf("found %d unique bug(s)\n", numOfBugs)
 	}
 
-	// 3. update if any new select records found
+	// 2. update if any new select records found
 	entry := fctx.GetQueueEntryByGExecID(i.Exec.String())
 	if entry == nil {
 		return fmt.Errorf("cannot find queue entry for %s", i.Exec.String())
@@ -185,5 +168,24 @@ func HandleExec(ctx context.Context, i *api.Input, o *api.Output, fctx *api.Cont
 	if newSelects != 0 {
 		logger.Printf("found %d new selects", newSelects)
 	}
+
+	// 3. update/add interest input
+	if i.Stage == api.InitStage {
+		// if input is init, since init stage by default is interested input, so no need to check interest
+		// simply update output and hash
+		ii := fctx.Interests.Find(i)
+		ii.Output = o
+		fctx.UpdateOrtOutputHash(hash.AsSha256(o.OracleRtOutput))
+		return nil
+	}
+	isInteresed, err := interestHdl.IsInterested(i, o)
+	if err != nil {
+		return nil
+	}
+	if isInteresed {
+		logger.Printf("%s is interesting", i.ID)
+		fctx.Interests.Add(api.NewExecutedInterestInput(i, o))
+	}
+
 	return nil
 }

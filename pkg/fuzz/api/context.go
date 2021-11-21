@@ -111,6 +111,9 @@ func (c *Context) RecordTargetTimeoutOnce(target string) {
 
 // UpdateOrtOutputHash will update hash record if not exist. It returns true if it is successfully updated, false otherwise
 func (c *Context) UpdateOrtOutputHash(h string) bool {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
 	if _, exist := c.oracleRtOutputHashes[h]; !exist {
 		c.oracleRtOutputHashes[h] = struct{}{}
 		return true
