@@ -7,6 +7,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Prepare docker image
-        run: docker build -t gfuzz:test .
+        run: docker build -t gfuzz:test -f docker/dev/Dockerfile .
       - name: Run unit tests
         run: docker run -v "$GITHUB_WORKSPACE:/gfuzz" gfuzz:test make test

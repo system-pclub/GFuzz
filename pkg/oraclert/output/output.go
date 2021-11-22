@@ -41,3 +41,9 @@ func Deserialize(data []byte) (*Output, error) {
 	return &o, nil
 
 }
+
+type BySelectID []SelectRecord
+
+func (a BySelectID) Len() int           { return len(a) }
+func (a BySelectID) Less(i, j int) bool { return a[i].ID < a[j].ID }
+func (a BySelectID) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }

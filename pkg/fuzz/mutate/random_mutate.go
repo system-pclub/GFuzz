@@ -17,8 +17,12 @@ func (d *RandomMutateStrategy) Mutate(g *gexecfuzz.GExecFuzz, curr *config.Confi
 	cfg := config.NewConfig()
 	cfg.SelEfcm.SelTimeout = 500
 	mutateMethod := getRandomWithMax(10)
+	// get all select records we have seen so far for this executable
 	records := g.GetAllSelectRecords()
 	numOfSelects := len(records)
+	if numOfSelects == 0 {
+		return nil, nil
+	}
 
 	if mutateMethod < 8 {
 		// Mutate one select per time

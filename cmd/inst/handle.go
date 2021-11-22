@@ -8,7 +8,6 @@ import (
 )
 
 func HandleSrcFile(src string, reg *inst.PassRegistry, passes []string) error {
-	log.Printf("handle: %s\n", src)
 	iCtx, err := inst.NewInstContext(src)
 	if err != nil {
 		return err

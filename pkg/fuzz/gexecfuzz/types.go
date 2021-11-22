@@ -20,8 +20,9 @@ type GExecFuzz struct {
 
 func NewGExecFuzz(exec gexec.Executable) *GExecFuzz {
 	return &GExecFuzz{
-		Exec:      exec,
-		BestScore: 0,
+		Exec:       exec,
+		BestScore:  0,
+		OrtSelects: make(map[string]output.SelectRecord),
 	}
 }
 
@@ -29,7 +30,7 @@ func (e *GExecFuzz) String() string {
 	return e.Exec.String()
 }
 
-func (e *GExecFuzz) FindUnmetOrtSelect(records []output.SelectRecord) int {
+func (e *GExecFuzz) UpdateSelectRecordsIfNew(records []output.SelectRecord) int {
 	e.m.Lock()
 	defer e.m.Unlock()
 	newSelects := 0

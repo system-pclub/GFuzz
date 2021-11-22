@@ -1,7 +1,8 @@
-package exec
+package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"gfuzz/pkg/gexec"
 	"gfuzz/pkg/oraclert/config"
 	"gfuzz/pkg/oraclert/output"
@@ -78,4 +79,24 @@ func Deserilize(data []byte) (*Input, error) {
 		return nil, err
 	}
 	return &l, nil
+}
+
+// newExecInput should be the only way to create exec.Input
+func NewExecInput(ID uint32, fromID uint32, outputDir string, ge gexec.Executable,
+	rtConfig *config.Config, stage Stage) *Input {
+	inputID := fmt.Sprintf("%d-%s-%s-%d", ID, stage, ge.String(), fromID)
+	dir := path.Join(outputDir, "exec", inputID)
+	return &Input{
+		ID:             inputID,
+		Exec:           ge,
+		OracleRtConfig: rtConfig,
+		OutputDir:      dir,
+		Stage:          stage,
+	}
+}
+
+func NewInitExecInput(fctx *Context, ge gexec.Executable) *Input {
+	ortCfg := config.NewConfig()
+	globalID := fctx.GetAutoIncGlobalID()
+	return NewExecInput(globalID, 0, fctx.Cfg.OutputDir, ge, ortCfg, InitStage)
 }

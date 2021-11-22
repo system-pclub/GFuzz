@@ -254,9 +254,7 @@ func DequeueCheckEntry() *CheckEntry {
 }
 
 func EnqueueCheckEntry(CS []PrimInfo) *CheckEntry {
-	defer func() {
-		println("EnqueueCheckEntry finished ")
-	}()
+
 	lock(&MuCheckEntry)
 
 	if len(CS) == 1 {
@@ -319,9 +317,6 @@ func CheckBlockBug(CS []PrimInfo) (finished bool) {
 	mapCS := make(map[PrimInfo]struct{})
 	mapGS := make(map[*GoInfo]struct{}) // all goroutines that hold reference to primitives in mapCS
 	finished = false
-	defer func() {
-		println("finish CheckBlockBug")
-	}()
 	if BoolDebug {
 		print("Checking primtives:")
 		for _, chI := range CS {

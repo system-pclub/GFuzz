@@ -1,5 +1,8 @@
 VERSION=`cat VERSION`
-BUILD=`git log -1 --format=%h`-`date '+%s'`
+
+ifndef BUILD
+	BUILD=`git log -1 --format=%h`-`date '+%s'`
+endif
 
 BIN_FUZZER_LD_FLAGS="-X main.Version=${VERSION} -X main.Build=${BUILD}"
 BIN_INST_LD_FLAGS="-X main.Version=${VERSION} -X main.Build=${BUILD}"

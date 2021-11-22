@@ -1,5 +1,3 @@
-# TODO: use multi-stage build to reduce image size
-
 FROM golang:1.16.4
 RUN apt update && apt install -y python3
 WORKDIR /gfuzz
@@ -8,13 +6,18 @@ WORKDIR /gfuzz
 COPY patch ./patch
 COPY scripts ./scripts
 COPY pkg ./pkg
+COPY cmd ./cmd
+COPY docker/fuzzer-bin/entrypoint.sh docker/fuzzer-bin/entrypoint.sh
+COPY go.mod go.sum Makefile VERSION ./
+# build inst and fuzzer
+RUN make tidy
+RUN BUILD=docker make
 
-# Patch golang runtime in the container
+# patch golang runtime in the container
 RUN chmod +x scripts/patch.sh \
 && ./scripts/patch.sh
 
-
-WORKDIR /gfuzz
+RUN chmod +x docker/fuzzer-bin/entrypoint.sh
 
 # RUN groupadd gfgroup
 # RUN useradd -r -u 1001 -g gfgroup gfuser
@@ -23,5 +26,4 @@ WORKDIR /gfuzz
 # RUN chmod +x ./scripts/fuzz.sh
 # ENTRYPOINT [ "scripts/fuzz.sh" ] 
 
-
-
+ENTRYPOINT [ "/gfuzz/docker/fuzzer-bin/entrypoint.sh" ]

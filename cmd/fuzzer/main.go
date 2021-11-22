@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
-	"gfuzz/pkg/fuzz"
+	"gfuzz/pkg/fuzz/api"
 	"gfuzz/pkg/fuzz/config"
+	"gfuzz/pkg/fuzz/interest"
+	"gfuzz/pkg/fuzz/score"
 	"gfuzz/pkg/fuzzer"
 	gLog "gfuzz/pkg/fuzzer/log"
 	"gfuzz/pkg/gexec"
@@ -30,11 +32,7 @@ func main() {
 	}
 
 	if opts.OutputDir == "" {
-		log.Fatal("--outputDir is required")
-	}
-
-	if opts.InstStats == "" {
-		log.Fatal("--instStats is required")
+		log.Fatal("--out is required")
 	}
 
 	if _, err := os.Stat(opts.OutputDir); os.IsNotExist(err) {
@@ -45,10 +43,10 @@ func main() {
 	}
 
 	if opts.GoModDir == "" && opts.TestBinGlobs == nil {
-		log.Fatal("Either --goModDir or --testBin is required")
+		log.Fatal("Either --gomod or --testbin is required")
 	}
 
-	gLog.SetupLogger(filepath.Join(opts.OutputDir, GFUZZ_LOG_FILE))
+	gLog.SetupLogger(filepath.Join(opts.OutputDir, GFUZZ_LOG_FILE), true)
 
 	log.Printf("GFuzz Version: %s Build: %s", Version, Build)
 
@@ -58,47 +56,53 @@ func main() {
 	if err != nil {
 		log.Fatal("filepath.Abs", err)
 	}
+
 	config.MaxParallel = opts.Parallel
+	config.IsIgnoreFeedback = opts.IsIgnoreFeedback
 
 	// prepare fuzz targets
 	var execs []gexec.Executable
-	if opts.TestFunc != "" {
-		if opts.TestPkg == "" && opts.TestBin == "" {
-			log.Panicln("if --func is given, either --pkg or --testbin is also required")
-		}
-		if opts.TestPkg != "" {
-			execs = append(execs, &gexec.GoPkgTest{
-				Func:     opts.TestFunc,
-				Package:  opts.TestPkg,
-				GoModDir: opts.GoModDir,
-			})
-		} else {
-			execs = append(execs, &gexec.GoBinTest{
-				Func: opts.TestFunc,
-				Bin:  opts.TestBin,
-			})
-		}
-
-	} else if opts.TestPkg != "" {
-		execs, err = gexec.ListExecutablesInPackage(opts.GoModDir, opts.TestPkg)
-		if err != nil {
-			log.Printf("ListExecutablesInPackage: %s", err)
-		}
-	} else if opts.TestBinGlobs != nil {
+	if opts.TestBinGlobs != nil {
+		log.Printf("list test bin executables from %v", opts.TestBinGlobs)
 		execs, err = gexec.ListExecutablesFromTestBinGlobs(opts.TestBinGlobs)
 		if err != nil {
 			log.Printf("ListExecutablesFromTestBinGlobs: %s", err)
 		}
 	} else if opts.GoModDir != "" {
+		log.Printf("list test pkg executables from %v", opts.TestBinGlobs)
 		execs, err = gexec.ListExecutablesFromGoModule(opts.GoModDir)
 		if err != nil {
 			log.Printf("ListExecutablesFromGoModule: %s", err)
 		}
 	}
 
-	fuzzer.Shuffle(execs)
+	// filter fuzz targets by func or package if provided
+	var filteredExecs []gexec.Executable
+	for _, e := range execs {
 
-	fctx := fuzz.NewContext(execs, config, &fuzz.HandlerImpl{})
+		switch v := e.(type) {
+		case *gexec.GoBinTest:
+			if opts.TestFunc != "" && opts.TestFunc != v.Func {
+				continue
+			}
+		case *gexec.GoPkgTest:
+			if opts.TestFunc != "" && opts.TestFunc != v.Func {
+				continue
+			}
+
+			if opts.TestPkg != "" && opts.TestPkg != v.Package {
+				continue
+			}
+		}
+
+		filteredExecs = append(filteredExecs, e)
+	}
+
+	fuzzer.Shuffle(filteredExecs)
+	fctx := api.NewContext(filteredExecs, config)
+
+	var scorer api.ScoreStrategy = score.NewScoreStrategyImpl(fctx)
+	var interestHdl api.InterestHandler = interest.NewInterestHandlerImpl(fctx)
 
 	if opts.Ortconfig != "" {
 		ortcfgbytes, err := ioutil.ReadFile(opts.Ortconfig)
@@ -109,10 +113,14 @@ func main() {
 		if err != nil {
 			fmt.Errorf("parse %s: %s", opts.Ortconfig, err)
 		}
-		fuzzer.Replay(fctx, execs[0], config, ortconfig)
+		fuzzer.Replay(fctx, filteredExecs[0], config, ortconfig)
 		return
 	}
 
 	// start fuzzing
-	fuzzer.Main(fctx, execs, config)
+	// gLog.DisableStdoutLog()
+	// reportCh := make(chan *terminal.TerminalReport)
+	// go terminal.Render(reportCh)
+	// go terminal.Feed(reportCh, fctx)
+	fuzzer.Main(fctx, filteredExecs, config, interestHdl, scorer)
 }

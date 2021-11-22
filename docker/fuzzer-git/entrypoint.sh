@@ -1,0 +1,8 @@
+#!/bin/bash -e
+cd "$(dirname "$0")"
+
+OUT_DIR=$1
+shift 1
+
+# Start fuzzing
+/gfuzz/bin/fuzz --gomod /fuzz/target --out $OUT_DIR $@
