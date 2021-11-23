@@ -5,4 +5,4 @@ OUT_DIR=$1
 shift 1
 
 # Start fuzzing
-/gfuzz/bin/fuzz --gomod /fuzz/target --out $OUT_DIR $@
+/gfuzz/bin/fuzzer --gomod /fuzz/target --out $OUT_DIR $@

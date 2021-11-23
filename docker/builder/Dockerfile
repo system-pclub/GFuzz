@@ -24,23 +24,23 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 		vim-common \
 	&& rm -rf /var/lib/apt/lists/*
 
+COPY scripts /gfuzz/scripts
+
 WORKDIR /repos
 
-# gRPC code
-RUN git clone https://github.com/grpc/grpc-go.git
-RUN cd grpc-go && git checkout 9280052d36656451dd7568a18a836c2a74edaf6c
+RUN /gfuzz/scripts/clone-repos.sh .
 
 # override leakcheck.go to prevent sideeffect of leakcheck to the benchmark
-COPY docker/builder/leakcheck.go internal/leakcheck/leakcheck.go
+COPY docker/builder/leakcheck.go /repos/grpc-go/internal/leakcheck/leakcheck.go
 
-# avoid testsuite
-RUN grep -rl 'func (s) Test' ./ | xargs sed -i 's/func (s)/func/g'
+# avoid gRPC testsuite
+RUN cd /grpc-go && grep -rl 'func (s) Test' ./ | xargs sed -i 's/func (s)/func/g'
 
 WORKDIR /gfuzz
 
 # copy source files to docker
 COPY patch ./patch
-COPY scripts ./scripts
+
 COPY pkg ./pkg
 COPY cmd ./cmd
 COPY docker/builder/entrypoint.sh docker/builder/entrypoint.sh

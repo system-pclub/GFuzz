@@ -32,13 +32,17 @@ func HandleSrcFile(src string, reg *inst.PassRegistry, passes []string) error {
 	}
 
 	// check if output is valid, revert if error happened
-	if gofmt.HasSyntaxError(dst) {
-		if opts.IgnoreSyntaxErr {
-			ioutil.WriteFile(dst, iCtx.OriginalContent, 0666)
-			log.Printf("recover '%s' from syntax error\n", dst)
-		} else {
-			log.Panicf("syntax error found at file '%s'\n", dst)
+	if opts.CheckSyntaxErr {
+		if gofmt.HasSyntaxError(dst) {
+			if opts.AutoRecoverSyntaxErr {
+				// we simply ignored the instrumented result,
+				// and revert the file content back to original version.
+				ioutil.WriteFile(dst, iCtx.OriginalContent, 0666)
+				log.Printf("recover '%s' from syntax error\n", dst)
+			} else {
+				log.Panicf("syntax error found at file '%s'\n", dst)
 
+			}
 		}
 	}
 

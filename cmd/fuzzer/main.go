@@ -10,9 +10,11 @@ import (
 	gLog "gfuzz/pkg/fuzzer/log"
 	"gfuzz/pkg/gexec"
 	ortconfig "gfuzz/pkg/oraclert/config"
+	"gfuzz/pkg/utils/arr"
 	"io/ioutil"
 	"log"
 	"os"
+	"path"
 	"path/filepath"
 )
 
@@ -69,8 +71,9 @@ func main() {
 			log.Printf("ListExecutablesFromTestBinGlobs: %s", err)
 		}
 	} else if opts.GoModDir != "" {
-		log.Printf("list test pkg executables from %v", opts.TestBinGlobs)
-		execs, err = gexec.ListExecutablesFromGoModule(opts.GoModDir)
+		// output directory for compiled test binary file
+		binTestsDir := path.Join(opts.OutputDir, "tbin")
+		execs, err = gexec.ListExecutablesFromGoModule(opts.GoModDir, opts.TestPkg, true, binTestsDir)
 		if err != nil {
 			log.Printf("ListExecutablesFromGoModule: %s", err)
 		}
@@ -82,15 +85,18 @@ func main() {
 
 		switch v := e.(type) {
 		case *gexec.GoBinTest:
-			if opts.TestFunc != "" && opts.TestFunc != v.Func {
+			// The reason we don't filter package here are following:
+			// 1. test binary file itself cannot tell which package it comes from
+			// 2. we already filtered which packages to compile previous
+			if opts.TestFunc != nil && !arr.Contains(opts.TestFunc, v.Func) {
 				continue
 			}
 		case *gexec.GoPkgTest:
-			if opts.TestFunc != "" && opts.TestFunc != v.Func {
+			if opts.TestFunc != nil && !arr.Contains(opts.TestFunc, v.Func) {
 				continue
 			}
 
-			if opts.TestPkg != "" && opts.TestPkg != v.Package {
+			if opts.TestPkg != nil && !arr.Contains(opts.TestPkg, v.Package) {
 				continue
 			}
 		}

@@ -18,10 +18,10 @@ RUN BUILD=docker make
 
 RUN git clone ${GIT_URL} /fuzz/target
 RUN cd /fuzz/target \
-&& git checkout GIT_COMMIT \
+&& git checkout ${GIT_COMMIT} \
 && cd ..
 
-RUN /gfuzz/bin/inst --dir=/fuzz/target
+RUN /gfuzz/bin/inst --check-syntax-err --recover-syntax-err --dir=/fuzz/target
 
 # patch golang runtime in the container
 RUN chmod +x scripts/patch.sh \

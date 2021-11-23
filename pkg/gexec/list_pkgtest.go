@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	oe "os/exec"
+	"path"
 	"strings"
 	"time"
 )
@@ -114,11 +115,19 @@ func parseGoCmdTestListOutput(output string) ([]string, error) {
 	return filtered, nil
 }
 
-func ListExecutablesFromGoModule(goModDir string) ([]Executable, error) {
-	// Find all tests in all packages
-	packages, err := ListPackages(goModDir)
-	if err != nil {
-		return nil, fmt.Errorf("failed to list packages at %s: %v", goModDir, err)
+// ListExecutablesFromGoModule will return all executable tests
+// under given go module directory
+// If forceBinTest is used, then tests will first be compiled to binary file
+// and then use binary file to list tests (from GoPkgTest to GoBinTest)
+func ListExecutablesFromGoModule(goModDir string,
+	pkgs []string, forceBinTest bool, outputDir string) ([]Executable, error) {
+	var err error
+	if pkgs == nil {
+		// Find all tests in all packages
+		pkgs, err = ListPackages(goModDir)
+		if err != nil {
+			return nil, fmt.Errorf("failed to list packages at %s: %v", goModDir, err)
+		}
 	}
 
 	var execs []Executable
@@ -126,17 +135,65 @@ func ListExecutablesFromGoModule(goModDir string) ([]Executable, error) {
 	// ListTestsInPackage utilized command `go test -list` which cannot be run in parallel if they share same go code file.
 	// Run parallel will cause `intput/output error` when `go test` tries to open file already opened by previous `go test` command.
 	// Using other methold like `find Test | grep` can find test name but cannot find package location
-	for _, pkg := range packages {
+	for _, pkg := range pkgs {
+		var testsInPkg []Executable
+		if forceBinTest {
+			testBinFile := GetTestBinFileName(pkg)
+			fullTestBinFile := path.Join(outputDir, testBinFile)
+			err = CompileTestBinary(goModDir, pkg, fullTestBinFile)
+			if err != nil {
+				continue
+			}
+			testsInPkg, err = ListExecutablesFromTestBin(fullTestBinFile)
+		} else {
+			testsInPkg, err = ListExecutablesInPackage(goModDir, pkg)
+		}
 
-		testsInPkg, err := ListExecutablesInPackage(goModDir, pkg)
 		if err != nil {
 			log.Printf("[ignored] failed to list tests at package %s: %v", pkg, err)
 			continue
 		}
-
 		execs = append(execs, testsInPkg...)
 
 	}
 
 	return execs, nil
+}
+
+func GetTestBinFileName(pkg string) string {
+	pkgName := strings.ReplaceAll(pkg, "/", "-")
+	return pkgName + ".test"
+}
+
+// CompileTestBinary compiles the tests under the given package to the given
+// output file.
+func CompileTestBinary(goModDir string, pkg string, output string) error {
+	// prepare timeout context
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Minute)
+	defer cancel()
+
+	cmdParams := []string{
+		"go", "test", "-c", "-o", output, pkg,
+	}
+	// go test -c -o <output> <pkg>
+	cmd := oe.CommandContext(ctx, cmdParams[0], cmdParams[1:]...)
+	if goModDir != "" {
+		cmd.Dir = goModDir
+	}
+	cmd.Env = os.Environ()
+
+	var out bytes.Buffer
+	w := io.MultiWriter(&out, log.Writer())
+	cmd.Stdout = w
+	cmd.Stderr = w
+
+	log.Printf("%s", cmdParams)
+
+	err := cmd.Run()
+
+	if err != nil {
+		return fmt.Errorf("%s: %v", cmdParams, err)
+	}
+
+	return nil
 }

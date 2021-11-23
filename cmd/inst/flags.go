@@ -15,10 +15,11 @@ var opts struct {
 	Args     struct {
 		Globs []string
 	} `positional-arg-name:"globs" positional-args:"yes"`
-	Version         bool   `long:"version" description:"Print version and exit"`
-	IgnoreSyntaxErr bool   `long:"ignore-syntax-err"`
-	Parallel        int    `long:"parallel" default:"8"`
-	CPUProfile      string `long:"cpuprofile"`
+	Version              bool   `long:"version" description:"Print version and exit"`
+	CheckSyntaxErr       bool   `long:"check-syntax-err"`
+	AutoRecoverSyntaxErr bool   `long:"recover-syntax-err"`
+	Parallel             int    `long:"parallel" default:"8"`
+	CPUProfile           string `long:"cpuprofile"`
 }
 
 func parseFlags() {
