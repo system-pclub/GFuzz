@@ -142,6 +142,7 @@ func ListExecutablesFromGoModule(goModDir string,
 			fullTestBinFile := path.Join(outputDir, testBinFile)
 			err = CompileTestBinary(goModDir, pkg, fullTestBinFile)
 			if err != nil {
+				log.Printf("[ignored] failed to list tests at package %s: %v", pkg, err)
 				continue
 			}
 			testsInPkg, err = ListExecutablesFromTestBin(fullTestBinFile)
