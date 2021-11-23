@@ -7,7 +7,7 @@ OUT_DIR=$3
 shift 3
 
 if [ "$NEED_INST" = true ]; then
-    /gfuzz/bin/inst --dir $GOMOD_DIR
+    /gfuzz/bin/inst --check-syntax-err --recover-syntax-err --dir $GOMOD_DIR
 fi
 
 # Start fuzzing
