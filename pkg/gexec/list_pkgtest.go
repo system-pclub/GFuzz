@@ -169,15 +169,12 @@ func GetTestBinFileName(pkg string) string {
 // CompileTestBinary compiles the tests under the given package to the given
 // output file.
 func CompileTestBinary(goModDir string, pkg string, output string) error {
-	// prepare timeout context
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Minute)
-	defer cancel()
 
 	cmdParams := []string{
 		"go", "test", "-c", "-o", output, pkg,
 	}
 	// go test -c -o <output> <pkg>
-	cmd := oe.CommandContext(ctx, cmdParams[0], cmdParams[1:]...)
+	cmd := oe.Command(cmdParams[0], cmdParams[1:]...)
 	if goModDir != "" {
 		cmd.Dir = goModDir
 	}
