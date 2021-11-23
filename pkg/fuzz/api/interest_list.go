@@ -1,7 +1,6 @@
 package api
 
 import (
-	"log"
 	"sync"
 )
 
@@ -33,7 +32,6 @@ func (i *InterestList) Each(handler InterestHandler) {
 	currInterests := make([]*InterestInput, len(i.interestedInputs))
 	copy(currInterests, i.interestedInputs)
 	i.rw.RUnlock()
-	log.Printf("interest list length: %d\n", len(currInterests))
 	for _, i := range currInterests {
 		handler.HandleInterest(i)
 	}
