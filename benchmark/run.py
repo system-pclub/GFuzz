@@ -39,8 +39,8 @@ def benchmark_simple(run_mode:str):
 
     Args:
         run_mode (str): `native`, `inst`
-            native: run without patching golang runtime and insturmenting code
-            inst: run with patched golang runtime & instrumented code
+        native: run without patching golang runtime and insturmenting code
+        inst: run with patched golang runtime & instrumented code
     """
     
     # prepare test bin
@@ -93,13 +93,14 @@ def run_benchmark_with_tests(tests: List[BinTest], mode:str):
     total_dur = 0
     tests_dur = {}
     for t in tests:
+        strict_func_name = "^"+t.func+"$"
         if mode == "inst":
             dur = benchmark(10, lambda: subprocess.run(
-                [t.bin, "-test.timeout", "10s","-test.run", t.func], 
+                [t.bin, "-test.timeout", "10s","-test.run", strict_func_name], 
                 env=inst_run_env, timeout=10
                 ))
         elif mode == "native":
-            dur = benchmark(10, lambda: subprocess.run([t.bin, "-test.timeout", "10s", "-test.run", t.func]))
+            dur = benchmark(10, lambda: subprocess.run([t.bin, "-test.timeout", "10s", "-test.run", strict_func_name]))
         full_name = f"{t.bin}->{t.func}"
         if dur == -1:
             print(f"{full_name}: timeout")
@@ -114,8 +115,9 @@ def run_benchmark_with_tests(tests: List[BinTest], mode:str):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('testsuite', choices=["simple", "custom"])
-    parser.add_argument('--mode', choices=["native", "inst", "parallel-native"], required=True)
+    parser.add_argument('action', choices=["count-tests","benchmark"])
+    #parser.add_argument('testsuite', choices=["simple", "custom"])
+    parser.add_argument('--mode', choices=["native", "inst", "parallel-native"])
     parser.add_argument('--dir', type=str)
     parser.add_argument('--bins',  nargs='*')
     parser.add_argument('--bins-list-file', type=str)
@@ -126,8 +128,15 @@ def main():
     bins_dir = args.dir
     selected_bins = args.bins
     mode = args.mode
-    testsuite = args.testsuite
+    #testsuite = args.testsuite
+    testsuite = "custom"
     bins_list_file = args.bins_list_file
+
+    if args.action == "count-tests":
+        cnt = count_tests_from_bins_dir(bins_dir)
+        print(f"{bins_dir} contains {cnt} tests")
+        return
+
 
     if testsuite == "custom" and not bins_dir:
         raise Exception("--dir is required if testsuite is custom")
@@ -142,6 +151,17 @@ def main():
             bins = get_bins_from_file(bins_list_file)
             selected_bins = [os.path.join(bins_dir, bin) for bin in bins]
         benchmark_custom(bins_dir, mode, selected_bins)
+
+def count_tests_from_bins_dir(bins_dir:str) -> int:
+    bins = glob(f"{bins_dir}/*")
+    tests_cnt = 0
+    for bin in bins:
+        try:
+            tests = get_tests_from_test_bin(bin)
+            tests_cnt += len(tests)
+        except Exception as err:
+            print("ignore error: {err}")
+    return tests_cnt
 
 def get_bins_from_file(file: str)->List[str]:
     with open(file, "r") as f:
@@ -171,12 +191,16 @@ def restore_inst_run(std_input_content:str):
         f.write(std_input_content)
 
 def get_tests_from_test_bin(bin: str) -> List[BinTest]:
-    p = subprocess.run([bin, '-test.list', '.*'], stdout=subprocess.PIPE)
-    p.check_returncode()
-    out = p.stdout.decode('utf-8')
-    funcs = out.splitlines()
-    print("found tests", funcs)
-    return [BinTest(bin, func) for func in funcs]
+    try:
+        p = subprocess.run([bin, '-test.list', '.*'], stdout=subprocess.PIPE)
+        p.check_returncode()
+        out = p.stdout.decode('utf-8')
+        funcs = out.splitlines()
+        print("found tests", funcs)
+        return [BinTest(bin, func) for func in funcs]
+    except Exception as err:
+        print(err)
+        return []
 
 def benchmark(reps, func, prefunc=None):
     dur = 0

@@ -1,0 +1,419 @@
+total 424 tests
+/builder/etcd/inst/go.etcd.io-etcd-api-v3-etcdserverpb.test->open : no such file or directory:0.0238 seconds
+/builder/etcd/inst/go.etcd.io-etcd-api-v3-etcdserverpb.test->TestInvalidGoTypeIntPanic:0.0345 seconds
+/builder/etcd/inst/go.etcd.io-etcd-api-v3-v3rpc-rpctypes.test->open : no such file or directory:0.0218 seconds
+/builder/etcd/inst/go.etcd.io-etcd-api-v3-v3rpc-rpctypes.test->TestConvert:0.0192 seconds
+/builder/etcd/inst/go.etcd.io-etcd-client-v3-balancer.test->open : no such file or directory:0.2287 seconds
+/builder/etcd/inst/go.etcd.io-etcd-client-v3-balancer.test->TestRoundRobinBalancedResolvableNoFailover:0.2731 seconds
+/builder/etcd/inst/go.etcd.io-etcd-client-v3-balancer.test->TestRoundRobinBalancedResolvableFailoverFromRequestFail:0.1724 seconds
+/builder/etcd/inst/go.etcd.io-etcd-client-v3-balancer.test->Test_epsToAddrs:0.0353 seconds
+/builder/etcd/inst/go.etcd.io-etcd-client-v3-clientv3util.test->open : no such file or directory:0.3358 seconds
+/builder/etcd/inst/go.etcd.io-etcd-client-v3-namespace.test->open : no such file or directory:0.3274 seconds
+/builder/etcd/inst/go.etcd.io-etcd-client-v3-namespace.test->TestPrefixInterval:0.0396 seconds
+/builder/etcd/inst/go.etcd.io-etcd-client-v3-ordering.test->open : no such file or directory:0.2935 seconds
+/builder/etcd/inst/go.etcd.io-etcd-client-v3-ordering.test->TestKvOrdering:0.0351 seconds
+/builder/etcd/inst/go.etcd.io-etcd-client-v3-ordering.test->TestTxnOrdering:0.0355 seconds
+/builder/etcd/inst/go.etcd.io-etcd-client-v3-yaml.test->open : no such file or directory:0.2208 seconds
+/builder/etcd/inst/go.etcd.io-etcd-client-v3-yaml.test->TestConfigFromFile:0.0345 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-adt.test->open : no such file or directory:0.0707 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-adt.test->TestIntervalTreeInsert:0.0206 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-adt.test->TestIntervalTreeSelfBalanced:0.0123 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-adt.test->TestIntervalTreeDelete:0.0186 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-adt.test->TestIntervalTreeIntersects:0.0333 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-adt.test->TestIntervalTreeStringAffine:0.0214 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-adt.test->TestIntervalTreeStab:0.0182 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-adt.test->TestIntervalTreeRandom:0.0346 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-adt.test->TestIntervalTreeSortedVisit:0.0182 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-adt.test->TestIntervalTreeVisitExit:0.0100 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-adt.test->TestIntervalTreeContains:0.0108 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-adt.test->Example:0.0100 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-crc.test->open : no such file or directory:0.0355 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-crc.test->TestHash32:0.0098 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-expect.test->open : no such file or directory:0.0368 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-expect.test->TestExpectFunc:0.0359 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-expect.test->TestEcho:0.0420 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-expect.test->TestLineCount:0.0378 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-expect.test->TestSend:0.0187 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-expect.test->TestSignal:0.0204 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-fileutil.test->open : no such file or directory:0.0109 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-fileutil.test->TestIsDirWriteable:0.0350 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-fileutil.test->TestCreateDirAll:0.0351 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-fileutil.test->TestExist:0.0346 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-fileutil.test->TestDirEmpty:0.0205 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-fileutil.test->TestZeroToEnd:0.0213 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-fileutil.test->TestDirPermission:0.0373 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-fileutil.test->TestLockAndUnlockSyscallFlock:0.1682 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-fileutil.test->TestLockAndUnlock:0.1198 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-fileutil.test->TestPreallocateExtend:0.0193 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-fileutil.test->TestPreallocateExtendTrunc:0.0344 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-fileutil.test->TestPreallocateFixed:0.0208 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-fileutil.test->TestPurgeFile:0.0670 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-fileutil.test->TestPurgeFileHoldingLockFile:0.0684 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-fileutil.test->TestReadDir:0.0192 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-flags.test->open : no such file or directory:0.0117 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-flags.test->TestSetFlagsFromEnv:0.0218 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-flags.test->TestSetFlagsFromEnvBad:0.0360 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-flags.test->TestSetFlagsFromEnvParsingError:0.0368 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-flags.test->TestSelectiveStringValue:0.0192 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-flags.test->TestSelectiveStringsValue:0.0199 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-flags.test->TestStringsValue:0.0198 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-flags.test->TestNewUniqueStrings:0.0193 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-flags.test->TestNewUniqueURLsWithExceptions:0.0188 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-flags.test->TestValidateURLsValueBad:0.0402 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-flags.test->TestNewURLsValue:0.0351 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-httputil.test->open : no such file or directory:0.0205 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-httputil.test->TestGetHostname:0.0368 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-idutil.test->open : no such file or directory:0.0113 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-idutil.test->TestNewGenerator:0.0157 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-idutil.test->TestNewGeneratorUnique:0.0188 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-idutil.test->TestNext:0.0191 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-idutil.test->BenchmarkNext:0.0185 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-ioutil.test->open : no such file or directory:0.0096 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-ioutil.test->TestPageWriterRandom:0.0353 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-ioutil.test->TestPageWriterPartialSlack:0.0352 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-ioutil.test->TestPageWriterOffset:0.0362 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-ioutil.test->TestExactReadCloserExpectEOF:0.0369 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-ioutil.test->TestExactReadCloserShort:0.0226 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-ioutil.test->TestLimitedBufferReaderRead:0.0396 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-logutil.test->open : no such file or directory:0.0148 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-logutil.test->TestNewGRPCLoggerV2:0.0368 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-logutil.test->TestNewGRPCLoggerV2FromZapCore:0.0187 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-logutil.test->TestNewJournalWriter:0.0350 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-logutil.test->TestLogger:0.0349 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-netutil.test->open : no such file or directory:0.0210 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-netutil.test->TestResolveTCPAddrs:1.0259 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-netutil.test->TestURLsEqual:0.0180 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-netutil.test->TestURLStringsEqual:0.0181 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-netutil.test->TestGetDefaultInterface:0.0194 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-netutil.test->TestGetDefaultHost:0.0183 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-osutil.test->open : no such file or directory:0.0109 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-osutil.test->TestUnsetenv:0.0179 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-osutil.test->TestHandleInterrupts:0.0190 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-pathutil.test->open : no such file or directory:0.0097 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-pathutil.test->TestCanonicalURLPath:0.0192 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-pbutil.test->open : no such file or directory:0.0067 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-pbutil.test->TestMarshaler:0.0194 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-pbutil.test->TestMarshalerPanic:0.0191 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-pbutil.test->TestUnmarshaler:0.0257 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-pbutil.test->TestUnmarshalerPanic:0.0243 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-pbutil.test->TestGetBool:0.0212 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-proxy.test->open : no such file or directory:0.0135 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-proxy.test->TestServer_Unix_Insecure:0.0698 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-proxy.test->TestServer_TCP_Insecure:0.0357 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-proxy.test->TestServer_Unix_Insecure_DelayTx:0.1222 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-proxy.test->TestServer_TCP_Insecure_DelayTx:0.1175 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-proxy.test->TestServer_Unix_Insecure_DelayAccept:0.7726 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-proxy.test->TestServer_Unix_Secure_DelayAccept:0.0211 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-proxy.test->TestServer_PauseTx:0.2191 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-proxy.test->TestServer_ModifyTx_corrupt:0.0375 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-proxy.test->TestServer_ModifyTx_packet_loss:0.0185 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-proxy.test->TestServer_BlackholeTx:0.2242 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-proxy.test->TestServer_Shutdown:0.2246 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-proxy.test->TestServer_ShutdownListener:0.2233 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-proxy.test->TestServerHTTP_Insecure_DelayTx:0.4228 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-proxy.test->TestServerHTTP_Secure_DelayTx:0.0221 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-proxy.test->TestServerHTTP_Insecure_DelayRx:0.3700 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-proxy.test->TestServerHTTP_Secure_DelayRx:0.0190 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-report.test->open : no such file or directory:0.1263 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-report.test->TestPercentiles:0.0097 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-report.test->TestReport:0.0202 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-report.test->TestWeightedReport:0.0316 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-report.test->TestGetTimeseries:0.0270 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-schedule.test->open : no such file or directory:0.1223 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-schedule.test->TestFIFOSchedule:0.0206 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-srv.test->open : no such file or directory:0.1727 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-srv.test->TestSRVGetCluster:0.0206 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-srv.test->TestSRVDiscover:0.0124 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-srv.test->TestGetSRVService:0.0206 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-stringutil.test->TestUniqueStrings:0.1286 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-testutil.test->open : no such file or directory:0.2252 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-testutil.test->TestSample:0.0415 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-tlsutil.test->open : no such file or directory:0.0402 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-tlsutil.test->TestGetCipherSuites:2.4915 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-traceutil.test->open : no such file or directory:0.0184 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-traceutil.test->TestGet:0.0194 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-traceutil.test->TestCreate:0.0196 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-traceutil.test->TestLog:0.0369 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-traceutil.test->TestLogIfLong:0.0257 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-transport.test->open : no such file or directory:0.0214 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-transport.test->TestNewKeepAliveListener:0.1742 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-transport.test->TestNewKeepAliveListenerTLSEmptyConfig:0.0375 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-transport.test->TestNewListenerTLSInfo:0.2247 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-transport.test->TestNewListenerTLSInfoSkipClientSANVerify:0.7719 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-transport.test->TestNewListenerTLSEmptyInfo:0.0178 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-transport.test->TestNewTransportTLSInfo:0.0721 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-transport.test->TestTLSInfoNonexist:0.0180 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-transport.test->TestTLSInfoEmpty:0.0181 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-transport.test->TestTLSInfoMissingFields:0.0670 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-transport.test->TestTLSInfoParseFuncError:0.0678 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-transport.test->TestTLSInfoConfigFuncs:0.0702 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-transport.test->TestNewListenerUnixSocket:0.0195 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-transport.test->TestNewListenerTLSInfoSelfCert:0.1174 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-transport.test->TestIsClosedConnError:0.0192 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-transport.test->TestReadWriteTimeoutDialer:0.0680 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-transport.test->TestNewTimeoutListener:0.0197 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-transport.test->TestWriteReadTimeoutListener:0.0676 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-transport.test->TestNewTimeoutTransport:0.0354 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-transport.test->TestNewTransportTLSInvalidCipherSuitesTLS12:0.1182 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-types.test->open : no such file or directory:0.0200 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-types.test->TestIDString:0.0354 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-types.test->TestIDFromString:0.0185 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-types.test->TestIDFromStringFail:0.0189 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-types.test->TestIDSlice:0.0198 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-types.test->TestUnsafeSet:0.0190 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-types.test->TestThreadsafeSet:0.0185 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-types.test->TestUnsafeSetContainsAll:0.0193 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-types.test->TestUint64Slice:0.0186 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-types.test->TestNewURLs:0.0186 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-types.test->TestURLsString:0.0346 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-types.test->TestURLsSort:0.0181 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-types.test->TestURLsStringSlice:0.0186 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-types.test->TestNewURLsFail:0.0183 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-types.test->TestParseInitialCluster:0.0194 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-types.test->TestParseInitialClusterBad:0.0195 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-types.test->TestNameURLPairsString:0.0355 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-types.test->TestParse:0.0187 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-types.test->TestNewURLsMapIPV6:0.0183 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-types.test->TestNewURLsMapFromStringMapEmpty:0.0179 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-types.test->TestNewURLsMapFromStringMapNormal:0.0178 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-wait.test->open : no such file or directory:0.0097 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-wait.test->TestWait:0.0346 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-wait.test->TestRegisterDupPanic:0.0188 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-wait.test->TestTriggerDupSuppression:0.0185 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-wait.test->TestIsRegistered:0.0187 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-wait.test->TestWaitTime:0.0105 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-wait.test->TestWaitTestStress:0.5202 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-wait.test->BenchmarkWaitTime:0.0105 seconds
+/builder/etcd/inst/go.etcd.io-etcd-pkg-v3-wait.test->BenchmarkTriggerAnd10KWaitTime:0.0076 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2discovery.test->open : no such file or directory:0.0115 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2discovery.test->TestNewProxyFuncUnset:0.0190 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2discovery.test->TestNewProxyFuncBad:0.0179 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2discovery.test->TestNewProxyFunc:0.0207 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2discovery.test->TestCheckCluster:0.0692 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2discovery.test->TestWaitNodes:0.0415 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2discovery.test->TestCreateSelf:0.0181 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2discovery.test->TestNodesToCluster:0.0178 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2discovery.test->TestRetryFailure:0.0369 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2error.test->open : no such file or directory:0.0098 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2error.test->TestErrorWriteTo:0.0189 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2http-httptypes.test->open : no such file or directory:0.0200 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2http-httptypes.test->TestHTTPErrorWriteTo:0.0200 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2http-httptypes.test->TestMemberUnmarshal:0.0189 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2http-httptypes.test->TestMemberCreateRequestUnmarshal:0.0199 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2http-httptypes.test->TestMemberCreateRequestUnmarshalFail:0.0352 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->open : no such file or directory:0.0671 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestEventQueue:0.0693 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestScanHistory:0.0721 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestEventIndexHistoryCleared:0.0785 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestFullEventQueue:0.0371 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestCloneEvent:0.0384 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestHeapPushPop:0.0814 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestHeapUpdate:0.0439 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestNodeExternClone:0.0497 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestNewKVIs:0.0455 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestNewKVReadWriteCompare:0.0244 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestNewKVExpiration:0.0388 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestNewKVListReprCompareClone:0.0271 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestNewKVRemove:0.0411 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestNewDirIs:0.0061 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestNewDirReadWriteListReprClone:0.0718 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestNewDirExpirationTTL:0.0206 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestNewDirChild:0.0219 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestStoreStatsGetSuccess:0.0420 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestStoreStatsGetFail:0.0817 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestStoreStatsCreateSuccess:0.0416 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestStoreStatsCreateFail:0.0378 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestStoreStatsUpdateSuccess:0.0676 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestStoreStatsUpdateFail:0.0363 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestStoreStatsCompareAndSwapSuccess:0.0414 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestStoreStatsCompareAndSwapFail:0.0405 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestStoreStatsDeleteSuccess:0.0418 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestStoreStatsDeleteFail:0.0367 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestStoreStatsExpireCount:0.0412 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestMinExpireTime:0.0402 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestStoreGetDirectory:0.0371 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestStoreUpdateValueTTL:0.0193 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestStoreUpdateDirTTL:0.0382 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestStoreWatchExpire:0.0369 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestStoreWatchExpireRefresh:0.0359 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestStoreWatchExpireEmptyRefresh:0.0368 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestStoreWatchNoRefresh:0.0362 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestStoreRefresh:0.0347 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestStoreRecoverWithExpiration:0.0431 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestStoreWatchExpireWithHiddenKey:0.0362 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestIsHidden:0.0391 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->TestWatcher:0.0394 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->BenchmarkStoreSet128Bytes:0.0418 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->BenchmarkStoreSet1024Bytes:0.0385 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->BenchmarkStoreSet4096Bytes:0.0393 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->BenchmarkStoreSetWithJson128Bytes:0.0369 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->BenchmarkStoreSetWithJson1024Bytes:0.0184 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->BenchmarkStoreSetWithJson4096Bytes:0.0413 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->BenchmarkStoreDelete:0.0207 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->BenchmarkWatch:0.0436 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->BenchmarkWatchWithSet:0.0378 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->BenchmarkWatchWithSetBatch:0.0384 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v2store.test->BenchmarkWatchOneKey:0.0207 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v3compactor.test->open : no such file or directory:0.0688 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v3compactor.test->TestPeriodicHourly:0.6730 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v3compactor.test->TestPeriodicMinutes:0.8219 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v3compactor.test->TestPeriodicPause:0.4762 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v3compactor.test->TestRevision:0.1705 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-api-v3compactor.test->TestRevisionPause:0.1217 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-cindex.test->open : no such file or directory:0.0364 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-cindex.test->TestConsistentIndex:0.0785 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-etcdserver-cindex.test->TestFakeConsistentIndex:0.0364 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-lease-leasehttp.test->open : no such file or directory:0.0352 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-lease-leasehttp.test->TestRenewHTTP:0.1177 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-lease-leasehttp.test->TestTimeToLiveHTTP:0.0684 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-lease-leasehttp.test->TestRenewHTTPTimeout:1.0796 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-lease-leasehttp.test->TestTimeToLiveHTTPTimeout:1.0727 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-lease.test->open : no such file or directory:0.0683 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-lease.test->TestLeaseQueue:0.1698 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-lease.test->TestLessorGrant:0.0688 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-lease.test->TestLeaseConcurrentKeys:0.0674 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-lease.test->TestLessorRevoke:0.0352 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-lease.test->TestLessorRenew:0.0674 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-lease.test->TestLessorRenewWithCheckpointer:0.0739 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-lease.test->TestLessorRenewExtendPileup:0.3199 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-lease.test->TestLessorDetach:0.0670 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-lease.test->TestLessorRecover:0.0670 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-lease.test->TestLessorExpire:1.1230 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-lease.test->TestLessorExpireAndDemote:1.1227 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-lease.test->TestLessorMaxTTL:0.0366 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-lease.test->TestLessorCheckpointScheduling:1.0717 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-lease.test->TestLessorCheckpointsRestoredOnPromote:0.0710 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-lease.test->BenchmarkLessorGrant1000:0.0352 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-lease.test->BenchmarkLessorGrant100000:0.0675 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-lease.test->BenchmarkLessorRevoke1000:0.0227 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-lease.test->BenchmarkLessorRevoke100000:0.0383 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-lease.test->BenchmarkLessorRenew1000:0.0446 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-lease.test->BenchmarkLessorRenew100000:0.0791 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-lease.test->BenchmarkLessorFindExpired10000:0.0797 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-lease.test->BenchmarkLessorFindExpired100000:0.0674 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc-backend.test->open : no such file or directory:0.0401 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc-backend.test->TestBackendClose:0.0362 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc-backend.test->TestBackendSnapshot:0.0743 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc-backend.test->TestBackendBatchIntervalCommit:0.1707 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc-backend.test->TestBackendDefrag:0.1695 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc-backend.test->TestBackendWriteback:0.0688 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc-backend.test->TestConcurrentReadTx:0.0345 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc-backend.test->TestBackendWritebackForEach:0.0374 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc-backend.test->TestBatchTxPut:0.0745 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc-backend.test->TestBatchTxRange:0.0354 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc-backend.test->TestBatchTxDelete:0.0389 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc-backend.test->TestBatchTxCommit:0.0380 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc-backend.test->TestBatchTxBatchLimitCommit:0.0417 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc-backend.test->BenchmarkBackendPut:0.0276 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->open : no such file or directory:0.0719 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestIndexGet:0.0736 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestIndexRange:0.0716 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestIndexTombstone:0.0716 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestIndexRangeSince:0.1249 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestIndexCompactAndKeep:0.0795 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestKeyIndexGet:0.0747 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestKeyIndexSince:0.0427 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestKeyIndexPut:0.0392 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestKeyIndexRestore:0.0710 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestKeyIndexTombstone:0.0688 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestKeyIndexCompactAndKeep:0.0710 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestKeyIndexCompactOnFurtherRev:0.0713 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestKeyIndexIsEmpty:0.0758 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestKeyIndexFindGeneration:0.0469 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestKeyIndexLess:0.0751 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestGenerationIsEmpty:0.0667 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestGenerationWalk:0.0341 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestKVRange:0.0665 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestKVTxnRange:0.0680 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestKVRangeRev:0.0689 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestKVTxnRangeRev:0.1177 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestKVRangeBadRev:0.0680 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestKVTxnRangeBadRev:0.0782 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestKVRangeLimit:0.0674 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestKVTxnRangeLimit:0.0668 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestKVPutMultipleTimes:0.0677 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestKVTxnPutMultipleTimes:0.0733 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestKVDeleteRange:0.1177 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestKVTxnDeleteRange:0.1844 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestKVDeleteMultipleTimes:0.1192 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestKVTxnDeleteMultipleTimes:0.0718 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestKVOperationInSequence:0.1197 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestKVTxnBlockWriteOperations:0.1188 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestKVTxnNonBlockRange:0.0697 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestKVTxnOperationInSequence:0.1212 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestKVCompactReserveLastValue:0.0730 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestKVCompactBad:0.1255 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestKVHash:0.1289 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestKVRestore:0.1679 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestKVSnapshot:0.1209 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestWatchableKVWatch:0.1199 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestScheduleCompaction:0.1252 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestCompactAllAndRestore:0.1184 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestStoreRev:0.0686 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestStorePut:0.0709 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestStoreRange:0.0352 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestStoreDeleteRange:0.0685 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestStoreCompact:0.1185 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestStoreRestore:0.0807 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestRestoreDelete:0.0740 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestRestoreContinueUnfinishedCompaction:0.1721 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestHashKVWhenCompacting:4.5652 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestHashKVZeroRevision:2.0371 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestTxnPut:0.1208 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestConcurrentReadNotBlockingWrite:0.0705 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestRevision:0.0683 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestWatch:0.1190 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestNewWatcherCancel:0.0929 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestCancelUnsynced:0.2216 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestSyncWatchers:0.1181 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestWatchCompacted:0.1682 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestWatchFutureRev:0.1175 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestWatchRestore:0.3703 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestWatchRestoreSyncedWatcher:2.1786 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestWatchBatchUnsynced:0.4212 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestNewMapwatcherToEventMap:0.0349 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestWatchVictims:4.0219 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestStressWatchCancelClose:3.7109 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestWatcherWatchID:1.0793 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestWatcherRequestsCustomID:0.1176 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestWatcherWatchPrefix:0.6205 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestWatcherWatchWrongRange:0.0668 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestWatchDeleteRange:0.1227 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestWatchStreamCancelWatcherByID:0.1186 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestWatcherRequestProgress:0.0675 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->TestWatcherWatchWithFilter:0.1671 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->BenchmarkIndexCompact1:0.0704 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->BenchmarkIndexCompact100:0.0347 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->BenchmarkIndexCompact10000:0.0695 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->BenchmarkIndexCompact100000:0.1266 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->BenchmarkIndexCompact1000000:0.0670 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->BenchmarkStorePut:0.0672 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->BenchmarkStoreRangeKey1:0.0346 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->BenchmarkStoreRangeKey100:0.0810 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->BenchmarkConsistentIndex:0.0762 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->BenchmarkStorePutUpdate:0.0732 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->BenchmarkStoreTxnPut:0.0676 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->BenchmarkStoreRestoreRevs1:0.1179 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->BenchmarkStoreRestoreRevs10:0.0690 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->BenchmarkStoreRestoreRevs20:0.0679 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->BenchmarkWatchableStorePut:0.1182 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->BenchmarkWatchableStoreTxnPut:0.0701 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->BenchmarkWatchableStoreWatchPutSync:0.0713 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->BenchmarkWatchableStoreWatchPutUnsync:0.0717 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->BenchmarkWatchableStoreUnsyncedCancel:0.1184 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->BenchmarkWatchableStoreSyncedCancel:0.0356 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-mvcc.test->BenchmarkKVWatcherMemoryUsage:0.0680 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-proxy-httpproxy.test->open : no such file or directory:0.0383 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-proxy-httpproxy.test->TestNewDirectorScheme:0.0350 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-proxy-httpproxy.test->TestDirectorEndpointsFiltering:0.0343 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-proxy-httpproxy.test->TestReadonlyHandler:0.0346 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-proxy-httpproxy.test->TestConfigHandlerGET:0.0356 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-proxy-httpproxy.test->TestReverseProxyServe:0.0358 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-proxy-httpproxy.test->TestRedirectRequest:0.0354 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-proxy-httpproxy.test->TestMaybeSetForwardedFor:0.0350 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-proxy-httpproxy.test->TestRemoveSingleHopHeaders:0.1190 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-proxy-httpproxy.test->TestCopyHeader:0.0676 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-proxy-tcpproxy.test->open : no such file or directory:0.0194 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-proxy-tcpproxy.test->TestUserspaceProxy:0.0679 seconds
+/builder/etcd/inst/go.etcd.io-etcd-server-v3-proxy-tcpproxy.test->TestUserspaceProxyPriority:0.0349 seconds
+total average 0.1317 seconds / test

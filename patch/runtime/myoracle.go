@@ -72,14 +72,14 @@ func NewChanInfo(ch *hchan) *ChanInfo {
 		MapRefGoroutine: make(map[*GoInfo]struct{}),
 		StrDebug:        strLoc,
 		OKToCheck:       false,
-		BoolInSDK:       Index(strLoc, strSDKPath) >= 0,
+		BoolInSDK:       Index(strLoc, strSDKPath) < 0,
 		IntFlagFoundBug: 0,
 		SpecialFlag:     0,
 	}
 	if BoolDebug {
 		println("===Debug Info:")
 		println("\tMake of a new channel. The creation site is:", strLoc, ch)
-		println("\tSDK path is:", strSDKPath, "\tInSDK ", newChInfo.BoolInSDK)
+		println("\tSDK path is:", strSDKPath, "\tBoolMakeNotInSDK is:", newChInfo.BoolInSDK)
 	}
 	AddRefGoroutine(newChInfo, CurrentGoInfo())
 
@@ -254,14 +254,8 @@ func DequeueCheckEntry() *CheckEntry {
 }
 
 func EnqueueCheckEntry(CS []PrimInfo) *CheckEntry {
-
+	println("EnqueueCheckEntry ")
 	lock(&MuCheckEntry)
-
-	if len(CS) == 1 {
-		if CS[0].StringDebug() == "/data/ziheng/shared/gotest/stubs/etcd/pkg/mod/github.com/prometheus/client_golang@v1.0.0/prometheus/registry.go:266" {
-			print()
-		}
-	}
 
 	FnCheckCount(PtrCheckCounter)
 	newCheckEntry := &CheckEntry{
@@ -275,11 +269,6 @@ func EnqueueCheckEntry(CS []PrimInfo) *CheckEntry {
 		}
 	}
 	if BoolDebug {
-		if len(CS) == 1 {
-			if CS[0].StringDebug() == "/data/ziheng/shared/gotest/stubs/etcd/pkg/mod/github.com/prometheus/client_golang@v1.0.0/prometheus/registry.go:266" {
-				print()
-			}
-		}
 		print("Enqueueing:")
 		for _, c := range CS {
 			print("\t", c.StringDebug())
