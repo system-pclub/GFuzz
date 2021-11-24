@@ -14,7 +14,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"path"
 	"path/filepath"
 )
 
@@ -72,7 +71,7 @@ func main() {
 		}
 	} else if opts.GoModDir != "" {
 		// output directory for compiled test binary file
-		binTestsDir := path.Join(opts.OutputDir, "tbin")
+		binTestsDir, _ := filepath.Abs(filepath.Join(opts.OutputDir, "tbin"))
 		execs, err = gexec.ListExecutablesFromGoModule(opts.GoModDir, opts.TestPkg, true, binTestsDir)
 		if err != nil {
 			log.Printf("ListExecutablesFromGoModule: %s", err)
