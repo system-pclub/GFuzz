@@ -92,7 +92,6 @@ func main() {
 	}
 
 	// handle go source files
-	// TODO: use goroutine to accelerate
 	var wg sync.WaitGroup
 	toInstSrcCh := make(chan string)
 	for i := 1; i <= int(opts.Parallel); i++ {
