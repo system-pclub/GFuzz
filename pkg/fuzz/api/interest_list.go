@@ -38,7 +38,7 @@ func (i *InterestList) IsLooping() bool {
 	return atomic.LoadUint32(&i.looping) == 1
 }
 
-func (i *InterestList) Each(handler InterestHandler) {
+func (i *InterestList) Each(handler InterestHandler) (ret bool) {
 	i.rw.Lock()
 	currInterests := make([]*InterestInput, len(i.interestedInputs))
 	i.Dirty = false
@@ -47,9 +47,13 @@ func (i *InterestList) Each(handler InterestHandler) {
 	i.rw.Unlock()
 	log.Printf("interesting list length: %d", len(currInterests))
 	for _, i := range currInterests {
-		handler.HandleInterest(i)
+		handled, err := handler.HandleInterest(i)
+		if err != nil {
+			log.Printf("handling interest %s: %s", i.Input.ID, err)
+		}
+		ret = handled || ret
 	}
 
 	i.looping -= 1
-
+	return ret
 }

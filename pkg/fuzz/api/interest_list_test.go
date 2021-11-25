@@ -14,12 +14,12 @@ func (m *TestInterestHandler) IsInterested(i *Input, o *Output) (bool, error) {
 	return false, nil
 }
 
-func (m *TestInterestHandler) HandleInterest(i *InterestInput) error {
+func (m *TestInterestHandler) HandleInterest(i *InterestInput) (bool, error) {
 	if touched, existed := m.shoulTouch[i]; touched || !existed {
 		m.t.Fail()
 	}
 	m.shoulTouch[i] = true
-	return nil
+	return true, nil
 }
 
 func (m *TestInterestHandler) Check() {

@@ -17,8 +17,9 @@ type InterestInput struct {
 // InterestHandler is used to handle InterestInput in following:
 // sends deter or rand mutate inputs to fuzz context's channel
 type InterestHandler interface {
-	// HandleInterest will be called when handling
-	HandleInterest(i *InterestInput) error
+	// HandleInterest will be called when handling.
+	// Return true if something handled, false otherwise(such as no selects to mutate, no oracle runtime output to handle, etc.)
+	HandleInterest(i *InterestInput) (bool, error)
 	// IsInterested will decide if this execution should be added into interest list
 	IsInterested(i *Input, o *Output) (bool, error)
 }

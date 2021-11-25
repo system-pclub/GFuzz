@@ -60,11 +60,12 @@ func TryLoopInterestList(fctx *api.Context, interestHdl api.InterestHandler, exi
 		return
 	}
 
-	fctx.Interests.Each(interestHdl)
+	handled := fctx.Interests.Each(interestHdl)
 
-	if atomic.LoadInt32(&runningTasks) == 0 && !fctx.Interests.Dirty {
+	if atomic.LoadInt32(&runningTasks) == 0 && !fctx.Interests.Dirty && !handled {
 		if atomic.LoadUint32(&exited) == 0 {
 			atomic.StoreUint32(&exited, 1)
+			log.Printf("nothing to fuzz, exiting...")
 			close(exitCh)
 		}
 	}
