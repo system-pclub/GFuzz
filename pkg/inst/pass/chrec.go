@@ -65,26 +65,33 @@ func (p *ChRecPass) GetPreApply(iCtx *inst.InstContext) func(*astutil.Cursor) bo
 			iCtx.SetMetadata(MetadataKeyRequiredOrtImport, true)
 
 		// channel make operation
-		case *ast.AssignStmt:
-			if len(concrete.Rhs) == 1 {
-				if callExpr, ok := concrete.Rhs[0].(*ast.CallExpr); ok { // calling on the right
-					if funcIdent, ok := callExpr.Fun.(*ast.Ident); ok {
-						if funcIdent.Name == "make" {
-							if len(callExpr.Args) == 1 { // This is a make operation
-								if _, ok := callExpr.Args[0].(*ast.ChanType); ok {
-									intID := int(getNewOpID())
-									newCall := NewArgCallExpr(oraclertImportName, "StoreChMakeInfo", []ast.Expr{
-										concrete.Lhs[0],
-										&ast.BasicLit{
-											ValuePos: 0,
-											Kind:     token.INT,
-											Value:    strconv.Itoa(intID),
-										}})
-									c.InsertAfter(newCall)
-									addRecord(strconv.Itoa(intID) + ":chmake")
-									iCtx.SetMetadata(MetadataKeyRequiredOrtImport, true)
-								}
+
+		case *ast.CallExpr:
+			if funcIdent, ok := concrete.Fun.(*ast.Ident); ok {
+				if funcIdent.Name == "make" {
+					if len(concrete.Args) > 0 && len(concrete.Args) < 3 {
+						if ct, ok := concrete.Args[0].(*ast.ChanType); ok {
+							// This is a make operation
+
+							intID := int(getNewOpID())
+
+							newCallWithTypeAsser := &ast.TypeAssertExpr{
+								X: NewArgCall(oraclertImportName, "StoreChMakeInfo", []ast.Expr{
+									concrete,
+									&ast.BasicLit{
+										ValuePos: 0,
+										Kind:     token.INT,
+										Value:    strconv.Itoa(intID),
+									}}),
+								Type:   ct,
+								Lparen: token.NoPos,
+								Rparen: token.NoPos,
 							}
+
+							c.Replace(newCallWithTypeAsser)
+
+							addRecord(strconv.Itoa(intID) + ":chmake")
+							iCtx.SetMetadata(MetadataKeyRequiredOrtImport, true)
 						}
 					}
 				}

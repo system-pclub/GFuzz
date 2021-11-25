@@ -254,7 +254,6 @@ func DequeueCheckEntry() *CheckEntry {
 }
 
 func EnqueueCheckEntry(CS []PrimInfo) *CheckEntry {
-	println("EnqueueCheckEntry ")
 	lock(&MuCheckEntry)
 
 	FnCheckCount(PtrCheckCounter)

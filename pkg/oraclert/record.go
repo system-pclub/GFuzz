@@ -7,10 +7,11 @@ func StoreOpInfo(strOpType string, uint16OpID uint16) {
 	recordOp(uint16OpID)
 }
 
-func StoreChMakeInfo(ch interface{}, uint16OpID uint16) {
+func StoreChMakeInfo(ch interface{}, uint16OpID uint16) interface{} {
 	runtime.StoreChOpInfo("ChMake", uint16OpID)
 	runtime.LinkChToLastChanInfo(ch)
 	recordOp(uint16OpID)
+	return ch
 }
 
 func CurrentGoAddPrime(ch interface{}) {
