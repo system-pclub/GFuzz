@@ -13,8 +13,9 @@ import (
 )
 
 var (
-	Version string
-	Build   string
+	Version      string
+	Build        string
+	numOfHandled uint32
 )
 
 func main() {
@@ -124,4 +125,6 @@ func main() {
 			log.Fatalf("writing stats to %s: %s", opts.StatsOut, err)
 		}
 	}
+
+	log.Printf("successfully handled %d file(s)", numOfHandled)
 }

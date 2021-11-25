@@ -5,6 +5,7 @@ import (
 	"gfuzz/pkg/utils/gofmt"
 	"io/ioutil"
 	"log"
+	"sync/atomic"
 )
 
 func HandleSrcFile(src string, reg *inst.PassRegistry, passes []string) error {
@@ -43,7 +44,12 @@ func HandleSrcFile(src string, reg *inst.PassRegistry, passes []string) error {
 				log.Panicf("syntax error found at file '%s'\n", dst)
 
 			}
+		} else {
+			atomic.AddUint32(&numOfHandled, 1)
+
 		}
+	} else {
+		atomic.AddUint32(&numOfHandled, 1)
 	}
 
 	return nil

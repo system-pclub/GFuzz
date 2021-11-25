@@ -60,6 +60,7 @@ func main() {
 
 	config.MaxParallel = opts.Parallel
 	config.IsIgnoreFeedback = opts.IsIgnoreFeedback
+	config.OracleRtDebug = opts.OracleRtDebug
 
 	// prepare fuzz targets
 	var execs []gexec.Executable

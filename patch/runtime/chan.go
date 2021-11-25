@@ -53,8 +53,8 @@ type hchan struct {
 	chInfo *ChanInfo
 
 	///MYCODE:
-	id uint16 // an uint32 assigned to the channel when it is made. Start from 0 and increase by 1 every time
-	preLoc uint16 // used when BoolRecordPerCh is true; stores the hash of last operation of this channel
+	id         uint16      // an uint32 assigned to the channel when it is made. Start from 0 and increase by 1 every time
+	preLoc     uint16      // used when BoolRecordPerCh is true; stores the hash of last operation of this channel
 	chanRecord *ChanRecord // a data struct to record information of this channel
 }
 
@@ -113,7 +113,6 @@ func makechan(t *chantype, size int) *hchan {
 		c = new(hchan)
 		c.buf = mallocgc(mem, elem, true)
 	}
-
 
 	///MYCODE
 	c.chInfo = NewChanInfo(c)
@@ -246,7 +245,6 @@ func chansend(c *hchan, ep unsafe.Pointer, block bool, callerpc uintptr) bool {
 	if BoolRecord {
 		RecordChOp(c)
 	}
-
 
 	if c.closed != 0 {
 		unlock(&c.lock)
@@ -428,7 +426,6 @@ func closechan(c *hchan) {
 		}
 	}
 
-
 	if c.closed != 0 {
 		unlock(&c.lock)
 		///MYCODE
@@ -604,7 +601,6 @@ func chanrecv(c *hchan, ep unsafe.Pointer, block bool) (selected, received bool)
 		}
 		defer currentGo.WithdrawBlock(checkEntry)
 	}
-
 
 	///MYCODE
 	if BoolRecord {

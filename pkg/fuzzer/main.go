@@ -9,13 +9,19 @@ import (
 	ortconfig "gfuzz/pkg/oraclert/config"
 	"log"
 	"os"
+	"sync/atomic"
+)
+
+var (
+	runningTasks int32
+	exited       uint32
 )
 
 // Reply run the fuzzing with given oracle runtime configuration and given executable
 func Replay(fctx *api.Context, ge gexec.Executable, config *config.Config, rtConfig *ortconfig.Config) {
 	ctx := context.Background()
 	i := api.NewExecInput(fctx.GetAutoIncGlobalID(), 0, config.OutputDir, ge, rtConfig, api.ReplayStage)
-	Run(ctx, i)
+	Run(ctx, config, i)
 }
 
 // Main starts fuzzing with a given list of executables and configuration
@@ -36,34 +42,47 @@ func Main(fctx *api.Context, execs []gexec.Executable, config *config.Config,
 		fctx.Interests.Add(api.NewUnexecutedInterestInput(i))
 	})
 
-	triggerLoopCh := make(chan struct{})
+	exitCh := make(chan struct{})
 	// endless loop to handle interested inputs
 	go func() {
-		for {
-			select {
-			case <-triggerLoopCh:
-				// handle interested inputs one by one
-				fctx.Interests.Each(interestHdl)
-			}
-		}
+		TryLoopInterestList(fctx, interestHdl, exitCh)
 	}()
 
 	// start a group of workers to handle fuzz execution in parallel
 	startWorkers(config.MaxParallel, func(ctx context.Context) {
-		execWorker(ctx, fctx, interestHdl, triggerLoopCh)
+		execWorker(ctx, fctx, interestHdl, exitCh)
 	})
 
 }
 
+func TryLoopInterestList(fctx *api.Context, interestHdl api.InterestHandler, exitCh chan struct{}) {
+	if fctx.Interests.IsLooping() || atomic.LoadInt32(&runningTasks) > 0 {
+		return
+	}
+
+	fctx.Interests.Each(interestHdl)
+
+	if atomic.LoadInt32(&runningTasks) == 0 && !fctx.Interests.Dirty {
+		if atomic.LoadUint32(&exited) == 0 {
+			atomic.StoreUint32(&exited, 1)
+			close(exitCh)
+		}
+	}
+}
+
 // execWorker handles a execution inputs from channel
-func execWorker(ctx context.Context, fc *api.Context, interestHdl api.InterestHandler, triggerLoopCh chan struct{}) {
+func execWorker(ctx context.Context,
+	fc *api.Context,
+	interestHdl api.InterestHandler,
+	exitCh chan struct{}) {
 	logger := getWorkerLogger(ctx)
 
 	for {
 		select {
 		case i := <-fc.ExecInputCh:
 			logger.Printf("received %s", i.ID)
-			o, err := Run(ctx, i)
+			atomic.AddInt32(&runningTasks, 1)
+			o, err := Run(ctx, fc.Cfg, i)
 			if err != nil {
 				logger.Printf("%s: %s", i.ID, err)
 			}
@@ -72,7 +91,14 @@ func execWorker(ctx context.Context, fc *api.Context, interestHdl api.InterestHa
 			if err != nil {
 				logger.Printf("%s: %s", i.ID, err)
 			}
-		case triggerLoopCh <- struct{}{}:
+			logger.Printf("finished %s", i.ID)
+
+			atomic.AddInt32(&runningTasks, -1)
+
+			TryLoopInterestList(fc, interestHdl, exitCh)
+		case <-exitCh:
+			logger.Printf("exited")
+			return
 		}
 
 	}

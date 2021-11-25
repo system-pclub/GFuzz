@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"gfuzz/pkg/fuzz/api"
+	"gfuzz/pkg/fuzz/config"
 	"gfuzz/pkg/fuzzer/bug"
 	ortCfg "gfuzz/pkg/oraclert/config"
 	ortEnv "gfuzz/pkg/oraclert/env"
@@ -17,7 +18,7 @@ import (
 	"time"
 )
 
-func Run(ctx context.Context, input *api.Input) (*api.Output, error) {
+func Run(ctx context.Context, cfg *config.Config, input *api.Input) (*api.Output, error) {
 
 	logger := getWorkerLogger(ctx)
 
@@ -69,6 +70,9 @@ func Run(ctx context.Context, input *api.Input) (*api.Output, error) {
 	env = append(env, fmt.Sprintf("%s=%s", ortEnv.ORACLERT_CONFIG_FILE, ortCfgFp))
 	env = append(env, fmt.Sprintf("%s=%s", ortEnv.ORACLERT_STDOUT_FILE, gfOutputFp))
 	env = append(env, fmt.Sprintf("%s=%s", ortEnv.ORACLERT_OUTPUT_FILE, ortOutputFp))
+	if cfg.OracleRtDebug {
+		env = append(env, fmt.Sprintf("%s=1", ortEnv.ORACLERT_DEBUG))
+	}
 	cmd.Env = env
 
 	// redirect stdout to the file
