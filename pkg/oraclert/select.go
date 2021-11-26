@@ -8,6 +8,10 @@ import (
 
 // GetSelEfcmCaseIdx will be instrumented to each select in target program.
 func GetSelEfcmSwitchCaseIdx(filename string, origLine string, origCases int) int {
+	if efcmStrat == nil {
+		// if strategy is not initialized, return -1
+		return -1
+	}
 	atomic.AddUint32(&getSelEfcmCount, 1)
 	runtime.StoreLastMySwitchSelectNumCase(origCases)
 	runtime.StoreLastMySwitchLineNum(origLine)

@@ -24,23 +24,32 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 		vim-common \
 	&& rm -rf /var/lib/apt/lists/*
 
-COPY scripts /gfuzz/scripts
+COPY benchmark/clone-repos.sh /gfuzz/benchmark/clone-repos.sh
 
 WORKDIR /repos
 
-RUN /gfuzz/scripts/clone-repos.sh .
+COPY benchmark/repos/etcd ./etcd
+COPY benchmark/repos/go-ethereum ./go-ethereum
+COPY benchmark/repos/grpc-go ./grpc-go
+COPY benchmark/repos/kubernetes ./kubernetes
+COPY benchmark/repos/prometheus ./prometheus
+COPY benchmark/repos/tidb ./tidb
+
+COPY benchmark/repos/moby /go/src/github.com/docker/docker
+
 
 # override leakcheck.go to prevent sideeffect of leakcheck to the benchmark
 COPY docker/builder/leakcheck.go /repos/grpc-go/internal/leakcheck/leakcheck.go
 
 # avoid gRPC testsuite
-RUN cd /grpc-go && grep -rl 'func (s) Test' ./ | xargs sed -i 's/func (s)/func/g'
+RUN cd grpc-go && grep -rl 'func (s) Test' ./ | xargs sed -i 's/func (s)/func/g' && cd ..
+
 
 WORKDIR /gfuzz
 
 # copy source files to docker
+COPY scripts ./scripts
 COPY patch ./patch
-
 COPY pkg ./pkg
 COPY cmd ./cmd
 COPY docker/builder/entrypoint.sh docker/builder/entrypoint.sh

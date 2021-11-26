@@ -41,23 +41,22 @@ func (h *InterestHandlerImpl) IsInterested(i *api.Input, o *api.Output) (bool, e
 	}
 	return false, nil
 }
-func (h *InterestHandlerImpl) HandleInterest(i *api.InterestInput) error {
+func (h *InterestHandlerImpl) HandleInterest(i *api.InterestInput) (ret bool, err error) {
 
 	// if init input has not been executed, execute first
 	if i.Input.Stage == api.InitStage && !i.Executed {
 		i.HandledCnt += 1
 		i.Executed = true
 		h.fctx.ExecInputCh <- i.Input
-		return nil
+		return true, nil
 	}
 
 	if i.Output == nil {
 		// if executed is true but output is nil
 		// it could be still in channel pending to run
-		return nil
+		return false, nil
 	}
 
-	var err error
 	// if interested input has been executed, then try to mutate and send to execution according to its stage
 	switch i.Input.Stage {
 	case api.InitStage:
@@ -72,22 +71,22 @@ func (h *InterestHandlerImpl) HandleInterest(i *api.InterestInput) error {
 
 		// Yu:: Directly jump to RandStage if we see the init_stage for the second time.
 		// Yu :: The first time of execution should be covered by !i.Executed.
-		err = handleRandStageInput(h.fctx, i.Input, i.Output)
+		ret, err = handleRandStageInput(h.fctx, i.Input, i.Output)
 	case api.DeterStage:
 		// we are handling the output from the input with deter stage
 		//err = handleDeterStageInput(h.fctx, i.Input, i.Output)
 
 		// Yu:: Should not be seen in the exec. But if seen, treat it as rand.
-		err = handleRandStageInput(h.fctx, i.Input, i.Output)
+		ret, err = handleRandStageInput(h.fctx, i.Input, i.Output)
 	case api.CalibStage:
 		// we are handling the output from the input with calib stage
 		//err = handleCalibStageInput(h.fctx, i.Input, i.Output)
 
 		// Yu:: Should not be seen in the exec. But if seen, treat it as rand.
-		err = handleRandStageInput(h.fctx, i.Input, i.Output)
+		ret, err = handleRandStageInput(h.fctx, i.Input, i.Output)
 	case api.RandStage:
 		// we are handling the output from the input with rand stage
-		err = handleRandStageInput(h.fctx, i.Input, i.Output)
+		ret, err = handleRandStageInput(h.fctx, i.Input, i.Output)
 	case api.ReplayStage:
 		// no need to handle replay
 
@@ -96,31 +95,31 @@ func (h *InterestHandlerImpl) HandleInterest(i *api.InterestInput) error {
 	}
 
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	i.HandledCnt += 1
 
-	return nil
+	return ret, nil
 
 }
 
-func handleInitStageInput(fctx *api.Context, i *api.Input, o *api.Output) error {
+func handleInitStageInput(fctx *api.Context, i *api.Input, o *api.Output) (bool, error) {
 
 	//g := fctx.GetQueueEntryByGExecID(i.Exec.String())
 	//execID, err := getExecIDFromInputID(i.ID)
 	//if err != nil {
-	//	return err
+	//	return false, err
 	//}
 	//var deterInputs []*api.Input
 	//var mts mutate.OrtConfigMutateStrategy = &mutate.DeterMutateStrategy{}
 	//
 	//if o.OracleRtOutput == nil {
-	//	return nil
+	//	return false, nil
 	//}
 	//cfgs, err := mts.Mutate(g, i.OracleRtConfig, o.OracleRtOutput)
 	//if err != nil {
-	//	return err
+	//	return false, err
 	//}
 
 	//for _, cfg := range cfgs {
@@ -131,45 +130,45 @@ func handleInitStageInput(fctx *api.Context, i *api.Input, o *api.Output) error 
 	//	fctx.ExecInputCh <- input
 	//}
 
-	return nil
+	return true, nil
 }
 
-func handleDeterStageInput(fctx *api.Context, i *api.Input, o *api.Output) error {
+func handleDeterStageInput(fctx *api.Context, i *api.Input, o *api.Output) (bool, error) {
 	g := fctx.GetQueueEntryByGExecID(i.Exec.String())
 	execID, err := getExecIDFromInputID(i.ID)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	input := api.NewExecInput(fctx.GetAutoIncGlobalID(), execID, fctx.Cfg.OutputDir, g.Exec, i.OracleRtConfig, api.CalibStage)
 	fctx.ExecInputCh <- input
-	return nil
+	return true, nil
 }
 
-func handleCalibStageInput(fctx *api.Context, i *api.Input, o *api.Output) error {
+func handleCalibStageInput(fctx *api.Context, i *api.Input, o *api.Output) (bool, error) {
 	g := fctx.GetQueueEntryByGExecID(i.Exec.String())
 	execID, err := getExecIDFromInputID(i.ID)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	input := api.NewExecInput(fctx.GetAutoIncGlobalID(), execID, fctx.Cfg.OutputDir, g.Exec, i.OracleRtConfig, api.RandStage)
 	fctx.ExecInputCh <- input
-	return nil
+	return true, nil
 }
 
-func handleRandStageInput(fctx *api.Context, i *api.Input, o *api.Output) error {
+func handleRandStageInput(fctx *api.Context, i *api.Input, o *api.Output) (bool, error) {
 	g := fctx.GetQueueEntryByGExecID(i.Exec.String())
 	execID, err := getExecIDFromInputID(i.ID)
 	if err != nil {
-		return err
+		return false, err
 	}
 	var randInputs []*api.Input
 	var mts mutate.OrtConfigMutateStrategy = &mutate.RandomMutateStrategy{}
 
 	cfgs, err := mts.Mutate(g, i.OracleRtConfig, o.OracleRtOutput)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	for _, cfg := range cfgs {
@@ -180,7 +179,7 @@ func handleRandStageInput(fctx *api.Context, i *api.Input, o *api.Output) error 
 		fctx.ExecInputCh <- input
 	}
 
-	return nil
+	return true, nil
 }
 
 func getExecIDFromInputID(inputID string) (uint32, error) {

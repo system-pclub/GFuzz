@@ -22,11 +22,11 @@ var opts struct {
 	Version   bool   `long:"version" description:"Print version and exit"`
 
 	// Fuzzing
-	GlobalTuple  bool `long:"globalTuple" description:"Whether prev_location is global or per channel"`
-	ScoreSdk     bool `long:"scoreSdk" description:"Recording/scoring if channel comes from Go SDK"`
-	ScoreAllPrim bool `long:"scoreAllPrim" description:"Recording/scoring other primitives like Mutex together with channel"`
-	TimeDivideBy int  `long:"timeDivideBy" description:"Durations in time/sleep.go will be divided by this int number"`
-
+	GlobalTuple      bool `long:"globalTuple" description:"Whether prev_location is global or per channel"`
+	ScoreSdk         bool `long:"scoreSdk" description:"Recording/scoring if channel comes from Go SDK"`
+	ScoreAllPrim     bool `long:"scoreAllPrim" description:"Recording/scoring other primitives like Mutex together with channel"`
+	TimeDivideBy     int  `long:"timeDivideBy" description:"Durations in time/sleep.go will be divided by this int number"`
+	OracleRtDebug    bool `long:"oraclertdebug"`
 	IsIgnoreFeedback bool `long:"isIgnoreFeedback" description:"Is ignoring the feedback, and save every mutated seed into the fuzzing queue"`
 }
 

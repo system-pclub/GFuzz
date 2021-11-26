@@ -167,9 +167,6 @@ func EnqueueBlockEntry(vecPrim []PrimInfo, op string) *BlockEntry {
 
 	_, strFile, intLine, _ := Caller(layer)
 	entry.StrOpPosition = strFile + ":" + Itoa(intLine)
-	if entry.StrOpPosition == "/data/ziheng/shared/gotest/stubs/etcd/src/go.etcd.io/etcd/client/client.go:708" {
-		//println("enqueue blockentry for 708:", entry)
-	}
 
 	lock(&MuBlockEntry)
 	MapBlockEntry[entry] = struct{}{}
@@ -180,9 +177,6 @@ func EnqueueBlockEntry(vecPrim []PrimInfo, op string) *BlockEntry {
 
 func DequeueBlockEntry(entry *BlockEntry) {
 	lock(&MuBlockEntry)
-	if entry.StrOpPosition == "/data/ziheng/shared/gotest/stubs/etcd/src/go.etcd.io/etcd/client/client.go:708" {
-		//println("dequeue blockentry for 708:", entry)
-	}
 	delete(MapBlockEntry, entry)
 	unlock(&MuBlockEntry)
 }

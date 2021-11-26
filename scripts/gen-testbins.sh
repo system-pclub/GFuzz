@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -x
 EXCLUDE_PATHS="integration"
 TESTDIRS="./..."
 pkg_list=$(go list $TESTDIRS | grep -vE "($EXCLUDE_PATHS)")

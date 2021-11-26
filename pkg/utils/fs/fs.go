@@ -1,7 +1,6 @@
 package fs
 
 import (
-	"fmt"
 	"io/fs"
 	"os"
 	"strings"
@@ -19,7 +18,6 @@ func ListFilesByGlob(glob string) ([]string, error) {
 	} else {
 		fsys = os.DirFS(".")
 	}
-	fmt.Printf("%s, %s\n", fsys, glob)
 	matches, err := doublestar.Glob(fsys, glob)
 	if err != nil {
 		return nil, err
