@@ -31,7 +31,7 @@ func ListPackages(goModRootPath string) ([]string, error) {
 	err := cmd.Run()
 
 	if err != nil {
-		return nil, fmt.Errorf("[go list ./...] %v", err)
+		log.Printf("[go list ./...]: %v", err)
 	}
 
 	return parseGoCmdListOutput(out.String())

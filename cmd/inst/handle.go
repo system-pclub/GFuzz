@@ -38,8 +38,11 @@ func HandleSrcFile(src string, reg *inst.PassRegistry, passes []string) error {
 			if opts.AutoRecoverSyntaxErr {
 				// we simply ignored the instrumented result,
 				// and revert the file content back to original version.
-				ioutil.WriteFile(dst, iCtx.OriginalContent, 0666)
-				log.Printf("recover '%s' from syntax error\n", dst)
+				err = ioutil.WriteFile(dst, iCtx.OriginalContent, 0777)
+				if err != nil {
+					log.Panicf("failed to recover file '%s'", dst)
+				}
+				log.Printf("recovered '%s' from syntax error\n", dst)
 			} else {
 				log.Panicf("syntax error found at file '%s'\n", dst)
 

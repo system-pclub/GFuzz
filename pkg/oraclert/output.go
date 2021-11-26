@@ -43,6 +43,9 @@ func GenerateOracleRtOutput(config *config.Config) *output.Output {
 }
 
 func DumpOracleRtOutput(config *config.Config, outputFile string) error {
+	if outputFile == "" {
+		return nil
+	}
 	o := GenerateOracleRtOutput(config)
 	bytes, err := output.Serialize(o)
 	if err != nil {

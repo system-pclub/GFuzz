@@ -29,6 +29,9 @@ func init() {
 	ortStdoutFile = os.Getenv(env.ORACLERT_STDOUT_FILE)
 	ortOutputFile = os.Getenv(env.ORACLERT_OUTPUT_FILE)
 	rtConfigFile := os.Getenv(env.ORACLERT_CONFIG_FILE)
+	if rtConfigFile == "" {
+		return
+	}
 	data, err := ioutil.ReadFile(rtConfigFile)
 	if err == nil {
 		ortConfig, err = config.Deserilize(data)
@@ -39,9 +42,9 @@ func init() {
 			efcmStrat = selefcm.NewSelectCaseInOrder(ortConfig.SelEfcm.Efcms)
 			selTimeout = ortConfig.SelEfcm.SelTimeout
 		} else {
-			fmt.Println(err)
+			fmt.Printf("OracleRt deserilize config: %s", err)
 		}
 	} else {
-		fmt.Println(err)
+		fmt.Printf("OracleRt read config: %s", err)
 	}
 }
