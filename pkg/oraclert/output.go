@@ -79,8 +79,9 @@ func getTuples() map[uint32]uint32 {
 func getSelects() []output.SelectRecord {
 	var selects []output.SelectRecord
 
-	runtime.ProcessSelectInfo(func(selectInfo map[string]runtime.SelectInfo) {
-		for _, selectInput := range selectInfo {
+	runtime.ProcessSelectInfo(func(selectInfos map[string]runtime.SelectInfo) {
+		fmt.Printf("[oraclert]: %d selects\n", len(selectInfos))
+		for _, selectInput := range selectInfos {
 			// filename:linenum:totalCaseNum:chooseCaseNum
 			strFileName := selectInput.StrFileName
 			if indexEnter := strings.Index(strFileName, "\n"); indexEnter > -1 {

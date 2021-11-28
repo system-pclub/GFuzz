@@ -116,6 +116,9 @@ func handleInitStageInput(fctx *api.Context, i *api.Input, o *api.Output) (bool,
 		deterInputs = append(deterInputs, api.NewExecInput(fctx.GetAutoIncGlobalID(), execID, fctx.Cfg.OutputDir, g.Exec, cfg, api.DeterStage))
 	}
 
+	if len(deterInputs) == 0 {
+		return false, nil
+	}
 	for _, input := range deterInputs {
 		fctx.ExecInputCh <- input
 	}

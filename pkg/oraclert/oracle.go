@@ -52,6 +52,8 @@ func StrPointer(v interface{}) string {
 
 var BoolOracleStarted bool = false // This variable is used to avoid this problem: a test invokes multiple tests, and so our
 // BeforeRun and AfterRun is also invoked multiple times, bringing unexpected problems to fuzzer
+var globalEntry *OracleEntry
+var entryMtx sync.Mutex
 
 func BeforeRun() *OracleEntry {
 	StrTestMod = os.Getenv("TestMod")
@@ -79,10 +81,14 @@ func BeforeRunTestOnce() *OracleEntry {
 }
 
 func BeforeRunFuzz() (result *OracleEntry) {
-	if BoolOracleStarted {
-		return nil
+	entryMtx.Lock()
+	defer entryMtx.Unlock()
+	if globalEntry != nil {
+		println("[oraclert] already started, return existing entry.")
+		return globalEntry
 	} else {
 		BoolOracleStarted = true
+		println("[oraclert] started")
 	}
 	var err error
 	baseStr := os.Getenv("GF_TIME_DIVIDE")
@@ -99,6 +105,7 @@ func BeforeRunFuzz() (result *OracleEntry) {
 		ChEnforceCheck:          make(chan struct{}),
 		Uint32DelayCheckCounter: 0,
 	}
+	globalEntry = result
 	StrBitGlobalTuple := os.Getenv("BitGlobalTuple")
 	if StrBitGlobalTuple == "1" {
 		runtime.BoolRecordPerCh = false
@@ -320,6 +327,7 @@ func DelayCheckCounterFN(ptrCounter *uint32) {
 }
 
 func AfterRun(entry *OracleEntry) {
+	println("[oraclert]: AfterRun")
 	switch StrTestMod {
 	case "TestOnce": // Run all unit tests once, and print a file containing each test's name, # of select visited
 		AfterRunTestOnce(entry)
@@ -348,7 +356,10 @@ func StrTestNameAndSelectCount() string {
 }
 
 func AfterRunFuzz(entry *OracleEntry) {
+	println("[oraclert]: AfterRunFuzz")
+
 	if entry == nil {
+		println("[oraclert]: entry is nil. return.")
 		return
 	}
 
@@ -356,6 +367,8 @@ func AfterRunFuzz(entry *OracleEntry) {
 	if err != nil {
 		println("DumpOracleRtOutput", err)
 	}
+
+	println("[oraclert]: CheckBugEnd...")
 
 	CheckBugEnd(entry)
 	runtime.DumpAllStack()
