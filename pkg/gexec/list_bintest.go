@@ -2,7 +2,6 @@ package gexec
 
 import (
 	"bytes"
-	"fmt"
 	"gfuzz/pkg/utils/fs"
 	"io"
 	"log"
@@ -51,7 +50,7 @@ func ListExecutablesFromTestBin(testBin string) ([]Executable, error) {
 	err := cmd.Run()
 
 	if err != nil {
-		return nil, fmt.Errorf("[%s -test.list .*] failed: %v", testBin, err)
+		log.Printf("[%s -test.list .*] failed: %v", testBin, err)
 	}
 
 	testFuncs, err := parseGoCmdTestListOutput(out.String())

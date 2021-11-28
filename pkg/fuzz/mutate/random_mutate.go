@@ -15,7 +15,11 @@ type RandomMutateStrategy struct{}
 func (d *RandomMutateStrategy) Mutate(g *gexecfuzz.GExecFuzz, curr *config.Config, o *output.Output) ([]*config.Config, error) {
 	var cfgs []*config.Config
 	cfg := config.NewConfig()
-	cfg.SelEfcm.SelTimeout = 500
+	cfg.SelEfcm.SelTimeout = curr.SelEfcm.SelTimeout
+	cfg.SelEfcm.SelTimeout += 1000
+	if cfg.SelEfcm.SelTimeout > 10000 {
+		cfg.SelEfcm.SelTimeout = 1000
+	}
 	mutateMethod := getRandomWithMax(10)
 	// get all select records we have seen so far for this executable
 	records := g.GetAllSelectRecords()

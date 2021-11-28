@@ -106,29 +106,32 @@ func (h *InterestHandlerImpl) HandleInterest(i *api.InterestInput) (ret bool, er
 
 func handleInitStageInput(fctx *api.Context, i *api.Input, o *api.Output) (bool, error) {
 
-	//g := fctx.GetQueueEntryByGExecID(i.Exec.String())
-	//execID, err := getExecIDFromInputID(i.ID)
-	//if err != nil {
-	//	return false, err
-	//}
-	//var deterInputs []*api.Input
-	//var mts mutate.OrtConfigMutateStrategy = &mutate.DeterMutateStrategy{}
-	//
-	//if o.OracleRtOutput == nil {
-	//	return false, nil
-	//}
-	//cfgs, err := mts.Mutate(g, i.OracleRtConfig, o.OracleRtOutput)
-	//if err != nil {
-	//	return false, err
-	//}
+	// g := fctx.GetQueueEntryByGExecID(i.Exec.String())
+	// execID, err := getExecIDFromInputID(i.ID)
+	// if err != nil {
+	// 	return false, err
+	// }
+	// var deterInputs []*api.Input
+	// var mts mutate.OrtConfigMutateStrategy = &mutate.DeterMutateStrategy{}
 
-	//for _, cfg := range cfgs {
-	//	deterInputs = append(deterInputs, api.NewExecInput(fctx.GetAutoIncGlobalID(), execID, fctx.Cfg.OutputDir, g.Exec, cfg, api.DeterStage))
-	//}
-	//
-	//for _, input := range deterInputs {
-	//	fctx.ExecInputCh <- input
-	//}
+	// if o.OracleRtOutput == nil {
+	// 	return false, nil
+	// }
+	// cfgs, err := mts.Mutate(g, i.OracleRtConfig, o.OracleRtOutput)
+	// if err != nil {
+	// 	return false, err
+	// }
+
+	// for _, cfg := range cfgs {
+	// 	deterInputs = append(deterInputs, api.NewExecInput(fctx.GetAutoIncGlobalID(), execID, fctx.Cfg.OutputDir, g.Exec, cfg, api.DeterStage))
+	// }
+
+	// if len(deterInputs) == 0 {
+	// 	return false, nil
+	// }
+	// for _, input := range deterInputs {
+	// 	fctx.ExecInputCh <- input
+	// }
 
 	return true, nil
 }

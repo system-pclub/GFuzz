@@ -126,5 +126,5 @@ func main() {
 		}
 	}
 
-	log.Printf("successfully handled %d file(s)", numOfHandled)
+	log.Printf("successfully handled %d/%d file(s)", numOfHandled, len(goSrcFiles))
 }
