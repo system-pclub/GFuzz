@@ -53,6 +53,7 @@ func StrPointer(v interface{}) string {
 var BoolOracleStarted bool = false // This variable is used to avoid this problem: a test invokes multiple tests, and so our
 // BeforeRun and AfterRun is also invoked multiple times, bringing unexpected problems to fuzzer
 var globalEntry *OracleEntry
+var afterRunCalled bool
 var entryMtx sync.Mutex
 
 func BeforeRun() *OracleEntry {
@@ -356,7 +357,15 @@ func StrTestNameAndSelectCount() string {
 }
 
 func AfterRunFuzz(entry *OracleEntry) {
+	entryMtx.Lock()
+	if afterRunCalled {
+		println("[oraclert]: called. ignored.")
+		entryMtx.Unlock()
+		return
+	}
+	afterRunCalled = true
 	println("[oraclert]: AfterRunFuzz")
+	entryMtx.Unlock()
 
 	if entry == nil {
 		println("[oraclert]: entry is nil. return.")

@@ -20,6 +20,7 @@ func GetSelEfcmSwitchCaseIdx(filename string, origLine string, origCases int) in
 	}
 	selectID := filename + ":" + origLine
 	idx := efcmStrat.GetCase(selectID)
+	//fmt.Printf("[oraclert] index %d is chosen for %s\n", idx, selectID)
 	if idx != -1 {
 		runtime.StoreLastMySwitchChoice(idx)
 		return idx

@@ -41,6 +41,8 @@ func init() {
 			// We can create different strategies according to our needs
 			efcmStrat = selefcm.NewSelectCaseInOrder(ortConfig.SelEfcm.Efcms)
 			selTimeout = ortConfig.SelEfcm.SelTimeout
+			fmt.Printf("[oraclert] selefcm timeout: %d", selTimeout)
+
 		} else {
 			fmt.Printf("OracleRt deserilize config: %s", err)
 		}

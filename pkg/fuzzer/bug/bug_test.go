@@ -286,6 +286,28 @@ main.main()
 	}
 }
 
+func TestRandomOutput1(t *testing.T) {
+	content := `
+-----New Blocking Bug:
+---Primitive location:
+/fuzz/target/internal/transport/http2_client.go:287
+/fuzz/target/internal/grpcsync/event.go:67
+---Primitive pointer:
+-----Withdraw prim:0xc0002a6400
+0xc0002a69c0
+0xc0002a6400
+-----End Bug`
+	bugIds, err := GetListOfBugIDFromStdoutContent(content)
+	if err != nil {
+		t.Fail()
+	}
+
+	if len(bugIds) != 0 {
+		t.Fail()
+	}
+
+}
+
 func TestRandomOutput(t *testing.T) {
 	content := `
 	=== RUN   TestPingPong
