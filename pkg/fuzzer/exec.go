@@ -156,11 +156,13 @@ func HandleExec(ctx context.Context, i *api.Input, o *api.Output, fctx *api.Cont
 			stdout, _ := i.GetOutputFilePath()
 			fctx.AddBugID(bugID, stdout)
 			numOfBugs += 1
+			logger.Printf("found unique bug: %s", bugID)
 		}
 	}
 
 	if numOfBugs != 0 {
 		logger.Printf("found %d unique bug(s)\n", numOfBugs)
+
 	}
 
 	// 2. update if any new select records found

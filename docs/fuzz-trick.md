@@ -27,3 +27,8 @@ func check(efer Errorfer, timeout time.Duration) {
     // comment out or add oraclert as exception
 }
 ```
+
+Replace 'func (s) Test' with 'func Test'.
+```
+$ grep -rl 'func (s) Test' ./ | xargs sed -i 's/func (s)/func/g'
+```

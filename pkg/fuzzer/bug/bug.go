@@ -168,7 +168,7 @@ func GetListOfBugIDFromStdoutContent(c string) ([]string, error) {
 				continue
 			}
 
-			idPrimLocEnd, err := findSucLinePrefix(idPrimLoc, linesThisBug, "---")
+			idPrimLocEnd, err := findSucLinePrefix(idPrimLoc, linesThisBug, "---", "")
 
 			if err != nil {
 				log.Printf("find \"---\" after \"---Primitive location:\" failed: %s", err)
@@ -187,7 +187,7 @@ func GetListOfBugIDFromStdoutContent(c string) ([]string, error) {
 				continue
 			}
 
-			idPrimPtrEnd, err := findSucLinePrefix(idPrimPtr, linesThisBug, "---")
+			idPrimPtrEnd, err := findSucLinePrefix(idPrimPtr, linesThisBug, "---", "-----Withdraw")
 
 			if err != nil {
 				log.Printf("find \"---\" after \"---Primitive pointer:\" failed: %s", err)
@@ -195,6 +195,9 @@ func GetListOfBugIDFromStdoutContent(c string) ([]string, error) {
 			}
 
 			for i := idPrimPtr + 1; i < idPrimPtrEnd; i++ {
+				if !strings.HasPrefix(linesThisBug[i], "0x") {
+					continue
+				}
 				bug.vecPrimPtr = append(bug.vecPrimPtr, linesThisBug[i])
 			}
 
@@ -204,7 +207,7 @@ func GetListOfBugIDFromStdoutContent(c string) ([]string, error) {
 			if err != nil {
 				// this is OK, some bug reports don't contain "---Stack:"
 			} else {
-				idStackEnd, err := findSucLinePrefix(idStack, linesThisBug, "---")
+				idStackEnd, err := findSucLinePrefix(idStack, linesThisBug, "---", "")
 
 				if err != nil {
 					log.Printf("find \"---\" after \"---Stack:\" failed: %s", err)
@@ -284,8 +287,11 @@ func findSucLineEqual(idx int, lines []string, strTarget string) (int, error) {
 	return -1, fmt.Errorf("malformed bug, can't find string %s since line %d", strTarget, idx)
 }
 
-func findSucLinePrefix(idx int, lines []string, strTarget string) (int, error) {
+func findSucLinePrefix(idx int, lines []string, strTarget string, skipPrefix string) (int, error) {
 	for i := idx + 1; i < len(lines); i++ {
+		if skipPrefix != "" && strings.HasPrefix(lines[i], skipPrefix) {
+			continue
+		}
 		if strings.HasPrefix(lines[i], strTarget) {
 			return i, nil
 		}
