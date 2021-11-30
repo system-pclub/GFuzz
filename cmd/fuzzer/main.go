@@ -58,8 +58,11 @@ func main() {
 		log.Fatal("filepath.Abs", err)
 	}
 
-	/* Set up config from opts */
+	// Set up config from opts
 	config.MaxParallel = opts.Parallel
+	if config.MaxParallel == 0 {
+		config.MaxParallel = 5
+	}
 	log.Printf("Running with MaxParallel: %v", config.MaxParallel)
 
 	config.IsIgnoreFeedback = opts.IsIgnoreFeedback
@@ -70,8 +73,13 @@ func main() {
 	config.OracleRtDebug = opts.OracleRtDebug
 
 	config.RandMutateEnergy = opts.RandMutateEnergy
+	if config.RandMutateEnergy == 0 {
+		// Default 100
+		config.RandMutateEnergy = 100
+	}
 	log.Printf("Using Random mutation energy: %v", config.RandMutateEnergy)
 
+	// Default: do not use score
 	config.IsUsingScore = opts.IsUsingScore
 	if config.IsUsingScore {
 		log.Printf("Using score to prioritize fuzzing entries. ")
