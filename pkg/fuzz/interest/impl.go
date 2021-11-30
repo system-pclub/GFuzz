@@ -5,6 +5,7 @@ import (
 	"gfuzz/pkg/fuzz/api"
 	"gfuzz/pkg/fuzz/mutate"
 	"gfuzz/pkg/utils/hash"
+	"gfuzz/pkg/fuzz/score"
 	"math"
 	"strconv"
 	"strings"
@@ -106,32 +107,32 @@ func (h *InterestHandlerImpl) HandleInterest(i *api.InterestInput) (ret bool, er
 
 func handleInitStageInput(fctx *api.Context, i *api.Input, o *api.Output) (bool, error) {
 
-	// g := fctx.GetQueueEntryByGExecID(i.Exec.String())
-	// execID, err := getExecIDFromInputID(i.ID)
-	// if err != nil {
-	// 	return false, err
-	// }
-	// var deterInputs []*api.Input
-	// var mts mutate.OrtConfigMutateStrategy = &mutate.DeterMutateStrategy{}
-
-	// if o.OracleRtOutput == nil {
-	// 	return false, nil
-	// }
-	// cfgs, err := mts.Mutate(g, i.OracleRtConfig, o.OracleRtOutput)
-	// if err != nil {
-	// 	return false, err
-	// }
-
-	// for _, cfg := range cfgs {
-	// 	deterInputs = append(deterInputs, api.NewExecInput(fctx.GetAutoIncGlobalID(), execID, fctx.Cfg.OutputDir, g.Exec, cfg, api.DeterStage))
-	// }
-
-	// if len(deterInputs) == 0 {
-	// 	return false, nil
-	// }
-	// for _, input := range deterInputs {
-	// 	fctx.ExecInputCh <- input
-	// }
+	//g := fctx.GetQueueEntryByGExecID(i.Exec.String())
+	//execID, err := getExecIDFromInputID(i.ID)
+	//if err != nil {
+	//	return false, err
+	//}
+	//var deterInputs []*api.Input
+	//var mts mutate.OrtConfigMutateStrategy = &mutate.DeterMutateStrategy{}
+	//
+	//if o.OracleRtOutput == nil {
+	//	return false, nil
+	//}
+	//cfgs, err := mts.Mutate(g, i.OracleRtConfig, o.OracleRtOutput, 0)
+	//if err != nil {
+	//	return false, err
+	//}
+	//
+	//for _, cfg := range cfgs {
+	//	deterInputs = append(deterInputs, api.NewExecInput(fctx.GetAutoIncGlobalID(), execID, fctx.Cfg.OutputDir, g.Exec, cfg, api.DeterStage))
+	//}
+	//
+	//if len(deterInputs) == 0 {
+	//	return false, nil
+	//}
+	//for _, input := range deterInputs {
+	//	fctx.ExecInputCh <- input
+	//}
 
 	return true, nil
 }
@@ -169,7 +170,20 @@ func handleRandStageInput(fctx *api.Context, i *api.Input, o *api.Output) (bool,
 	var randInputs []*api.Input
 	var mts mutate.OrtConfigMutateStrategy = &mutate.RandomMutateStrategy{}
 
-	cfgs, err := mts.Mutate(g, i.OracleRtConfig, o.OracleRtOutput)
+
+	randMutateEnergy := fctx.Cfg.RandMutateEnergy
+
+	if fctx.IsUsingScore {
+		var scoreFunc api.ScoreStrategy = score.NewScoreStrategyImpl(fctx)
+		curScore, _ := scoreFunc.Score(i, o)
+		if curScore > fctx.GlobalBestScore {
+			fctx.GlobalBestScore = curScore
+		}
+		randMutateEnergy = int(float64(randMutateEnergy) * (float64(curScore) / float64(fctx.GlobalBestScore)))
+	}
+
+	cfgs, err := mts.Mutate(g, i.OracleRtConfig, o.OracleRtOutput, randMutateEnergy)
+
 	if err != nil {
 		return false, err
 	}

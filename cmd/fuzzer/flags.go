@@ -27,7 +27,9 @@ var opts struct {
 	ScoreAllPrim     bool `long:"scoreAllPrim" description:"Recording/scoring other primitives like Mutex together with channel"`
 	TimeDivideBy     int  `long:"timeDivideBy" description:"Durations in time/sleep.go will be divided by this int number"`
 	OracleRtDebug    bool `long:"oraclertdebug"`
-	IsIgnoreFeedback bool `long:"isIgnoreFeedback" description:"Is ignoring the feedback, and save every mutated seed into the fuzzing queue"`
+	IsIgnoreFeedback bool `long:"isIgnoreFeedback" description:"Is ignoring the feedback, and save every mutated seed into the fuzzing queue" default:"false"`
+	RandMutateEnergy int  `long:"randMutateEnergy" description:"Determine the energy of random mutations. If == 100 (default), then each seed would mutate 100 times in the rand mutation stage" default:"100"`
+	IsUsingScore     bool `long:"isUsingScore" description:"Is using score to priority testing case. " default:"false"`
 }
 
 func parseFlags() {

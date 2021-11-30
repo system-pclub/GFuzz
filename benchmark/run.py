@@ -29,6 +29,7 @@ TEST_BIN_INST = os.path.join(TMP_FOLDER, "inst.test")
 STD_RECORD_FILE = os.path.join(TMP_FOLDER, "record")
 STD_OUTPUT_FILE = os.path.join(TMP_FOLDER, "output")
 
+REPEAT = 10
 class BinTest:
     def __init__(self, bin:str, func:str) -> None:
         self.bin = bin
@@ -92,15 +93,16 @@ def run_benchmark_with_tests(tests: List[BinTest], mode:str):
         inst_run_env["GF_BENCHMARK"] = "1"
     total_dur = 0
     tests_dur = {}
+    global REPEAT
     for t in tests:
         strict_func_name = "^"+t.func+"$"
         if mode == "inst":
-            dur = benchmark(10, lambda: subprocess.run(
+            dur = benchmark(REPEAT, lambda: subprocess.run(
                 [t.bin, "-test.timeout", "10s","-test.run", strict_func_name], 
                 env=inst_run_env, timeout=10
                 ))
         elif mode == "native":
-            dur = benchmark(10, lambda: subprocess.run([t.bin, "-test.timeout", "10s", "-test.run", strict_func_name]))
+            dur = benchmark(REPEAT, lambda: subprocess.run([t.bin, "-test.timeout", "10s", "-test.run", strict_func_name]))
         full_name = f"{t.bin}->{t.func}"
         if dur == -1:
             print(f"{full_name}: timeout")
@@ -121,6 +123,7 @@ def main():
     parser.add_argument('--dir', type=str)
     parser.add_argument('--bins',  nargs='*')
     parser.add_argument('--bins-list-file', type=str)
+    parser.add_argument('--repeat', type=int, default=10)
     args = parser.parse_args()
 
     print(args)
@@ -131,6 +134,9 @@ def main():
     #testsuite = args.testsuite
     testsuite = "custom"
     bins_list_file = args.bins_list_file
+    global REPEAT
+    if args.repeat:
+        REPEAT = args.repeat
 
     if args.action == "count-tests":
         cnt = count_tests_from_bins_dir(bins_dir)

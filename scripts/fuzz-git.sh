@@ -1,9 +1,10 @@
 #!/bin/bash -xe
 cd "$(dirname "$0")"/..
 
+
 TARGET_GIT=$1
 TARGET_GIT_COMMIT=$2
-OUTPUT_DIR=$(realpath $3)
+OUTPUT_DIR=$3
 shift 3
 
 

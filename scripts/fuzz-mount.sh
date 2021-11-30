@@ -1,9 +1,12 @@
 #!/bin/bash -e
 cd "$(dirname "$0")"/..
 
-GOMOD_DIR=$(realpath $1)
-OUT_DIR=$(realpath $2)
+
+GOMOD_DIR=$1
+OUT_DIR=$2
 shift 2
+
+
 
 docker build -f docker/fuzzer/Dockerfile -t gfuzz:latest .
 

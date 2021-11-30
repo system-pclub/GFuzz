@@ -25,7 +25,7 @@ func TestDeterMutateStrategy(t *testing.T) {
 			},
 		},
 	}
-	cfgs, err := mts.Mutate(nil, curr, output)
+	cfgs, err := mts.Mutate(nil, curr, output, 0)
 
 	if err != nil {
 		t.Fail()

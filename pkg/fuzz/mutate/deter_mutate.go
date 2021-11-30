@@ -9,7 +9,7 @@ import (
 
 type DeterMutateStrategy struct{}
 
-func (d *DeterMutateStrategy) Mutate(g *gexecfuzz.GExecFuzz, curr *config.Config, o *output.Output) ([]*config.Config, error) {
+func (d *DeterMutateStrategy) Mutate(g *gexecfuzz.GExecFuzz, curr *config.Config, o *output.Output, energy int) ([]*config.Config, error) {
 	if o == nil || o.Selects == nil {
 		return nil, nil
 	}
