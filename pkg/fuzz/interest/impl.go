@@ -5,6 +5,7 @@ import (
 	"gfuzz/pkg/fuzz/api"
 	"gfuzz/pkg/fuzz/mutate"
 	"gfuzz/pkg/utils/hash"
+	"gfuzz/pkg/fuzz/score"
 	"math"
 	"strconv"
 	"strings"
@@ -159,7 +160,20 @@ func handleRandStageInput(fctx *api.Context, i *api.Input, o *api.Output) (bool,
 	var randInputs []*api.Input
 	var mts mutate.OrtConfigMutateStrategy = &mutate.RandomMutateStrategy{}
 
-	cfgs, err := mts.Mutate(g, i.OracleRtConfig, o.OracleRtOutput, fctx.Cfg.RandMutateEnergy)
+
+	randMutateEnergy := fctx.Cfg.RandMutateEnergy
+
+	if fctx.IsUsingScore {
+		var scoreFunc api.ScoreStrategy = score.NewScoreStrategyImpl(fctx)
+		curScore, _ := scoreFunc.Score(i, o)
+		if curScore > fctx.GlobalBestScore {
+			fctx.GlobalBestScore = curScore
+		}
+		randMutateEnergy = int(float64(randMutateEnergy) * (float64(curScore) / float64(fctx.GlobalBestScore)))
+	}
+
+	cfgs, err := mts.Mutate(g, i.OracleRtConfig, o.OracleRtOutput, randMutateEnergy)
+
 	if err != nil {
 		return false, err
 	}

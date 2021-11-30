@@ -28,6 +28,10 @@ type Context struct {
 	// timeout counter: src => how many times timeout when running this src
 	// Skip handling interest input if its target's timeout is more than three
 	timeoutTargets map[string]uint32
+
+	// Global best score
+	IsUsingScore     bool
+	GlobalBestScore  int
 }
 
 // NewContext returns a new FuzzerContext

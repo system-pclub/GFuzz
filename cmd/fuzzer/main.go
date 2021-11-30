@@ -58,10 +58,24 @@ func main() {
 		log.Fatal("filepath.Abs", err)
 	}
 
+	/* Set up config from opts */
 	config.MaxParallel = opts.Parallel
+	log.Printf("Running with MaxParallel: %v", config.MaxParallel)
+
 	config.IsIgnoreFeedback = opts.IsIgnoreFeedback
+	if config.IsIgnoreFeedback {
+		log.Printf("Warning: Ignoring feedback from the oracle. ")
+	}
+
 	config.OracleRtDebug = opts.OracleRtDebug
+
 	config.RandMutateEnergy = opts.RandMutateEnergy
+	log.Printf("Using Random mutation energy: %v", config.RandMutateEnergy)
+
+	config.IsUsingScore = opts.IsUsingScore
+	if config.IsUsingScore {
+		log.Printf("Using score to prioritize fuzzing entries. ")
+	}
 
 	// prepare fuzz targets
 	var execs []gexec.Executable

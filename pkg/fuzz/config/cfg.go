@@ -15,6 +15,7 @@ type Config struct {
 	TimeDivide              int  // Durations in time package will be divided by this int number
 	IsIgnoreFeedback        bool // Is ignoring the feedback, and save every mutated seed into the fuzzing queue
 	RandMutateEnergy        int  // Determine the energy of random mutations. If == 100, then each seed would mutate 100 times in the rand mutation stage.
+	IsUsingScore            bool // Is using score to priority testing case
 }
 
 func NewConfig() *Config {
