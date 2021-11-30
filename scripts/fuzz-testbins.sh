@@ -1,6 +1,7 @@
 #!/bin/bash -e
 cd "$(dirname "$0")"/..
 
+
 TESTBINS_DIR=$1
 OUT_DIR=$2
 shift 2
