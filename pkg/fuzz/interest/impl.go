@@ -107,7 +107,7 @@ func handleInitStageInput(fctx *api.Context, i *api.Input, o *api.Output) (bool,
 	if o.OracleRtOutput == nil {
 		return false, nil
 	}
-	cfgs, err := mts.Mutate(g, i.OracleRtConfig, o.OracleRtOutput)
+	cfgs, err := mts.Mutate(g, i.OracleRtConfig, o.OracleRtOutput, 0)
 	if err != nil {
 		return false, err
 	}
@@ -159,7 +159,7 @@ func handleRandStageInput(fctx *api.Context, i *api.Input, o *api.Output) (bool,
 	var randInputs []*api.Input
 	var mts mutate.OrtConfigMutateStrategy = &mutate.RandomMutateStrategy{}
 
-	cfgs, err := mts.Mutate(g, i.OracleRtConfig, o.OracleRtOutput)
+	cfgs, err := mts.Mutate(g, i.OracleRtConfig, o.OracleRtOutput, fctx.Cfg.RandMutateEnergy)
 	if err != nil {
 		return false, err
 	}

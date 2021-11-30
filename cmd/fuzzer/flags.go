@@ -28,6 +28,7 @@ var opts struct {
 	TimeDivideBy     int  `long:"timeDivideBy" description:"Durations in time/sleep.go will be divided by this int number"`
 	OracleRtDebug    bool `long:"oraclertdebug"`
 	IsIgnoreFeedback bool `long:"isIgnoreFeedback" description:"Is ignoring the feedback, and save every mutated seed into the fuzzing queue"`
+	RandMutateEnergy int  `long:"randMutateEnergy" description:"Determine the energy of random mutations. If == 100 (default), then each seed would mutate 100 times in the rand mutation stage" default:"100"`
 }
 
 func parseFlags() {

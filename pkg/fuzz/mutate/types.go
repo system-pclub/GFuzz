@@ -7,5 +7,5 @@ import (
 )
 
 type OrtConfigMutateStrategy interface {
-	Mutate(g *gexecfuzz.GExecFuzz, curr *config.Config, o *output.Output) ([]*config.Config, error)
+	Mutate(g *gexecfuzz.GExecFuzz, curr *config.Config, o *output.Output, energy int) ([]*config.Config, error)
 }
