@@ -12,7 +12,7 @@ mkdir -p $DEST_DIR
 cd $DEST_DIR
 
 git clone https://github.com/etcd-io/etcd.git 
-cd etcd && git checkout dae29bb719dd69dc119146fc297a0628fcc1ccf8 && cd ..
+cd etcd && git checkout 6bb26ef008f5465bd11b078f0a2e3ae95fdc6d4a && cd ..
 
 git clone https://github.com/grpc/grpc-go.git
 cd grpc-go && git checkout 9280052d36656451dd7568a18a836c2a74edaf6c && cd ..
@@ -30,4 +30,4 @@ git clone https://github.com/kubernetes/kubernetes.git
 cd kubernetes && git checkout 97d40890d00acf721ecabb8c9a6fec3b3234b74b && cd ..
 
 git clone https://github.com/moby/moby.git
-cd moby && git checkout 791640417b67036bbc7d13597cad55bb5fcead2b && cd ..
+cd moby && git checkout 546c33cedef6283101e8280159647b2b3aa9cc41 && cd ..
