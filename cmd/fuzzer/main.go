@@ -74,8 +74,9 @@ func main() {
 
 	config.RandMutateEnergy = opts.RandMutateEnergy
 	if config.RandMutateEnergy == 0 {
-		// Default 100
-		config.RandMutateEnergy = 100
+		// Default 5
+		config.RandMutateEnergy = 5
+		config.RandMutateEnergy = 1
 	}
 	log.Printf("Using Random mutation energy: %v", config.RandMutateEnergy)
 
