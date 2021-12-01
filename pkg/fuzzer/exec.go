@@ -169,6 +169,7 @@ func HandleExec(ctx context.Context, i *api.Input, o *api.Output, fctx *api.Cont
 	}
 
 	// 3. update if any new select records found
+	isFoundNewSelect := false
 	entry := fctx.GetQueueEntryByGExecID(i.Exec.String())
 	if entry == nil {
 		return fmt.Errorf("cannot find queue entry for %s", i.Exec.String())
@@ -176,15 +177,24 @@ func HandleExec(ctx context.Context, i *api.Input, o *api.Output, fctx *api.Cont
 	newSelects := entry.UpdateSelectRecordsIfNew(o.OracleRtOutput.Selects)
 	if newSelects != 0 {
 		logger.Printf("found %d new selects", newSelects)
+		isFoundNewSelect = true
 	}
 
 	// 4. update/add interest input
-	if i.Stage == api.InitStage {
+	if i.Stage == api.InitStage && isFoundNewSelect {
 		// if input is init, since init stage by default is interested input, so no need to check interest
 		// simply update output and hash
 		ii := fctx.Interests.Find(i)
 		ii.Output = o
-		fctx.UpdateOrtOutputHash(hash.AsSha256(o.OracleRtOutput))
+
+		// Use SELECT Record as feedback.
+		oSelectCopy := make([]ortOut.SelectRecord, 0)
+		for _, v := range o.OracleRtOutput.Selects {
+			v_copy := v
+			v_copy.Cases = 0
+			oSelectCopy = append(oSelectCopy, v_copy)
+		}
+		fctx.UpdateOrtOutputHash(hash.AsSha256(oSelectCopy))
 		return nil
 	}
 	isInteresed, err := interestHdl.IsInterested(i, o)

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"gfuzz/pkg/fuzz/api"
 	"gfuzz/pkg/fuzz/mutate"
-	"gfuzz/pkg/utils/hash"
 	"gfuzz/pkg/fuzz/score"
-	"math"
+	"gfuzz/pkg/oraclert/output"
+	"gfuzz/pkg/utils/hash"
 	"strconv"
 	"strings"
 )
@@ -27,16 +27,25 @@ func (h *InterestHandlerImpl) IsInterested(i *api.Input, o *api.Output) (bool, e
 		return true, nil
 	}
 
-	oTupleCopy := make(map[uint32]uint32)
-	for k, v := range o.OracleRtOutput.Tuples {
-		log2element := uint32(math.Log2(float64(v)))
-		if log2element > 0 {
-			oTupleCopy[k] = log2element
-		} else {
-			oTupleCopy[k] = 0
-		}
+	// Using SELECT record as feedback
+	oSelectCopy := make([]output.SelectRecord, 0)
+	for _, v := range o.OracleRtOutput.Selects {
+		v_copy := v
+		v_copy.Cases = 0
+		oSelectCopy = append(oSelectCopy, v_copy)
 	}
-	ortCfgHash := hash.AsSha256(oTupleCopy)
+
+	//oTupleCopy := make(map[uint32]uint32)
+	//for k, v := range o.OracleRtOutput.Tuples {
+	//	log2element := uint32(math.Log2(float64(v)))
+	//	if log2element > 0 {
+	//		oTupleCopy[k] = log2element
+	//	} else {
+	//		oTupleCopy[k] = 0
+	//	}
+	//}
+
+	ortCfgHash := hash.AsSha256(oSelectCopy)
 	if h.fctx.UpdateOrtOutputHash(ortCfgHash) {
 		return true, nil
 	}

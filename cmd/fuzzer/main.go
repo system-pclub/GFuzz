@@ -128,7 +128,7 @@ func main() {
 		filteredExecs = append(filteredExecs, e)
 	}
 
-	fuzzer.Shuffle(filteredExecs)
+	//fuzzer.Shuffle(filteredExecs)
 	fctx := api.NewContext(filteredExecs, config)
 
 	var scorer api.ScoreStrategy = score.NewScoreStrategyImpl(fctx)
