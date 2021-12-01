@@ -49,7 +49,7 @@ type Input struct {
 type Output struct {
 	OracleRtOutput *output.Output
 	BugIDs         []string
-	IsTimeout      bool
+	Timeout        bool
 }
 
 func (i *Input) GetOrtConfigFilePath() (string, error) {
