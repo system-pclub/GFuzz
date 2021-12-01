@@ -89,8 +89,6 @@ func Run(ctx context.Context, cfg *config.Config, input *api.Input) (*api.Output
 
 	var timeout bool = false
 	if runErr != nil {
-		// Go test failed might be intentional
-		logger.Printf("[input %s][ignored] run failed: %v", input.ID, runErr)
 
 		if errors.Is(runErr, context.DeadlineExceeded) {
 			timeout = true
@@ -130,7 +128,7 @@ func Run(ctx context.Context, cfg *config.Config, input *api.Input) (*api.Output
 
 	execOutput := &api.Output{
 		BugIDs:         bugIDs,
-		IsTimeout:      timeout,
+		Timeout:        timeout,
 		OracleRtOutput: ortOutput,
 	}
 
@@ -139,16 +137,21 @@ func Run(ctx context.Context, cfg *config.Config, input *api.Input) (*api.Output
 
 // HandleExec is called immediately after running execution.
 // It should take care of following things:
-// 1. check if any unique bugs found
-// 2. update if any new select records found
-// 3. update/add interest input
+// 1. ignore this exec if timeout (fixme: more flexible options like increasing timeout and try next time?)
+// 2. check if any unique bugs found
+// 3. update if any new select records found
+// 4. update/add interest input
 func HandleExec(ctx context.Context, i *api.Input, o *api.Output, fctx *api.Context, interestHdl api.InterestHandler) error {
 	if o.OracleRtOutput == nil {
 		return fmt.Errorf("cannot handle an exec without oracle runtime output")
 	}
 	logger := getWorkerLogger(ctx)
+	// 1. ignore this exec if timeout
+	if o.Timeout {
+		return fmt.Errorf("ignore because of timeout")
+	}
 
-	// 1. check if any unique bugs found
+	// 2. check if any unique bugs found
 	// Check any unique bugs found
 	numOfBugs := 0
 	for _, bugID := range o.BugIDs {
@@ -165,7 +168,7 @@ func HandleExec(ctx context.Context, i *api.Input, o *api.Output, fctx *api.Cont
 
 	}
 
-	// 2. update if any new select records found
+	// 3. update if any new select records found
 	entry := fctx.GetQueueEntryByGExecID(i.Exec.String())
 	if entry == nil {
 		return fmt.Errorf("cannot find queue entry for %s", i.Exec.String())
@@ -175,7 +178,7 @@ func HandleExec(ctx context.Context, i *api.Input, o *api.Output, fctx *api.Cont
 		logger.Printf("found %d new selects", newSelects)
 	}
 
-	// 3. update/add interest input
+	// 4. update/add interest input
 	if i.Stage == api.InitStage {
 		// if input is init, since init stage by default is interested input, so no need to check interest
 		// simply update output and hash
