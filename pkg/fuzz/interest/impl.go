@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"gfuzz/pkg/fuzz/api"
 	"gfuzz/pkg/fuzz/mutate"
-	"gfuzz/pkg/utils/hash"
 	"gfuzz/pkg/fuzz/score"
+	"gfuzz/pkg/utils/hash"
 	"math"
 	"strconv"
 	"strings"
@@ -48,6 +48,13 @@ func (h *InterestHandlerImpl) HandleInterest(i *api.InterestInput) (ret bool, er
 	if !i.Executed {
 		i.HandledCnt += 1
 		i.Executed = true
+		h.fctx.ExecInputCh <- i.Input
+		return true, nil
+	}
+
+	// If IsNoMuation, then we do not mutate the seeds. Directly runs the seed.
+	if h.fctx.Cfg.IsNoMutation {
+		i.HandledCnt += 1
 		h.fctx.ExecInputCh <- i.Input
 		return true, nil
 	}

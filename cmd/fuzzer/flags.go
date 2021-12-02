@@ -30,6 +30,7 @@ var opts struct {
 	IsIgnoreFeedback bool `long:"isIgnoreFeedback" description:"Is ignoring the feedback, and save every mutated seed into the fuzzing queue"`
 	RandMutateEnergy int  `long:"randMutateEnergy" description:"Determine the energy of random mutations. If == 100 (default), then each seed would mutate 100 times in the rand mutation stage"`
 	IsUsingScore     bool `long:"isUsingScore" description:"Is using score to priority testing case. "`
+	IsNoMutation     bool `long:"isNoMutation" description:"Disable mutations on all testing case. "`
 }
 
 func parseFlags() {
