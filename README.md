@@ -105,7 +105,7 @@ $ ./scripts/fuzz-git.sh https://github.com/kubernetes/kubernetes 97d40890d00acf7
 ```
 
 We compare GFuzz with GCatch in our evaluation. To check whether 
-GCatch can detect a bug, please see instruction at section 'Reproduce GFuzz bugs using GCatch' below.
+GCatch can detect a bug, please see instruction at section [Using GCatch to test GFuzz bugs](https://github.com/system-pclub/GFuzz#7-using-gcatch-to-test-gfuzz-bugs) below.
 
 
 
