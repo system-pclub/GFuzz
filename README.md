@@ -184,7 +184,7 @@ python3 ./script/plot_Figure_5.py --with-feedback-path /path/to/output/folder/GF
 
 4. Reproduce GFuzz bugs using GCatch: 
 
-Let's setup GCatch using the Docker environment
+Let's set up GCatch using the Docker environment
 
 ``` bash
 cd ~
@@ -193,14 +193,14 @@ cd ./GCatch/GCatch
 # This might take a while
 sudo docker build -t gcatch_test .
 
-# Upon finish the prvious command
+# Upon finish the previous command
 sudo docker run -it gcatch_test
 ```
 
-Now we are in a Docker terminal, the following commands are all executed inside this Docker env. 
+Now we are in a Docker terminal, the following commands are all executed inside this Docker environment. 
+Additionally, all bugs being detected by GFuzz can be found in Google Sheets: **XXX**, sheet *Table-2-Bug*. 
 
-For testing grpc, all grpc bugs detected by GFuzz can be found in Google Sheets: **XXX**: 
-To evaluate bugs in grpc, we need to find out the bug related program module. 
+For testing grpc: 
 All grpc packages start with *google.golang.org/grpc**. If the bug is located in grpc folder *internal/resolver*, then the module path would be *google.golang.org/grpc/internal/resolver*.
 
 ``` bash
@@ -305,7 +305,7 @@ GO111MODULE=off GCatch -path=/go/src/github.com/docker/docker -include=github.co
 ```
 
 
-If any bugs are found from any programs above, GCatch would have the following output format. 
+If any bugs found from any programs above, GCatch would output a bug report similar to the following format. 
 
 ``` bash
 Successfully built whole program. Now running checkers
