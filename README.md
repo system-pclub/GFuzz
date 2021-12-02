@@ -57,8 +57,7 @@ $ cd benchmark
 $ clone-repos.sh ./repos
 ```
 
-The line number of all applications (e.g., Kubernetes, Docker, ...) at a particular version 
-(e.g., mentioned in ./benchmark/clone-repos.sh)
+The line number of all applications 
 can be counted by executing the following command:
 
 ``` bash
@@ -67,8 +66,9 @@ $ loc.sh ./repos
 ```
 
 The unit tests of an applications (e.g., etcd) at a particular version 
-(e.g., mentioned in ./benchmark/clone-repos.sh)
+(e.g., see ./benchmark/clone-repos.sh)
 can be counted by executing the following command:
+
 ``` bash
 $ cd benchmark
 
@@ -85,10 +85,10 @@ $ ./benchmark.sh count-tests --dir /builder/etcd/native
 ## 3. Tab Table-2-Bug 
 
 This tab shows the detailed information of the detected bugs, including which application
-version we found a bug (Column B), where we report a bug (Column E),  
-what is the current status of a filed bug report (Columns G--J), bug categories (Columns L--V), 
-whether GCatch can detect a bug (Column X), 
-the reasons why GCatch fails (Columns Y--AC), and the unit test we used to find a bug (columns AE--AF). 
+version we found a bug (Column B), where we report a bug (Column E), what is the current 
+status of a filed bug report (Columns G--J), bug categories (Columns L--V), whether 
+GCatch can detect a bug (Column X), the reasons why GCatch fails (Columns Y--AC), 
+and the unit test we used to find a bug (columns AE--AF). 
 
 Users can execute the following command to apply GFuzz to 
 fuzz an application (e.g., Kubernetes) of a particular version 
