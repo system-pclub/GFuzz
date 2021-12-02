@@ -36,7 +36,7 @@ $ git checkout asplos-artifact
 ```
 
 
-Items (2), (3), (4) and (5) are released using a Google Sheet file "asplos-710-artifact" 
+Items (2), (3), (4) and (5) are released using a Google Sheet file [asplos-710-artifact] 
 (https://docs.google.com/spreadsheets/d/1tLcgsfYlll0g20KMYgDKkAtwZtk426dMSUZ6SvXk04s/edit#gid=0). 
 Particularly, (2), (3) and (4) are related to Table 2 in the paper, and
 (5) is to provide more information for Table 3 in the paper. 
@@ -84,11 +84,11 @@ $ ./benchmark.sh count-tests --dir /builder/etcd/native
 
 ## 3. Tab Table-2-Bug 
 
-This tab shows the detailed information of the detected bugs, including which application
+This tab shows the detailed information of the detected bugs, including at which application
 version we found a bug (Column B), where we report a bug (Column E), what is the current 
-status of a filed bug report (Columns G--J), bug categories (Columns L--V), whether 
-GCatch can detect a bug (Column X), the reasons why GCatch fails (Columns Y--AC), 
-and the unit test we used to find a bug (columns AE--AF). 
+status of a filed bug report (Columns G-J), bug categories (Columns L-V), whether 
+GCatch can detect a bug (Column X), the reasons why GCatch fails (Columns Y-AC), 
+and the unit test we used to find a bug (columns AE-AF). 
 
 Users can execute the following command to apply GFuzz to 
 fuzz an application (e.g., Kubernetes) of a particular version 
@@ -101,7 +101,7 @@ $ ./scripts/fuzz-git.sh https://github.com/kubernetes/kubernetes 97d40890d00acf7
 
 By default, GFuzz will use all unit tests of a given application. To ease
 the reproduction of our results, we enhance GFuzz to only use one unit 
-test (columns AE--AF). For example, users can execute the following command
+test (columns AE-AF). For example, users can execute the following command
 to inspect whether GFuzz can still detect the bug at row 4. 
 
 ``` bash
@@ -110,14 +110,15 @@ $ ./scripts/fuzz-git.sh https://github.com/kubernetes/kubernetes 97d40890d00acf7
 ```
 
 We compare GFuzz with GCatch in our evaluation. To check whether 
-GCatch can detect a bug, please see instruction at section 'Reproduce GFuzz bugs using GCatch' below.
+GCatch can detect a bug, please see the instructions 
+at section 'Reproduce GFuzz bugs using GCatch' below.
 
 
 
 
 ## 4. Tab Table-2-Overhead
 
-This tab shows the overhead of GFuzz’s sanitizer. 
+This tab shows the overhead of GFuzz's sanitizer. 
 
 Users can execute the following command to measure the overhead
 on an application (e.g., grpc): 
