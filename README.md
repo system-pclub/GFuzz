@@ -324,5 +324,145 @@ pip3 install matplotlib click datetime
 python3 ./script/plot_Figure_5.py --with-feedback-path /path/to/output/folder/GFuzz_out/ --no-feedback-path /path/to/output/folder/GFuzz_no_feedback/ --no-mutation-path grpc_no_feedback_all_stage_0 --no-oracle-path /path/to/output/folder/GFuzz_no_oracle/
 ```
 
-4. Reproduce GFuzz bugs using GCatch:
+4. Reproduce GFuzz bugs using GCatch: 
+
+Let's setup GCatch using the Docker environment
+
+``` bash
+cd ~
+git clone https://github.com/system-pclub/GCatch.git
+cd ./GCatch/GCatch
+# This might take a while
+sudo docker build -t gcatch_test .
+
+# Upon finish the prvious command
+sudo docker run -it gcatch_test
+```
+
+Now we are in a Docker terminal, the following commands are all executed inside this Docker env. 
+
+For testing grpc, all grpc bugs detected by GFuzz can be found in Google Sheets: **XXX**: 
+To evaluate bugs in grpc, we need to find out the bug related program module. 
+All grpc packages start with *google.golang.org/grpc**. If the bug is located in grpc folder *internal/resolver*, then the module path would be *google.golang.org/grpc/internal/resolver*.
+
+``` bash
+cd /playground
+git clone https://github.com/grpc/grpc-go.git
+cd /playground/grpc-go.git
+
+# checkout the specific buggy version
+
+GO111MODULE=on GCatch -mod -mod-abs-path=/playground/grpc-go -mod-module-path=module/path -compile-error
+```
+
+
+For testing etcd:
+All etcd package start with *go.etcd.io/etcd/.../v3*. For example, If the bug is located in etcd folder *tests/integration/snapshot*, then the module path would be *go.etcd.io/etcd/tests/v3/integration/snapshot*.
+
+``` bash
+cd /playground
+git clone https://github.com/etcd-io/etcd.git
+cd /playground/etcd
+
+# checkout the specific buggy version
+
+GO111MODULE=on GCatch -mod -mod-abs-path=/playground/etcd -mod-module-path=module_path -compile-error
+```
+
+For testing etcd: 
+All etcd packages start with *go.etcd.io/etcd/.../v3*. For example, if the bug is located in etcd folder *tests/integration/snapshot*, then the module path would be *go.etcd.io/etcd/tests/v3/integration/snapshot*.
+
+``` bash
+cd /playground
+git clone https://github.com/etcd-io/etcd.git
+cd /playground/etcd
+
+# checkout the specific buggy version
+
+GO111MODULE=on GCatch -mod -mod-abs-path=/playground/etcd -mod-module-path=module_path -compile-error
+```
+
+For testing Kubernetes:
+All Kubernetes packages start with *k8s.io/kubernetes*. For example, if the bug is located in Kubernets folder *pkg/kubelet/nodeshutdown/systemd*, then the module path is: *k8s.io/kubernetes/pkg/kubelet/nodeshutdown/systemd*
+
+``` bash
+cd /playground
+git clone https://github.com/kubernetes/kubernetes.git
+cd /playground/kubernetes
+
+# checkout the specific buggy version
+
+GO111MODULE=on GCatch -mod -mod-abs-path=/playground/kubernetes -mod-module-path=module_path  -compile-error
+```
+
+For testing Prometheus:
+All Prometheus packages start with *github.com/prometheus/prometheus*. For example, if the bug is located in Prometheus folder *storage/remote*, then the module path is: *github.com/prometheus/prometheus/storage/remote*
+
+``` bash
+cd /playground
+https://github.com/prometheus/prometheus.git
+cd /playground/prometheus
+
+# checkout the specific buggy version
+
+GO111MODULE=on GCatch -mod -mod-abs-path=/playground/prometheus -mod-module-path=module_path  -compile-error
+```
+
+For testing go-Ethereum:
+All go-Ethereum packages start with *github.com/ethereum/go-ethereum/*. For example, if the bug is located in Prometheus folder *core*, then the module path is: *github.com/ethereum/go-ethereum/core*
+
+``` bash
+cd /playground
+git clone https://github.com/ethereum/go-ethereum.git
+cd /playground/go-ethereum
+
+# checkout the specific buggy version
+
+GO111MODULE=on GCatch -mod -mod-abs-path=/playground/go-ethereum -mod-module-path=module_path  -compile-error
+```
+
+For testing tidb:
+For tidb module names, most tidb packages start with *github.com/pingcap/tidb*. For example, if the bug is located in tidb folder *./ddl/*, then the module path is: *github.com/pingcap/tidb/ddl*. However, for bugs reported in *badger*, the module path is: *github.com/pingcap/badger*
+
+``` bash
+cd /playground
+git clone https://github.com/ethereum/go-ethereum.git
+cd /playground/go-ethereum
+
+# checkout the specific buggy version
+
+GO111MODULE=on GCatch -mod -mod-abs-path=/playground/tidb -mod-module-path=module_path  -compile-error
+```
+
+For testing Moby(Docker):
+Docker fuzzing uses a slightly different routine. The Docker code must be stored in path */go/src/github.com/*. 
+
+``` bash
+cd /go/src/github.com
+mkdir -p docker
+cd docker
+git clone https://github.com/moby/moby.git
+mv moby docker
+GO111MODULE=off GCatch -path=/go/src/github.com/docker/docker -include=github.com/docker/docker -r -compile-error
+```
+
+
+If any bugs are found from any programs above, GCatch would have the following output format. 
+
+``` bash
+Successfully built whole program. Now running checkers
+----------Bug[1]----------
+        Type: BMOC      Reason: One or multiple channel operation is blocked.
+-----Blocking at:
+        File: /playground/prometheus/web/web.go:949
+-----Blocking Path NO. 0
+ChanMake :/playground/prometheus/web/web.go:947:12       '✓'
+Chan_op :/playground/prometheus/web/web.go:948:13        '✓'
+Chan_op :/playground/prometheus/web/web.go:949:12        Blocking
+If :/playground/prometheus/web/web.go:949:22     '✗'
+Return :/playground/prometheus/web/web.go:950:13         '✗'
+```
+
+
+
 
