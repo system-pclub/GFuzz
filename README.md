@@ -22,8 +22,10 @@ bugs in Go programs. For artifact evaluation, we release
 (2) information of evaluated benchmarks, 
 (3) information of detected bugs, 
 (4) execution overhead of GFuzz's sanitizer, 
-and (5) study results of whether 
-GFuzz can help detect bugs in two public concurrency bug sets. 
+(5) study results of whether 
+GFuzz can help detect bugs in two public concurrency bug sets,
+and (6) scripts to compare the effectiveness of GFuzz's different features.  
+
 
 Item (1) can be checked out by executing the following commands
 
@@ -36,8 +38,11 @@ $ git checkout asplos-artifact
 
 Items (2), (3), (4) and (5) are released using a Google Sheet file "asplos-710-artifact" 
 (https://docs.google.com/spreadsheets/d/1tLcgsfYlll0g20KMYgDKkAtwZtk426dMSUZ6SvXk04s/edit#gid=0). 
+Particularly, (2), (3) and (4) are related to Table 2 in the paper, and
+(5) is to provide more information for Table 3 in the paper. 
 All columns and tabs discussed later are in the Google Sheet file, unless otherwise specified. 
 
+Item (6) is to reproduce Figure 5 in the paper. 
 
 
 ## 2. Tab Table-2-Benchmark
