@@ -27,7 +27,7 @@ GFuzz can help detect bugs in two public concurrency bug sets.
 
 Item (1) can be checked out by executing the following commands
 
-```
+``` bash
 git clone https://github.com/system-pclub/GFuzz.git
 
 cd GFuzz
@@ -52,7 +52,7 @@ The line number of an application (e.g., Kubernetes) at a particular version
 (e.g., 97d40890d00acf721ecabb8c9a6fec3b3234b74b)
 can be counted by executing the following command:
 
-```
+``` bash
 XXX
 ```
 
@@ -60,7 +60,7 @@ The unit tests of an application (e.g., Kubernetes) at a particular version
 (e.g., 97d40890d00acf721ecabb8c9a6fec3b3234b74b)
 can be counted by executing the following command:
 
-```
+``` bash
 XXX
 ```
 
@@ -76,7 +76,7 @@ Users can execute the following command to apply GFuzz to
 fuzz an application (e.g., Kubernetes) of a particular version 
 (e.g., 97d40890d00acf721ecabb8c9a6fec3b3234b74b):
 
-```
+``` bash
 XXX
 ```
 
@@ -85,40 +85,43 @@ the reproduction of our results, we enhance GFuzz to only use one unit
 test (columns AE--AF). For example, users can execute the following command
 to inspect whether GFuzz can still detect the bug at row XXX. 
 
+``` bash
+XXX
 ```
+
+We compare GFuzz with GCatch in our evaluation. To check whether 
+GCatch can detect a bug (e.g., XXX), users can execute the following command:
+
+
+``` bash
 XXX
 ```
 
 
 
 
+## 4. Tab Table-2-Overhead
+
+This tab shows the overhead of GFuzz’s sanitizer. 
+
+Users can execute the following command to measure the overhead
+on an application (e.g., XXX): 
+
+``` bash
+XXX
+```
+
+
+## 5. Tab Table-3
+
+In Section 7.2 of the paper, we manually studied whether reordering messages can
+help detect channel-related bugs in two public sets of Go concurrency bugs. 
+This tab shows the detailed labeling. 
 
 
 
----------
-Asplos Artifact Tutorial
+## 6. Figure 5 of the paper
 
-1. asplos 710 table 2 benchmark
-
-[benchmark/README.md](benchmark/README.md)
-
-2. asplos 710 table 2 bug
-
-In short, there are two main scripts for achieving out-of-box fuzzing:
-
-scripts/fuzz-git.sh
-	This script is suitable for those Golang repositories that can directly be used with fuzzing, without extra changes/replacements before fuzzing.
-Usage:
-./scripts/fuzz-git.sh <GIT URL> <GIT COMMIT> <OUTPUT DIR> [optional flags for fuzzer] 
-
-
-scripts/fuzz-mount.sh
-	This script is suitable for those Golang repositories that require extra changes before fuzzing. For example, gRPC has lots of Test Suite(single test entrypoint but triggered lots of tests)
-
-Usage:
-	./scripts/fuzz-mount.sh <REPO DIR> <OUTPUT DIR> [optional flags for fuzzer] 
-
-3. To reproduce Figure 5, Contributions of GFuzz components:
 
 We evaluate GFuzz on grpc in Figure 5. 
 
