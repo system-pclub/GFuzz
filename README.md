@@ -182,8 +182,7 @@ sudo ./script/fuzz-mount.sh /path/to/grpc_2/ /path/to/output/folder/GFuzz_no_mut
 For fuzzing without oracle:
 
 ``` bash
-# Copy grpc into the GFuzz benchmark folder. The grpc code must be exactly in the ./benchmark/tmp/builder folder
-cp -r /path/to/grpc/ ./benchmark/tmp/builder/grpc/
+./benchmark/clone-repos.sh ./repos
 
 # If you have ran this script before, skip it
 ./benchmark/build.sh
@@ -193,7 +192,7 @@ cp -r /path/to/grpc/ ./benchmark/tmp/builder/grpc/
 ./benchmark.sh benchmark --dir /builder/grpc/native --mode native
 
 # Run GFuzz with the compiled grpc
-sudo ./script/fuzz-testbins.sh ./benchmark/tmp/builder/grpc/native/ /path/to/output/folder/GFuzz_no_oracle/
+sudo ./script/fuzz-testbins.sh ./tmp/builder/grpc/native/ /path/to/output/folder/GFuzz_no_oracle/
 ```
 
 After fuzzing for 3 hours with each configs, we can plot Figure 5 using the following script: 
