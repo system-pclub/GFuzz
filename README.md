@@ -18,13 +18,13 @@ to use a docker of this version or higher to reproduce our experiments.
 
 Our paper presents GFuzz, a dynamic detector for channel-related concurrency
 bugs in Go programs. For artifact evaluation, we release 
-(1) the tool we built, 
-(2) information of evaluated benchmarks, 
-(3) information of detected bugs, 
-(4) execution overhead of GFuzz's sanitizer, 
-(5) study results of whether 
+- (1) the tool we built, 
+- (2) information of evaluated benchmarks, 
+- (3) information of detected bugs, 
+- (4) execution overhead of GFuzz's sanitizer, 
+- (5) study results of whether 
 GFuzz can help detect bugs in two public concurrency bug sets,
-and (6) scripts to compare the effectiveness of GFuzz's different features.  
+- (6) scripts to compare the effectiveness of GFuzz's different features.  
 
 
 Item (1) can be checked out by executing the following commands
@@ -109,22 +109,12 @@ $ ./scripts/fuzz-git.sh https://github.com/kubernetes/kubernetes 97d40890d00acf7
 
 Some applications might need special cares:
 
-- gRPC, prometheus:
-Details can be found at [docs/fuzz-trick.md](docs/fuzz-trick.md) 
-And then using
-
-```bash
-$ ./scripts/fuzz-mount.sh <repository dir> <output dir> [optional flags for fuzzer]
-```
-
-to trigger fuzzing.
-
 - etcd:
-Since etcd is monorepo of many Golang modules, you might need to build test binary by yourself or simply use the similar commands in [docker/builder/entrypoint.sh](docker/builder/entrypoint.sh)
-- docker:
-Docker(moby) does not support go module. So that you have to use GO111MODULE=off if you want to build yourself. 
+Since etcd is monorepo of many Golang modules, you might need to build test binary by yourself or simply use the commands in [docker/builder/entrypoint.sh](docker/builder/entrypoint.sh)
+- Docker:
+Docker(moby) does not support go module, so that you have to use GO111MODULE=off. 
 
-Example command to build test binary
+Users command to build test binary
 ```bash
 OUTPUT_DIR=<output dir>
 export GO111MODULE=off
@@ -146,6 +136,17 @@ And then use
 ```bash
 $ ./scripts/fuzz-testbins.sh <testbin dir> <output dir> [optional flags for fuzzer]
 ```
+to trigger fuzzing.
+
+
+- gRPC, prometheus:
+Details can be found at [docs/fuzz-trick.md](docs/fuzz-trick.md) 
+And then using
+
+```bash
+$ ./scripts/fuzz-mount.sh <repository dir> <output dir> [optional flags for fuzzer]
+```
+
 to trigger fuzzing.
 
 We compare GFuzz with GCatch in our evaluation. To check whether 
