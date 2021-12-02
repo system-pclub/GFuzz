@@ -384,24 +384,33 @@ Here is a real world example for fuzzing gRPC.
 Result Explain
 First we can go through the fuzzer.log:
 
-
-
+```
 2021/11/29 23:22:36 [worker 3] received 25389-rand-google.golang.org-grpc-internal-transport.test-TestKeepaliveServerClosesUnresponsiveClient-1106
 2021/11/29 23:22:40 [worker 3] found unique bug: /fuzz/target/internal/transport/keepalive_test.go:381
 2021/11/29 23:22:40 [worker 3] found 1 unique bug(s)
+```
 
 If we saw log like ‘found xxx unique bug(s)’, this means that previous run with id ‘25389-rand-google.golang.org-grpc-internal-transport.test-TestKeepaliveServerClosesUnresponsiveClient-1106’ detected​​ a bug. If we look at exec folder in the output directory, you should see a folder with the exact name: {outputdir}/exec/25389-rand-google.golang.org-grpc-internal-transport.test-TestKeepaliveServerClosesUnresponsiveClient-1106
 
 The output exists in exec/{run id}/stdout, usually the user should expect a pattern of ‘-----New Blocking Bug’, which is printed by oracle runtime.
 Primitive location indicates where the primitive is been make ( something like position of ch := make(chan struct{}))
 Primitive pointer indicates the memory address of this primitive at runtime (this is for oracle for eliminating false positive)
+```
 -----New Blocking Bug:
 ---Primitive location:
 /fuzz/target/internal/transport/keepalive_test.go:381
 ---Primitive pointer:
 0xc0002b0000
 -----End Bug
+```
 
 At the bottom of stdout, we should expect an full goroutine stack trace, usually you will find a goroutine blocked with corresponding primitive (we can see from filename in the stack usually)
 
+```
+goroutine 50 [chan send]:
+google.golang.org/grpc/internal/transport.TestKeepaliveServerClosesUnresponsiveClient.func2(0x941dc0, 0xc000286000, 0xc0003a68b0, 0xc0002aa000)
+	/fuzz/target/internal/transport/keepalive_test.go:387 +0x134
+created by google.golang.org/grpc/internal/transport.TestKeepaliveServerClosesUnresponsiveClient
+	/fuzz/target/internal/transport/keepalive_test.go:382 +0x535
+```
 
