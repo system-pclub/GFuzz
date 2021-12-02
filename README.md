@@ -306,7 +306,7 @@ GO111MODULE=off GCatch -path=/go/src/github.com/docker/docker -include=github.co
 ```
 
 
-If any bugs found from any programs above, GCatch would output a bug report similar to the following format. 
+If any bug was found from any programs above, GCatch would output a bug report similar to the following format. 
 
 ``` bash
 Successfully built whole program. Now running checkers
