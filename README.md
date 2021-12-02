@@ -1,4 +1,47 @@
-# GFuzz
+# The code, analysis scripts and results for ASPLOS 2022 Artifact Evaluation
+
+Version: 1.1\
+Update:  Dec 01, 2021\
+Paper:   Who Goes First? Detecting Go Concurrency Bugs via Message Reordering
+
+This document is to help users reproduce the results we reported in our submission. 
+It contains the following descriptions:
+
+## 0. Artifact Expectation
+
+The code and the scripts of our built tool are released in this repository. 
+The detailed information of our experiments is released in an excel file. 
+All the experiments can be executed using Docker 20.10.8. We expect users 
+to use a docker of this version or higher to reproduce our experiments. 
+
+## 1. Artifact Overview
+
+Our paper presents GFuzz, a dynamic detector for channel-related concurrency
+bugs in Go programs. For artifact evaluation, we release 1) the tool we built, 
+2) information of evaluated benchmarks (columns 2--4 in Table 2), 
+3) information of detected bugs (columns 5--12 Table 2), 
+4) execution overhead of GFuzz’s sanitizer (column 13 in Table 2), 
+and 5) study results of whether 
+GFuzz can help detect bugs in two public concurrency bug sets (Table 3). 
+
+Item 1) can be checked out by executing the following commands
+
+```
+git clone https://github.com/system-pclub/GFuzz.git
+
+cd GFuzz
+
+git checkout asplos-artifact
+```
+
+
+Items 2), 3), 4) and 5) are released using a Google Sheet file “asplos-710-artifact” 
+(https://docs.google.com/spreadsheets/d/1tLcgsfYlll0g20KMYgDKkAtwZtk426dMSUZ6SvXk04s/edit#gid=0). 
+All columns and tabs discussed later are in the Google Sheet file, unless otherwise specified. 
+
+
+
+
 Fuzzing concurrent Go programs
 
 - [GFuzz](#gfuzz)
