@@ -84,7 +84,7 @@ $ ./benchmark.sh count-tests --dir /builder/etcd/native
 ## 3. Tab Table-2-Bug 
 
 This tab shows the detailed information of the detected bugs, including at which application
-version we found a bug (Column B), where we report a bug (Column E), what is the current 
+version we find a bug (Column B), where we report a bug (Column E), what is the current 
 status of a filed bug report (Columns G-J), bug categories (Columns L-V), whether 
 GCatch can detect a bug (Column X), the reasons why GCatch fails (Columns Y-AC), 
 and the unit test we used to find a bug (columns AE-AF). 
@@ -107,14 +107,11 @@ to inspect whether GFuzz can still detect the bug at row 4.
 $ ./scripts/fuzz-git.sh https://github.com/kubernetes/kubernetes 97d40890d00acf721ecabb8c9a6fec3b3234b74b $(pwd)/tmp/out --pkg k8s.io/kubernetes/pkg/kubelet/cm/devicemanager --func TestAllocate
 ```
 
-Some applications might need special cares:
+GFuzz needs to build unit tests first and then conducts the fuzzing. 
+Since etcd is monorepo of many Golang modules, you need to manually build its tests using the commands in [docker/builder/entrypoint.sh](docker/builder/entrypoint.sh). 
+Docker(moby) does not support go module, so that you have to turn off GO111MODULE. 
+Specifically, you can use the following commands to build Docker’s tests. 
 
-- etcd:
-Since etcd is monorepo of many Golang modules, you might need to build test binary by yourself or simply use the commands in [docker/builder/entrypoint.sh](docker/builder/entrypoint.sh)
-- Docker:
-Docker(moby) does not support go module, so that you have to use GO111MODULE=off. 
-
-Users command to build test binary
 ```bash
 OUTPUT_DIR=<output dir>
 export GO111MODULE=off
@@ -128,26 +125,22 @@ do
 done
 export GO111MODULE=on
 ```
-More details can be found at [docker/builder/entrypoint.sh](docker/builder/entrypoint.sh).
 
-The recommended way are using benchmark/clone-repos.sh and benchmark/build.sh to always build correct instrumented test binary(feel free to comment out applications you are not interested in [docker/builder/entrypoint.sh](docker/builder/entrypoint.sh).
+For etcd and Docker, the recommended way is to use benchmark/clone-repos.sh and benchmark/build.sh to build tests firstly (feel free to comment out applications you are not interested in [docker/builder/entrypoint.sh](docker/builder/entrypoint.sh)), and 
+then to use the following command to do the fuzzing. 
 
-And then use
 ```bash
 $ ./scripts/fuzz-testbins.sh <testbin dir> <output dir> [optional flags for fuzzer]
 ```
-to trigger fuzzing.
 
 
-- gRPC, prometheus:
-Details can be found at [docs/fuzz-trick.md](docs/fuzz-trick.md) 
-And then using
+For gRPC and prometheus, some testing settings need to be changed firstly. 
+Details can be found at [docs/fuzz-trick.md](docs/fuzz-trick.md). 
+Then, you can use the following command to run the fuzzing. 
 
 ```bash
 $ ./scripts/fuzz-mount.sh <repository dir> <output dir> [optional flags for fuzzer]
 ```
-
-to trigger fuzzing.
 
 We compare GFuzz with GCatch in our evaluation. To check whether 
 GCatch can detect a bug, please see instruction at section [Using GCatch to test GFuzz bugs](https://github.com/system-pclub/GFuzz#7-using-gcatch-to-test-gfuzz-bugs) below.
