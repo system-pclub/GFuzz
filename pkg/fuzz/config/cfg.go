@@ -16,6 +16,7 @@ type Config struct {
 	IsIgnoreFeedback        bool // Is ignoring the feedback, and save every mutated seed into the fuzzing queue
 	RandMutateEnergy        int  // Determine the energy of random mutations. If == 100, then each seed would mutate 100 times in the rand mutation stage.
 	IsUsingScore            bool // Is using score to priority testing case
+	IsNoMutation            bool // Disable mutations on all testing case.
 }
 
 func NewConfig() *Config {
