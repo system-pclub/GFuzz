@@ -28,11 +28,9 @@ GFuzz can help detect bugs in two public concurrency bug sets.
 Item (1) can be checked out by executing the following commands
 
 ``` bash
-git clone https://github.com/system-pclub/GFuzz.git
-
-cd GFuzz
-
-git checkout asplos-artifact
+$ git clone https://github.com/system-pclub/GFuzz.git
+$ cd GFuzz
+$ git checkout asplos-artifact
 ```
 
 
@@ -69,13 +67,13 @@ can be counted by executing the following command:
 ``` bash
 $ cd benchmark
 
-// If you run before, skip it.
+# If you run before, skip it.
 $ ./clone-repos.sh repos
 
-// If you run before, skip it.
+# If you run before, skip it.
 $ ./build.sh
 
-// run script to count specific app. Same way for the others
+# run script to count specific app. Same way for the others
 $ ./benchmark.sh count-tests --dir /builder/etcd/native
 ```
 
@@ -123,10 +121,10 @@ on an application (e.g., grpc):
 
 $ cd benchmark
 
-// If you run before, skip it.
+# If you run before, skip it.
 $ ./clone-repos.sh repos
 
-// If you run before, skip it.
+# If you run before, skip it.
 $ ./build.sh
 
 # /builder is the mapped directory of host directory 'tmp/builder', which is output of ./build.sh
@@ -150,58 +148,58 @@ We evaluate GFuzz on grpc in Figure 5.
 
 ``` bash
 # First of all, setup grpc
-cd ~
-git clone https://github.com/grpc/grpc-go.git
-cd grpc-go
+$ cd ~
+$ git clone https://github.com/grpc/grpc-go.git
+$ cd grpc-go
 
 # Checkout the version we are evaluating on
-git checkout 9280052d36656451dd7568a18a836c2a74edaf6c 
+$ git checkout 9280052d36656451dd7568a18a836c2a74edaf6c 
 ```
 
 It is required to use a fresh grpc folder each time we begin the GFuzz fuzzing. 
 To run GFuzz on the grpc library:
 ``` bash
 # Copy a new fresh grpc folder to fuzz on. 
-cp -r /path/to/grpc/ /path/to/grpc_0/
-sudo ./script/fuzz-mount.sh /path/to/grpc_0/ /path/to/output/folder/GFuzz_out/
+$ cp -r /path/to/grpc/ /path/to/grpc_0/
+$ sudo ./script/fuzz-mount.sh /path/to/grpc_0/ /path/to/output/folder/GFuzz_out/
 ```
 For fuzzing without feedback:
 
 ``` bash
-cp -r /path/to/grpc/ /path/to/grpc_1/
-sudo ./script/fuzz-mount.sh /path/to/grpc_1/ /path/to/output/folder/GFuzz_no_feedback/ --isIgnoreFeedback 1
+$ cp -r /path/to/grpc/ /path/to/grpc_1/
+$ sudo ./script/fuzz-mount.sh /path/to/grpc_1/ /path/to/output/folder/GFuzz_no_feedback/ --isIgnoreFeedback 1
 ```
 
 For fuzzing without mutations:
 
 ``` bash
-cp -r /path/to/grpc/ /path/to/grpc_2/
-sudo ./script/fuzz-mount.sh /path/to/grpc_2/ /path/to/output/folder/GFuzz_no_mutation/ --isNoMutation 1
+$ cp -r /path/to/grpc/ /path/to/grpc_2/
+$ sudo ./script/fuzz-mount.sh /path/to/grpc_2/ /path/to/output/folder/GFuzz_no_mutation/ --isNoMutation 1
 ```
 
 For fuzzing without oracle:
 
 ``` bash
-./benchmark/clone-repos.sh ./repos
+$ ./benchmark/clone-repos.sh ./repos
 
 # If you have ran this script before, skip it
-./benchmark/build.sh
+$ ./benchmark/build.sh
 
 # Build an uninstrumented grpc
 # /builder is the mapped directory of host directory 'tmp/builder', which is output of ./build.sh
-./benchmark.sh benchmark --dir /builder/grpc/native --mode native
+$ ./benchmark.sh benchmark --dir /builder/grpc/native --mode native
 
 # Run GFuzz with the compiled grpc
-sudo ./script/fuzz-testbins.sh ./tmp/builder/grpc/native/ /path/to/output/folder/GFuzz_no_oracle/
+$ sudo ./script/fuzz-testbins.sh ./tmp/builder/grpc/native/ /path/to/output/folder/GFuzz_no_oracle/
 ```
 
 After fuzzing for 3 hours with each configs, we can plot Figure 5 using the following script: 
 
 ``` bash
 # Install python3 dependent libraries
-pip3 install matplotlib click datetime
+$ pip3 install matplotlib click datetime
 
-python3 ./script/plot_Figure_5.py --with-feedback-path /path/to/output/folder/GFuzz_out/ --no-feedback-path /path/to/output/folder/GFuzz_no_feedback/ --no-mutation-path /path/to/output/folder/GFuzz_no_mutation/ --no-oracle-path /path/to/output/folder/GFuzz_no_oracle/
+$ python3 ./script/plot_Figure_5.py --with-feedback-path /path/to/output/folder/GFuzz_out/ --no-feedback-path /path/to/output/folder/GFuzz_no_feedback/ --no-mutation-path /path/to/output/folder/GFuzz_no_mutation/ --no-oracle-path /path/to/output/folder/GFuzz_no_oracle/
 ```
 
 ## 7. Using GCatch to test GFuzz bugs: 
@@ -209,14 +207,14 @@ python3 ./script/plot_Figure_5.py --with-feedback-path /path/to/output/folder/GF
 Let's set up GCatch using a Docker environment
 
 ``` bash
-cd ~
-git clone https://github.com/system-pclub/GCatch.git
-cd ./GCatch/GCatch
+$ cd ~
+$ git clone https://github.com/system-pclub/GCatch.git
+$ cd ./GCatch/GCatch
 # This might take a while
-sudo docker build -t gcatch_test .
+$ sudo docker build -t gcatch_test .
 
 # Upon finish the previous command
-sudo docker run -it gcatch_test
+$ sudo docker run -it gcatch_test
 ```
 
 Now we are in a Docker terminal, the following commands are all executed inside this Docker environment. 
@@ -226,13 +224,13 @@ For testing grpc:
 All grpc packages start with *google.golang.org/grpc*. If the bug is located in grpc folder *internal/resolver*, then the module path would be *google.golang.org/grpc/internal/resolver*.
 
 ``` bash
-cd /playground
-git clone https://github.com/grpc/grpc-go.git
-cd /playground/grpc-go.git
+$ cd /playground
+$ git clone https://github.com/grpc/grpc-go.git
+$ cd /playground/grpc-go.git
 
 # checkout the specific buggy version
 
-GO111MODULE=on GCatch -mod -mod-abs-path=/playground/grpc-go -mod-module-path=module_path -compile-error
+$ GO111MODULE=on GCatch -mod -mod-abs-path=/playground/grpc-go -mod-module-path=module_path -compile-error
 ```
 
 
@@ -240,90 +238,90 @@ For testing etcd:
 All etcd package start with *go.etcd.io/etcd/.../v3*. For example, If the bug is located in etcd folder *tests/integration/snapshot*, then the module path would be *go.etcd.io/etcd/tests/v3/integration/snapshot*.
 
 ``` bash
-cd /playground
-git clone https://github.com/etcd-io/etcd.git
-cd /playground/etcd
+$ cd /playground
+$ git clone https://github.com/etcd-io/etcd.git
+$ cd /playground/etcd
 
 # checkout the specific buggy version
 
-GO111MODULE=on GCatch -mod -mod-abs-path=/playground/etcd -mod-module-path=module_path -compile-error
+$ GO111MODULE=on GCatch -mod -mod-abs-path=/playground/etcd -mod-module-path=module_path -compile-error
 ```
 
 For testing etcd: 
 All etcd packages start with *go.etcd.io/etcd/.../v3*. For example, if the bug is located in etcd folder *tests/integration/snapshot*, then the module path would be *go.etcd.io/etcd/tests/v3/integration/snapshot*.
 
 ``` bash
-cd /playground
-git clone https://github.com/etcd-io/etcd.git
-cd /playground/etcd
+$ cd /playground
+$ git clone https://github.com/etcd-io/etcd.git
+$ cd /playground/etcd
 
 # checkout the specific buggy version
 
-GO111MODULE=on GCatch -mod -mod-abs-path=/playground/etcd -mod-module-path=module_path -compile-error
+$ GO111MODULE=on GCatch -mod -mod-abs-path=/playground/etcd -mod-module-path=module_path -compile-error
 ```
 
 For testing Kubernetes:
 All Kubernetes packages start with *k8s.io/kubernetes*. For example, if the bug is located in Kubernets folder *pkg/kubelet/nodeshutdown/systemd*, then the module path is: *k8s.io/kubernetes/pkg/kubelet/nodeshutdown/systemd*
 
 ``` bash
-cd /playground
-git clone https://github.com/kubernetes/kubernetes.git
-cd /playground/kubernetes
+$ cd /playground
+$ git clone https://github.com/kubernetes/kubernetes.git
+$ cd /playground/kubernetes
 
 # checkout the specific buggy version
 
-GO111MODULE=on GCatch -mod -mod-abs-path=/playground/kubernetes -mod-module-path=module_path  -compile-error
+$ GO111MODULE=on GCatch -mod -mod-abs-path=/playground/kubernetes -mod-module-path=module_path  -compile-error
 ```
 
 For testing Prometheus:
 All Prometheus packages start with *github.com/prometheus/prometheus*. For example, if the bug is located in Prometheus folder *storage/remote*, then the module path is: *github.com/prometheus/prometheus/storage/remote*
 
 ``` bash
-cd /playground
-https://github.com/prometheus/prometheus.git
-cd /playground/prometheus
+$ cd /playground
+$ https://github.com/prometheus/prometheus.git
+$ cd /playground/prometheus
 
 # checkout the specific buggy version
 
-GO111MODULE=on GCatch -mod -mod-abs-path=/playground/prometheus -mod-module-path=module_path  -compile-error
+$ GO111MODULE=on GCatch -mod -mod-abs-path=/playground/prometheus -mod-module-path=module_path  -compile-error
 ```
 
 For testing go-Ethereum:
 All go-Ethereum packages start with *github.com/ethereum/go-ethereum/*. For example, if the bug is located in Prometheus folder *core*, then the module path is: *github.com/ethereum/go-ethereum/core*
 
 ``` bash
-cd /playground
-git clone https://github.com/ethereum/go-ethereum.git
-cd /playground/go-ethereum
+$ cd /playground
+$ git clone https://github.com/ethereum/go-ethereum.git
+$ cd /playground/go-ethereum
 
 # checkout the specific buggy version
 
-GO111MODULE=on GCatch -mod -mod-abs-path=/playground/go-ethereum -mod-module-path=module_path  -compile-error
+$ GO111MODULE=on GCatch -mod -mod-abs-path=/playground/go-ethereum -mod-module-path=module_path  -compile-error
 ```
 
 For testing tidb:
 For tidb module names, most tidb packages start with *github.com/pingcap/tidb*. For example, if the bug is located in tidb folder *./ddl/*, then the module path is: *github.com/pingcap/tidb/ddl*. However, for bugs reported in *badger*, the module path is: *github.com/pingcap/badger*
 
 ``` bash
-cd /playground
-git clone https://github.com/pingcap/tidb.git
-cd /playground/tidb
+$ cd /playground
+$ git clone https://github.com/pingcap/tidb.git
+$ cd /playground/tidb
 
 # checkout the specific buggy version
 
-GO111MODULE=on GCatch -mod -mod-abs-path=/playground/tidb -mod-module-path=module_path  -compile-error
+$ GO111MODULE=on GCatch -mod -mod-abs-path=/playground/tidb -mod-module-path=module_path  -compile-error
 ```
 
 For testing Moby(Docker):
 Docker fuzzing uses a slightly different routine. The Docker code must be stored in path */go/src/github.com/*. 
 
 ``` bash
-cd /go/src/github.com
-mkdir -p docker
-cd docker
-git clone https://github.com/moby/moby.git
-mv moby docker
-GO111MODULE=off GCatch -path=/go/src/github.com/docker/docker -include=github.com/docker/docker -r -compile-error
+$ cd /go/src/github.com
+$ mkdir -p docker
+$ cd docker
+$ git clone https://github.com/moby/moby.git
+$ mv moby docker
+$ GO111MODULE=off GCatch -path=/go/src/github.com/docker/docker -include=github.com/docker/docker -r -compile-error
 ```
 
 
