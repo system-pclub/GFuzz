@@ -233,20 +233,6 @@ $ cd /playground/grpc-go.git
 $ GO111MODULE=on GCatch -mod -mod-abs-path=/playground/grpc-go -mod-module-path=module_path -compile-error
 ```
 
-
-For testing etcd:
-All etcd package start with *go.etcd.io/etcd/.../v3*. For example, If the bug is located in etcd folder *tests/integration/snapshot*, then the module path would be *go.etcd.io/etcd/tests/v3/integration/snapshot*.
-
-``` bash
-$ cd /playground
-$ git clone https://github.com/etcd-io/etcd.git
-$ cd /playground/etcd
-
-# checkout the specific buggy version
-
-$ GO111MODULE=on GCatch -mod -mod-abs-path=/playground/etcd -mod-module-path=module_path -compile-error
-```
-
 For testing etcd: 
 All etcd packages start with *go.etcd.io/etcd/.../v3*. For example, if the bug is located in etcd folder *tests/integration/snapshot*, then the module path would be *go.etcd.io/etcd/tests/v3/integration/snapshot*.
 
