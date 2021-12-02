@@ -158,14 +158,14 @@ cd grpc-go
 git checkout 9280052d36656451dd7568a18a836c2a74edaf6c 
 ```
 
-It is required to use a fresh grpc folder with the correct version every time when we are begin the GFuzz fuzzing. 
+It is required to use a fresh grpc folder each time we begin the GFuzz fuzzing. 
 To run GFuzz on the grpc library:
 ``` bash
+# Copy a new fresh grpc folder to fuzz on. 
 cp -r /path/to/grpc/ /path/to/grpc_0/
 sudo ./script/fuzz-mount.sh /path/to/grpc_0/ /path/to/output/folder/GFuzz_out/
 ```
-
-Additionally, to run GFuzz on grpc, but ignore the fuzzer feedback:
+For fuzzing without feedback:
 
 ``` bash
 cp -r /path/to/grpc/ /path/to/grpc_1/
@@ -196,7 +196,7 @@ cp -r /path/to/grpc/ ./benchmark/tmp/builder/grpc/
 sudo ./script/fuzz-testbins.sh ./benchmark/tmp/builder/grpc/native/ /path/to/output/folder/GFuzz_no_oracle/
 ```
 
-After fuzzing for 3 hours for each config, we can plot Figure 5: 
+After fuzzing for 3 hours with each configs, we can plot Figure 5 using the following script: 
 
 ``` bash
 # Install python3 dependent libraries
@@ -205,9 +205,9 @@ pip3 install matplotlib click datetime
 python3 ./script/plot_Figure_5.py --with-feedback-path /path/to/output/folder/GFuzz_out/ --no-feedback-path /path/to/output/folder/GFuzz_no_feedback/ --no-mutation-path grpc_no_feedback_all_stage_0 --no-oracle-path /path/to/output/folder/GFuzz_no_oracle/
 ```
 
-4. Reproduce GFuzz bugs using GCatch: 
+## 7. Using GCatch to test GFuzz bugs: 
 
-Let's set up GCatch using the Docker environment
+Let's set up GCatch using a Docker environment
 
 ``` bash
 cd ~
@@ -221,10 +221,10 @@ sudo docker run -it gcatch_test
 ```
 
 Now we are in a Docker terminal, the following commands are all executed inside this Docker environment. 
-Additionally, all bugs being detected by GFuzz can be found in Google Sheets: **[Google Sheet](https://docs.google.com/spreadsheets/d/1tLcgsfYlll0g20KMYgDKkAtwZtk426dMSUZ6SvXk04s/edit?usp=sharing)**, sheet *Table-2-Bug*. 
+Additionally, all bugs being detected by GFuzz can be found in Google Sheets: [link](https://docs.google.com/spreadsheets/d/1tLcgsfYlll0g20KMYgDKkAtwZtk426dMSUZ6SvXk04s/edit?usp=sharing), table *Table-2-Bug*. 
 
 For testing grpc: 
-All grpc packages start with *google.golang.org/grpc**. If the bug is located in grpc folder *internal/resolver*, then the module path would be *google.golang.org/grpc/internal/resolver*.
+All grpc packages start with *google.golang.org/grpc*. If the bug is located in grpc folder *internal/resolver*, then the module path would be *google.golang.org/grpc/internal/resolver*.
 
 ``` bash
 cd /playground
@@ -233,7 +233,7 @@ cd /playground/grpc-go.git
 
 # checkout the specific buggy version
 
-GO111MODULE=on GCatch -mod -mod-abs-path=/playground/grpc-go -mod-module-path=module/path -compile-error
+GO111MODULE=on GCatch -mod -mod-abs-path=/playground/grpc-go -mod-module-path=module_path -compile-error
 ```
 
 
@@ -307,8 +307,8 @@ For tidb module names, most tidb packages start with *github.com/pingcap/tidb*. 
 
 ``` bash
 cd /playground
-git clone https://github.com/ethereum/go-ethereum.git
-cd /playground/go-ethereum
+git clone https://github.com/pingcap/tidb.git
+cd /playground/tidb
 
 # checkout the specific buggy version
 
@@ -328,7 +328,7 @@ GO111MODULE=off GCatch -path=/go/src/github.com/docker/docker -include=github.co
 ```
 
 
-If any bugs found from any programs above, GCatch would output a bug report similar to the following format. 
+If any bug was found from any programs above, GCatch would output a bug report similar to the following format. 
 
 ``` bash
 Successfully built whole program. Now running checkers
