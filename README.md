@@ -285,8 +285,8 @@ For tidb module names, most tidb packages start with *github.com/pingcap/tidb*. 
 
 ``` bash
 cd /playground
-git clone https://github.com/ethereum/go-ethereum.git
-cd /playground/go-ethereum
+git clone https://github.com/pingcap/tidb.git
+cd /playground/tidb
 
 # checkout the specific buggy version
 
