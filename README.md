@@ -214,7 +214,10 @@ Application Options:
       --scoreSdk          Recording/scoring if channel comes from Go SDK
       --scoreAllPrim      Recording/scoring other primitives like Mutex together with channel
       --timeDivideBy=     Durations in time/sleep.go will be divided by this int number
+      --oraclertdebug
       --isIgnoreFeedback  Is ignoring the feedback, and save every mutated seed into the fuzzing queue
+      --randMutateEnergy= Determine the energy of random mutations. If == 100 (default), then each seed would mutate 100 times in the rand mutation stage
+      --isUsingScore      Is using score to priority testing case.
 
 Help Options:
   -h, --help              Show this help message
@@ -236,3 +239,26 @@ $ fuzzer --gomod /abc/def --pkg gomodulename/aaa --func TestABC
 # If you have compiled a list of test binary files
 $ fuzzer --bin /abc/*.test
 ```
+
+---------
+Asplos Artifact Tutorial
+
+1. asplos 710 table 2 benchmark
+
+[benchmark/README.md](benchmark/README.md)
+
+2. asplos 710 table 2 bug
+
+In short, there are two main scripts for achieving out-of-box fuzzing:
+
+scripts/fuzz-git.sh
+	This script is suitable for those Golang repositories that can directly be used with fuzzing, without extra changes/replacements before fuzzing.
+Usage:
+./scripts/fuzz-git.sh <GIT URL> <GIT COMMIT> <OUTPUT DIR> [optional flags for fuzzer] 
+
+
+scripts/fuzz-mount.sh
+	This script is suitable for those Golang repositories that require extra changes before fuzzing. For example, gRPC has lots of Test Suite(single test entrypoint but triggered lots of tests)
+
+Usage:
+	./scripts/fuzz-mount.sh <REPO DIR> <OUTPUT DIR> [optional flags for fuzzer] 
