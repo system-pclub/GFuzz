@@ -103,8 +103,48 @@ to inspect whether GFuzz can still detect the bug at row 4.
 
 ``` bash
 $ ./scripts/fuzz-git.sh https://github.com/kubernetes/kubernetes 97d40890d00acf721ecabb8c9a6fec3b3234b74b $(pwd)/tmp/out --pkg k8s.io/kubernetes/pkg/kubelet/cm/devicemanager --func TestAllocate
-
 ```
+
+Some applications might need special cares:
+
+- gRPC, prometheus:
+Details can be found at [docs/fuzz-trick.md](docs/fuzz-trick.md) 
+And then using
+
+```bash
+$ ./scripts/fuzz-mount.sh <repository dir> <output dir> [optional flags for fuzzer]
+```
+
+to trigger fuzzing.
+
+- etcd:
+Since etcd is monorepo of many Golang modules, you might need to build test binary by yourself or simply use the similar commands in [docker/builder/entrypoint.sh](docker/builder/entrypoint.sh)
+- docker:
+Docker(moby) does not support go module. So that you have to use GO111MODULE=off if you want to build yourself. 
+
+Example command to build test binary
+```bash
+OUTPUT_DIR=<output dir>
+export GO111MODULE=off
+pkg_list=$(go list github.com/docker/docker/... | grep -vE "(integration)")
+
+for pkg in $pkg_list
+do
+    echo "generating test bin for $pkg"
+    name=$(echo "$pkg" | sed "s/\//-/g")
+    go test -c -o $OUTPUT_DIR/moby/native/$name.test $pkg
+done
+export GO111MODULE=on
+```
+More details can be found at [docker/builder/entrypoint.sh](docker/builder/entrypoint.sh).
+
+The recommended way are using benchmark/clone-repos.sh and benchmark/build.sh to always build correct instrumented test binary(feel free to comment out applications you are not interested in [docker/builder/entrypoint.sh](docker/builder/entrypoint.sh).
+
+And then use
+```bash
+$ ./scripts/fuzz-testbins.sh <testbin dir> <output dir> [optional flags for fuzzer]
+```
+to trigger fuzzing.
 
 We compare GFuzz with GCatch in our evaluation. To check whether 
 GCatch can detect a bug, please see instruction at section 'Reproduce GFuzz bugs using GCatch' below.
