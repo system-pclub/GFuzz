@@ -223,7 +223,7 @@ $ sudo docker run -it gcatch_test
 ```
 
 Now we are in a Docker terminal, the following commands are all executed inside this Docker environment. 
-Additionally, all bugs being detected by GFuzz can be found in Google Sheets: [link](https://docs.google.com/spreadsheets/d/1tLcgsfYlll0g20KMYgDKkAtwZtk426dMSUZ6SvXk04s/edit?usp=sharing), table *Table-2-Bug*. 
+Additionally, all bugs being detected by GFuzz can be found in [Tab Table-2-Bug](https://github.com/system-pclub/GFuzz#3-tab-table-2-bug). 
 
 For testing grpc: 
 All grpc packages start with *google.golang.org/grpc*. If the bug is located in grpc folder *internal/resolver*, then the module path would be *google.golang.org/grpc/internal/resolver*.
