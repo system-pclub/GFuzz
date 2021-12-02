@@ -1,269 +1,127 @@
-# GFuzz
-Fuzzing concurrent Go programs
+# The code, analysis scripts and results for ASPLOS 2022 Artifact Evaluation
 
-- [GFuzz](#gfuzz)
-  - [Architecture](#architecture)
-    - [GFuzz Fuzzer](#gfuzz-fuzzer)
-    - [GFuzz Oracle](#gfuzz-oracle)
-  - [Packages](#packages)
-    - [pkg/oraclert](#pkgoraclert)
-    - [pkg/selefcm (select enforcement)](#pkgselefcm-select-enforcement)
-    - [pkg/inst (instrumentation)](#pkginst-instrumentation)
-    - [pkg/fuzz](#pkgfuzz)
-    - [pkg/fuzzer](#pkgfuzzer)
-    - [pkg/gexec](#pkggexec)
-    - [pkg/inst](#pkginst)
-    - [pkg/stats](#pkgstats)
-    - [pkg/utils/**](#pkgutils)
-    - [pkg/inst/pass (built-in passes)](#pkginstpass-built-in-passes)
-  - [Dev](#dev)
-    - [Prerequistes](#prerequistes)
-    - [Build](#build)
-    - [Useful Scripts](#useful-scripts)
-      - [Manually Run a Test/Program after Instrumentation](#manually-run-a-testprogram-after-instrumentation)
-  - [Executable `bin/inst`](#executable-bininst)
-    - [Example](#example)
-  - [Executable `bin/fuzzer`](#executable-binfuzzer)
-    - [Example](#example-1)
+Version: 1.1\
+Update:  Dec 01, 2021\
+Paper:   Who Goes First? Detecting Go Concurrency Bugs via Message Reordering
 
+This document is to help users reproduce the results we reported in our submission. 
+It contains the following descriptions:
 
+## 0. Artifact Expectation
 
-## Architecture
-GFuzz is composed by two parts: **Fuzzer** and **Oracle**.
+The code and the scripts of our built tool are released in this repository. 
+The detailed information of our experiments is released in an excel file. 
+All the experiments can be executed using Docker 20.10.8. We expect users 
+to use a docker of this version or higher to reproduce our experiments. 
 
-### GFuzz Fuzzer
-GFuzz Fuzzer generates different combination of `select` choices (forcing application to go with certain case).  It requires
-help from instrumentation.
+## 1. Artifact Overview
 
-### GFuzz Oracle
-GFuzz Oracle detects blocking & non-blocking issues during application is running. It requires help from both instrumentation
-and golang package `runtime` patched in advance.
+Our paper presents GFuzz, a dynamic detector for channel-related concurrency
+bugs in Go programs. For artifact evaluation, we release 
+(1) the tool we built, 
+(2) information of evaluated benchmarks, 
+(3) information of detected bugs, 
+(4) execution overhead of GFuzz's sanitizer, 
+and (5) study results of whether 
+GFuzz can help detect bugs in two public concurrency bug sets. 
 
-## Packages
+Item (1) can be checked out by executing the following commands
 
-### pkg/oraclert
+``` bash
+git clone https://github.com/system-pclub/GFuzz.git
 
-Package `oraclert` is part of GFuzz Oracle. This package requires patched golang environment to work properly. It provides
-1. Detecting blocking/non-blocking issue happened during application runtime.
+cd GFuzz
 
-### pkg/selefcm (select enforcement)
-
-Package `selefcm` provides a list of strategies for application to choose proper select case by given a list of select choices (optional)
-
-### pkg/inst (instrumentation)
-
-Package `inst` provides modifying golang source code framework and utilities. It provides `InstPass` interface to easily write your own pass to instrument/modify/analysis golang source code.
-
-### pkg/fuzz
-
-Package `fuzz` provides 
-
-### pkg/fuzzer
-
-Package `fuzzer` provides 
-
-### pkg/gexec
-
-Package `gexec` provides 
-
-### pkg/inst
-
-Package `inst` provides 
-
-### pkg/stats
-
-Package `stats` provides 
-
-### pkg/utils/**
-
-Packages under `utils/**` provides 
-
-### pkg/inst/pass (built-in passes)
-
-
-<table>
-<tr>
-<th> Pass </th>
- <th> Description </th> 
- <th> Source</th>
- <th>Example</th>
-</tr>
-
-<tr>
-<td>chrec</td>
-<td>record channel related operations like make, send, recv, close</td>
-<td><a href="pkg/inst/pass/chrec.go">pkg/inst/pass/chrec.go</a></td>
-<td><a href="_examples/inst/chrec">_examples/inst/chrec</a></td>
-</tr>
-
-<tr>
-<td>mtxrec</td>
-<td>record mutex related operations </td>
-<td><a href="pkg/inst/pass/mtxrec.go">pkg/inst/pass/mtxrec.go</a></td>
-<td><a href="_examples/inst/mtxrec">_examples/inst/mtxrec</a></td>
-</tr>
-
-<tr>
-<td>wgrec</td>
-<td>record WaitGroup related operations</td>
-<td><a href="pkg/inst/pass/wgrec.go">pkg/inst/pass/wgrec.go</a></td>
-<td><a href="_examples/inst/wgrec">_examples/inst/wgrec</a></td>
-</tr>
-
-<tr>
-<td>cvrec</td>
-<td>record Conditional Variable related operations</td>
-<td><a href="pkg/inst/pass/cvrec.go">pkg/inst/pass/cvrec.go</a></td>
-<td><a href="_examples/inst/cvrec">_examples/inst/cvrec</a></td>
-</tr>
-
-<tr>
-<td>selefcm</td>
-<td>transform select into select with integer case (each case is one of original case and timeout)</td>
-<td><a href="pkg/inst/pass/selefcm.go">pkg/inst/pass/selefcm.go</a></td>
-<td><a href="_examples/inst/selefcm">_examples/inst/selefcm</a></td>
-</tr>
-
-<tr>
-<td>oracle</td>
-<td>insert function call to trigger oracle at the beginning of Test function or main program (TODO)</td>
-<td><a href="pkg/inst/pass/oracle.go">pkg/inst/pass/oracle.go</a></td>
-<td><a href="_examples/inst/oracle">_examples/inst/oracle</a></td>
-</tr>
-
-</table>
-
-## Dev
-
-### Prerequistes
-Since large parts of GFuzz are required instrumented Golang environment, we would suggest develop/test in universal Docker environment.
-
-```bash
-
-// The script will 
-// 1. build a container with instrumented Golang environment 
-// 2. mapping current directly and run the container
-// 3. try `make test` after the container bring up!
-$ ./script/dev.sh
-
+git checkout asplos-artifact
 ```
 
-### Build
 
-```bash
-$ make
+Items (2), (3), (4) and (5) are released using a Google Sheet file "asplos-710-artifact" 
+(https://docs.google.com/spreadsheets/d/1tLcgsfYlll0g20KMYgDKkAtwZtk426dMSUZ6SvXk04s/edit#gid=0). 
+All columns and tabs discussed later are in the Google Sheet file, unless otherwise specified. 
+
+
+
+## 2. Tab Table-2-Benchmark
+
+This tab shows the information of our evaluated benchmarks. 
+Column F shows the versions we use to count the line numbers (Column D)
+and the unit-test numbers (Column E). 
+
+The line number of an application (e.g., Kubernetes) at a particular version 
+(e.g., 97d40890d00acf721ecabb8c9a6fec3b3234b74b)
+can be counted by executing the following command:
+
+``` bash
+XXX
 ```
 
-### Useful Scripts
+The unit tests of an application (e.g., Kubernetes) at a particular version 
+(e.g., 97d40890d00acf721ecabb8c9a6fec3b3234b74b)
+can be counted by executing the following command:
 
-#### Manually Run a Test/Program after Instrumentation
-```
-# For example, after instrument the gRPC code base by bin/inst, we can manully trigger a test in patched go runtime environment.
-# Usually it is run in Docker so that patched go runtime will not effect your local environment.
-
-export ORACLERT_CONFIG_FILE=/workspaces/GFuzz/tmp/grpc-go/ort_config
-export ORACLERT_OUTPUT_FILE=/workspaces/GFuzz/tmp/grpc-go/ort_outputs
-go test -run=TestGRPCLBStatsUnaryFailedToSend google.golang.org/grpc/balancer/grpclb
+``` bash
+XXX
 ```
 
-## Executable `bin/inst`
+## 3. Tab Table-2-Bug 
 
-```
-Usage:
-  inst [OPTIONS] [Globs...]
+This tab shows the detailed information of the detected bugs, including which application
+version we found a bug (Column B), where we report a bug (Column E),  
+what is the current status of a filed bug report (Columns G--J), bug categories (Columns L--V), 
+whether GCatch can detect a bug (Column X), 
+the reasons why GCatch fails (Columns Y--AC), and the unit test we used to find a bug (columns AE--AF). 
 
-Application Options:
-      --pass=               A list of passes you want to use in this instrumentation
-      --dir=                Instrument all go source files under this directory
-      --file=               Instrument single go source file
-      --out=                Output instrumented golang source file to the given file. Only allow when instrumenting single golang source
-                            file
-      --statsOut=           Output statistics
-      --version             Print version and exit
-      --check-syntax-err
-      --recover-syntax-err
-      --parallel=
-      --cpuprofile=
+Users can execute the following command to apply GFuzz to 
+fuzz an application (e.g., Kubernetes) of a particular version 
+(e.g., 97d40890d00acf721ecabb8c9a6fec3b3234b74b):
 
-Help Options:
-  -h, --help                Show this help message
+``` bash
+XXX
 ```
 
-### Example
-```bash
-# Suppose /abc/def is directory contains go.mod
-$ inst --dir /abc/def
+By default, GFuzz will use all unit tests of a given application. To ease
+the reproduction of our results, we enhance GFuzz to only use one unit 
+test (columns AE--AF). For example, users can execute the following command
+to inspect whether GFuzz can still detect the bug at row XXX. 
+
+``` bash
+XXX
 ```
 
-## Executable `bin/fuzzer`
-```
-Usage:
-  fuzzer [OPTIONS]
+We compare GFuzz with GCatch in our evaluation. To check whether 
+GCatch can detect a bug (e.g., XXX), users can execute the following command:
 
-Application Options:
-      --gomod=            Directory contains go.mod
-      --func=             Only run specific test function in the test
-      --pkg=              Only run test functions in the specific package
-      --bin=              A list of globs for Go test bins.
-      --ortconfig=        Only run once with given ortconfig
-      --out=              Directory for fuzzing output
-      --parallel=         Number of workers to fuzz parallel (default: 5)
-      --instStats=        This parameter consumes a file path to a statistics file generated by isnt.
-      --version           Print version and exit
-      --globalTuple       Whether prev_location is global or per channel
-      --scoreSdk          Recording/scoring if channel comes from Go SDK
-      --scoreAllPrim      Recording/scoring other primitives like Mutex together with channel
-      --timeDivideBy=     Durations in time/sleep.go will be divided by this int number
-      --oraclertdebug
-      --isIgnoreFeedback  Is ignoring the feedback, and save every mutated seed into the fuzzing queue
-      --randMutateEnergy= Determine the energy of random mutations. If == 100 (default), then each seed would mutate 100 times in the rand mutation stage
-      --isUsingScore      Is using score to priority testing case.
 
-Help Options:
-  -h, --help              Show this help message
+``` bash
+XXX
 ```
 
-### Example
-```bash
-# Suppose /abc/def is directory contains go.mod
 
-# Fuzz whole module, it implies every tests in every packages will be fuzzed
-$ fuzzer --gomod /abc/def
 
-# Fuzz selected package(s)
-$ fuzzer --gomod /abc/def --pkg gomodulename/aaa --pkg gomodulename/bbb
 
-# Fuzz selected func(s)
-$ fuzzer --gomod /abc/def --pkg gomodulename/aaa --func TestABC
+## 4. Tab Table-2-Overhead
 
-# If you have compiled a list of test binary files
-$ fuzzer --bin /abc/*.test
+This tab shows the overhead of GFuzz’s sanitizer. 
+
+Users can execute the following command to measure the overhead
+on an application (e.g., XXX): 
+
+``` bash
+XXX
 ```
 
----------
-Asplos Artifact Tutorial
 
-1. asplos 710 table 2 benchmark
+## 5. Tab Table-3
 
-[benchmark/README.md](benchmark/README.md)
-
-2. asplos 710 table 2 bug
-
-In short, there are two main scripts for achieving out-of-box fuzzing:
-
-scripts/fuzz-git.sh
-	This script is suitable for those Golang repositories that can directly be used with fuzzing, without extra changes/replacements before fuzzing.
-Usage:
-./scripts/fuzz-git.sh <GIT URL> <GIT COMMIT> <OUTPUT DIR> [optional flags for fuzzer] 
+In Section 7.2 of the paper, we manually studied whether reordering messages can
+help detect channel-related bugs in two public sets of Go concurrency bugs. 
+This tab shows the detailed labeling. 
 
 
-scripts/fuzz-mount.sh
-	This script is suitable for those Golang repositories that require extra changes before fuzzing. For example, gRPC has lots of Test Suite(single test entrypoint but triggered lots of tests)
 
-Usage:
-	./scripts/fuzz-mount.sh <REPO DIR> <OUTPUT DIR> [optional flags for fuzzer] 
+## 6. Figure 5 of the paper
 
-3. To reproduce Figure 5, Contributions of GFuzz components:
 
 We evaluate GFuzz on grpc in Figure 5. 
 
