@@ -180,7 +180,7 @@ After fuzzing for 3 hours with each configs, we can plot Figure 5 using the foll
 # Install python3 dependent libraries
 pip3 install matplotlib click datetime
 
-python3 ./script/plot_Figure_5.py --with-feedback-path /path/to/output/folder/GFuzz_out/ --no-feedback-path /path/to/output/folder/GFuzz_no_feedback/ --no-mutation-path grpc_no_feedback_all_stage_0 --no-oracle-path /path/to/output/folder/GFuzz_no_oracle/
+python3 ./script/plot_Figure_5.py --with-feedback-path /path/to/output/folder/GFuzz_out/ --no-feedback-path /path/to/output/folder/GFuzz_no_feedback/ --no-mutation-path /path/to/output/folder/GFuzz_no_mutation/ --no-oracle-path /path/to/output/folder/GFuzz_no_oracle/
 ```
 
 ## 7. Using GCatch to test GFuzz bugs: 
