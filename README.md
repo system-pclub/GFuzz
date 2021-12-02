@@ -36,7 +36,7 @@ $ git checkout asplos-artifact
 ```
 
 
-Items (2), (3), (4) and (5) are released using a Google Sheet file [asplos-710-artifact](https://docs.google.com/spreadsheets/d/1tLcgsfYlll0g20KMYgDKkAtwZtk426dMSUZ6SvXk04s/edit#gid=0). 
+Items (2), (3), (4) and (5) are released using a Google Sheet file [asplos-710-artifact](https://docs.google.com/spreadsheets/d/1tLcgsfYlll0g20KMYgDKkAtwZtk426dMSUZ6SvXk04s/edit?usp=sharing). 
 Particularly, (2), (3) and (4) are related to Table 2 in the paper, and
 (5) is to provide more information for Table 3 in the paper. 
 All columns and tabs discussed later are in the Google Sheet file, unless otherwise specified. 
@@ -109,8 +109,8 @@ $ ./scripts/fuzz-git.sh https://github.com/kubernetes/kubernetes 97d40890d00acf7
 
 GFuzz needs to build unit tests first and then conducts the fuzzing. 
 Since etcd is monorepo of many Golang modules, you need to manually build its tests using the commands in [docker/builder/entrypoint.sh](docker/builder/entrypoint.sh). 
-Docker(moby) does not support go module, so that you have to turn off GO111MODULE. 
-Specifically, you can use the following commands to build Docker’s tests. 
+Docker (moby) does not support go module, so that you have to turn off GO111MODULE. 
+Specifically, you need to use the following commands to build Docker’s tests. 
 
 ```bash
 OUTPUT_DIR=<output dir>
