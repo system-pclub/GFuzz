@@ -48,20 +48,35 @@ This tab shows the information of our evaluated benchmarks.
 Column F shows the versions we use to count the line numbers (Column D)
 and the unit-test numbers (Column E). 
 
-The line number of an application (e.g., Kubernetes) at a particular version 
-(e.g., 97d40890d00acf721ecabb8c9a6fec3b3234b74b)
-can be counted by executing the following command:
-
-``` bash
-XXX
+Prerequiste: clone all applications with specific commit version:
+```bash
+$ cd benchmark
+$ clone-repos.sh ./repos
 ```
 
-The unit tests of an application (e.g., Kubernetes) at a particular version 
-(e.g., 97d40890d00acf721ecabb8c9a6fec3b3234b74b)
+The line number of all applications (e.g., Kubernetes, Docker, ...) at a particular version 
+(e.g., mentioned in ./benchmark/clone-repos.sh)
 can be counted by executing the following command:
 
 ``` bash
-XXX
+$ cd benchmark
+$ loc.sh ./repos
+```
+
+The unit tests of an applications (e.g., etcd) at a particular version 
+(e.g., mentioned in ./benchmark/clone-repos.sh)
+can be counted by executing the following command:
+``` bash
+$ cd benchmark
+
+// If you run before, skip it.
+$ ./clone-repos.sh repos
+
+// If you run before, skip it.
+$ ./build.sh
+
+// run script to count specific app. Same way for the others
+$ ./benchmark.sh count-tests --dir /builder/etcd/native
 ```
 
 ## 3. Tab Table-2-Bug 
@@ -77,25 +92,22 @@ fuzz an application (e.g., Kubernetes) of a particular version
 (e.g., 97d40890d00acf721ecabb8c9a6fec3b3234b74b):
 
 ``` bash
-XXX
+$ ./scripts/fuzz-git.sh https://github.com/kubernetes/kubernetes 97d40890d00acf721ecabb8c9a6fec3b3234b74b $(pwd)/tmp/out
+
 ```
 
 By default, GFuzz will use all unit tests of a given application. To ease
 the reproduction of our results, we enhance GFuzz to only use one unit 
 test (columns AE--AF). For example, users can execute the following command
-to inspect whether GFuzz can still detect the bug at row XXX. 
+to inspect whether GFuzz can still detect the bug at row 4. 
 
 ``` bash
-XXX
+$ ./scripts/fuzz-git.sh https://github.com/kubernetes/kubernetes 97d40890d00acf721ecabb8c9a6fec3b3234b74b $(pwd)/tmp/out --pkg k8s.io/kubernetes/pkg/kubelet/cm/devicemanager --func TestAllocate
+
 ```
 
 We compare GFuzz with GCatch in our evaluation. To check whether 
-GCatch can detect a bug (e.g., XXX), users can execute the following command:
-
-
-``` bash
-XXX
-```
+GCatch can detect a bug, please see instruction at section 'Reproduce GFuzz bugs using GCatch' below.
 
 
 
@@ -105,10 +117,21 @@ XXX
 This tab shows the overhead of GFuzz’s sanitizer. 
 
 Users can execute the following command to measure the overhead
-on an application (e.g., XXX): 
+on an application (e.g., grpc): 
 
 ``` bash
-XXX
+
+$ cd benchmark
+
+// If you run before, skip it.
+$ ./clone-repos.sh repos
+
+// If you run before, skip it.
+$ ./build.sh
+
+# /builder is the mapped directory of host directory 'tmp/builder', which is output of ./build.sh
+$ ./benchmark.sh benchmark --dir /builder/grpc/native --mode native
+$ ./benchmark.sh benchmark --dir /builder/grpc/inst --mode inst
 ```
 
 
@@ -198,7 +221,7 @@ sudo docker run -it gcatch_test
 ```
 
 Now we are in a Docker terminal, the following commands are all executed inside this Docker environment. 
-Additionally, all bugs being detected by GFuzz can be found in Google Sheets: **XXX**, sheet *Table-2-Bug*. 
+Additionally, all bugs being detected by GFuzz can be found in Google Sheets: **[Google Sheet](https://docs.google.com/spreadsheets/d/1tLcgsfYlll0g20KMYgDKkAtwZtk426dMSUZ6SvXk04s/edit?usp=sharing)**, sheet *Table-2-Bug*. 
 
 For testing grpc: 
 All grpc packages start with *google.golang.org/grpc**. If the bug is located in grpc folder *internal/resolver*, then the module path would be *google.golang.org/grpc/internal/resolver*.
