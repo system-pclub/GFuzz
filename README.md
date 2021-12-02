@@ -42,6 +42,52 @@ All columns and tabs discussed later are in the Google Sheet file, unless otherw
 
 
 
+## 2. Tab Table-2-Benchmark
+
+This tab shows the information of our evaluated benchmarks. 
+Column F shows the versions we use to count the line numbers (Column D)
+and the unit-test numbers (Column E). 
+
+The line number of an application (e.g., Kubernetes) at a particular version 
+(e.g., 97d40890d00acf721ecabb8c9a6fec3b3234b74b)
+can be counted by executing the following command:
+
+```
+XXX
+```
+
+The unit tests of an application (e.g., Kubernetes) at a particular version 
+(e.g., 97d40890d00acf721ecabb8c9a6fec3b3234b74b)
+can be counted by executing the following command:
+
+```
+XXX
+```
+
+## 3. Tab Table-2-Bug 
+
+This tab shows the detailed information of the detected bugs, including which application
+version we found a bug (Column B), where we report a bug (Column E),  
+what is the current status of a filed bug report (Columns G--J), bug categories (Columns L--V), 
+whether GCatch can detect a bug (Column X), 
+the reasons why GCatch fails (Columns Y--AC), and the unit test we used to find a bug (columns AE--AF). 
+
+Users can execute the following command to apply GFuzz to 
+fuzz an application (e.g., Kubernetes) of a particular version 
+(e.g., 97d40890d00acf721ecabb8c9a6fec3b3234b74b):
+
+```
+XXX
+```
+
+By default, GFuzz will use all unit tests of a given application. To ease
+the reproduction of our results, we enhance GFuzz to only use one unit 
+test (columns AE--AF). For example, users can execute the following command
+to inspect whether GFuzz can still detect the bug at row XXX. 
+
+```
+XXX
+```
 
 
 
