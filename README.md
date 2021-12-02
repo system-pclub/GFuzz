@@ -18,13 +18,13 @@ to use a docker of this version or higher to reproduce our experiments.
 
 Our paper presents GFuzz, a dynamic detector for channel-related concurrency
 bugs in Go programs. For artifact evaluation, we release 
-(1) the tool we built, 
-(2) information of evaluated benchmarks, 
-(3) information of detected bugs, 
-(4) execution overhead of GFuzz's sanitizer, 
-(5) study results of whether 
+- (1) the tool we built, 
+- (2) information of evaluated benchmarks, 
+- (3) information of detected bugs, 
+- (4) execution overhead of GFuzz's sanitizer, 
+- (5) study results of whether 
 GFuzz can help detect bugs in two public concurrency bug sets,
-and (6) scripts to compare the effectiveness of GFuzz's different features.  
+- (6) scripts to compare the effectiveness of GFuzz's different features.  
 
 
 Item (1) can be checked out by executing the following commands
@@ -36,7 +36,7 @@ $ git checkout asplos-artifact
 ```
 
 
-Items (2), (3), (4) and (5) are released using a Google Sheet file [asplos-710-artifact](https://docs.google.com/spreadsheets/d/1tLcgsfYlll0g20KMYgDKkAtwZtk426dMSUZ6SvXk04s/edit#gid=0). 
+Items (2), (3), (4) and (5) are released using a Google Sheet file [asplos-710-artifact](https://docs.google.com/spreadsheets/d/1tLcgsfYlll0g20KMYgDKkAtwZtk426dMSUZ6SvXk04s/edit?usp=sharing). 
 Particularly, (2), (3) and (4) are related to Table 2 in the paper, and
 (5) is to provide more information for Table 3 in the paper. 
 All columns and tabs discussed later are in the Google Sheet file, unless otherwise specified. 
@@ -84,7 +84,7 @@ $ ./benchmark.sh count-tests --dir /builder/etcd/native
 ## 3. Tab Table-2-Bug 
 
 This tab shows the detailed information of the detected bugs, including at which application
-version we found a bug (Column B), where we report a bug (Column E), what is the current 
+version we find a bug (Column B), where we report a bug (Column E), what is the current 
 status of a filed bug report (Columns G-J), bug categories (Columns L-V), whether 
 GCatch can detect a bug (Column X), the reasons why GCatch fails (Columns Y-AC), 
 and the unit test we used to find a bug (columns AE-AF). 
@@ -107,24 +107,11 @@ to inspect whether GFuzz can still detect the bug at row 4.
 $ ./scripts/fuzz-git.sh https://github.com/kubernetes/kubernetes 97d40890d00acf721ecabb8c9a6fec3b3234b74b $(pwd)/tmp/out --pkg k8s.io/kubernetes/pkg/kubelet/cm/devicemanager --func TestAllocate
 ```
 
-Some applications might need special cares:
+GFuzz needs to build unit tests first and then conducts the fuzzing. 
+Since etcd is monorepo of many Golang modules, you need to manually build its tests using the commands in [docker/builder/entrypoint.sh](docker/builder/entrypoint.sh). 
+Docker (moby) does not support go module, so that you have to turn off GO111MODULE. 
+Specifically, you need to use the following commands to build Docker’s tests. 
 
-- gRPC, prometheus:
-Details can be found at [docs/fuzz-trick.md](docs/fuzz-trick.md) 
-And then using
-
-```bash
-$ ./scripts/fuzz-mount.sh <repository dir> <output dir> [optional flags for fuzzer]
-```
-
-to trigger fuzzing.
-
-- etcd:
-Since etcd is monorepo of many Golang modules, you might need to build test binary by yourself or simply use the similar commands in [docker/builder/entrypoint.sh](docker/builder/entrypoint.sh)
-- docker:
-Docker(moby) does not support go module. So that you have to use GO111MODULE=off if you want to build yourself. 
-
-Example command to build test binary
 ```bash
 OUTPUT_DIR=<output dir>
 export GO111MODULE=off
@@ -138,15 +125,22 @@ do
 done
 export GO111MODULE=on
 ```
-More details can be found at [docker/builder/entrypoint.sh](docker/builder/entrypoint.sh).
 
-The recommended way are using benchmark/clone-repos.sh and benchmark/build.sh to always build correct instrumented test binary(feel free to comment out applications you are not interested in [docker/builder/entrypoint.sh](docker/builder/entrypoint.sh).
+For etcd and Docker, the recommended way is to use benchmark/clone-repos.sh and benchmark/build.sh to build tests firstly (feel free to comment out applications you are not interested in [docker/builder/entrypoint.sh](docker/builder/entrypoint.sh)), and 
+then to use the following command to do the fuzzing. 
 
-And then use
 ```bash
 $ ./scripts/fuzz-testbins.sh <testbin dir> <output dir> [optional flags for fuzzer]
 ```
-to trigger fuzzing.
+
+
+For gRPC and prometheus, some testing settings need to be changed firstly. 
+Details can be found at [docs/fuzz-trick.md](docs/fuzz-trick.md). 
+Then, you can use the following command to run the fuzzing. 
+
+```bash
+$ ./scripts/fuzz-mount.sh <repository dir> <output dir> [optional flags for fuzzer]
+```
 
 We compare GFuzz with GCatch in our evaluation. To check whether 
 GCatch can detect a bug, please see instruction at section [Using GCatch to test GFuzz bugs](https://github.com/system-pclub/GFuzz#7-using-gcatch-to-test-gfuzz-bugs) below.
