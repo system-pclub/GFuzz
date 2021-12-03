@@ -5,7 +5,6 @@ import (
 	"gfuzz/pkg/fuzz/api"
 	"gfuzz/pkg/fuzz/mutate"
 	"gfuzz/pkg/fuzz/score"
-	"gfuzz/pkg/oraclert/output"
 	"gfuzz/pkg/utils/hash"
 	"strconv"
 	"strings"
@@ -28,11 +27,18 @@ func (h *InterestHandlerImpl) IsInterested(i *api.Input, o *api.Output) (bool, e
 	}
 
 	// Using SELECT record as feedback
-	oSelectCopy := make([]output.SelectRecord, 0)
+	oSelectMap := make(map[string][]uint)
 	for _, v := range o.OracleRtOutput.Selects {
-		v_copy := v
-		v_copy.Cases = 0
-		oSelectCopy = append(oSelectCopy, v_copy)
+		vSelectId := v.ID
+		vSelectChosen := v.Chosen
+
+		if val, ok := oSelectMap[vSelectId]; ok {
+			val = append(val, vSelectChosen)
+			oSelectMap[vSelectId] = val
+		} else {
+			val := []uint{vSelectChosen}
+			oSelectMap[vSelectId] = val
+		}
 	}
 
 	//oTupleCopy := make(map[uint32]uint32)
@@ -45,7 +51,7 @@ func (h *InterestHandlerImpl) IsInterested(i *api.Input, o *api.Output) (bool, e
 	//	}
 	//}
 
-	ortCfgHash := hash.AsSha256(oSelectCopy)
+	ortCfgHash := hash.AsSha256(oSelectMap)
 	if h.fctx.UpdateOrtOutputHash(ortCfgHash) {
 		return true, nil
 	}
