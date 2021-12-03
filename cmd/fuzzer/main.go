@@ -70,6 +70,11 @@ func main() {
 		log.Printf("Warning: Ignoring feedback from the oracle. ")
 	}
 
+	config.IsNoMutation = opts.IsNoMutation
+	if config.IsIgnoreFeedback {
+		log.Printf("Warning: Do not apply mutations to all test cases. ")
+	}
+
 	config.OracleRtDebug = opts.OracleRtDebug
 
 	config.RandMutateEnergy = opts.RandMutateEnergy

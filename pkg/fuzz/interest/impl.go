@@ -61,6 +61,13 @@ func (h *InterestHandlerImpl) HandleInterest(i *api.InterestInput) (ret bool, er
 		return true, nil
 	}
 
+	// If IsNoMuation, then we do not mutate the seeds. Directly runs the seed.
+	if h.fctx.Cfg.IsNoMutation {
+		i.HandledCnt += 1
+		h.fctx.ExecInputCh <- i.Input
+		return true, nil
+	}
+
 	if i.Output == nil {
 		// if executed is true but output is nil
 		// it could be still in channel pending to run
@@ -178,7 +185,6 @@ func handleRandStageInput(fctx *api.Context, i *api.Input, o *api.Output) (bool,
 	}
 	var randInputs []*api.Input
 	var mts mutate.OrtConfigMutateStrategy = &mutate.RandomMutateStrategy{}
-
 
 	randMutateEnergy := fctx.Cfg.RandMutateEnergy
 
