@@ -6,8 +6,10 @@ import (
 	"gfuzz/pkg/fuzz/mutate"
 	"gfuzz/pkg/fuzz/score"
 	"gfuzz/pkg/utils/hash"
+	"math/rand"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type InterestHandlerImpl struct {
@@ -204,13 +206,18 @@ func handleRandStageInput(fctx *api.Context, i *api.Input, o *api.Output) (bool,
 
 	randMutateEnergy := fctx.Cfg.RandMutateEnergy
 
-	if fctx.IsUsingScore {
-		var scoreFunc api.ScoreStrategy = score.NewScoreStrategyImpl(fctx)
+	if !fctx.Cfg.IsDisableScore {
+		var scoreFunc = score.NewScoreStrategyImpl(fctx)
 		curScore, _ := scoreFunc.Score(i, o)
 		if curScore > fctx.GlobalBestScore {
 			fctx.GlobalBestScore = curScore
 		}
-		randMutateEnergy = int(float64(randMutateEnergy) * (float64(curScore) / float64(fctx.GlobalBestScore)))
+		randMutateChances := int(100.0 * (float64(curScore) / float64(fctx.GlobalBestScore)))
+		rand.Seed(time.Now().UnixNano())
+		if rand.Intn(100) >= randMutateChances {
+			// Skip the test case based on rand possibilities.
+			return true, nil
+		}
 	}
 
 	cfgs, err := mts.Mutate(g, i.OracleRtConfig, o.OracleRtOutput, randMutateEnergy)

@@ -30,8 +30,7 @@ type Context struct {
 	timeoutTargets map[string]uint32
 
 	// Global best score
-	IsUsingScore     bool
-	GlobalBestScore  int
+	GlobalBestScore int
 }
 
 // NewContext returns a new FuzzerContext

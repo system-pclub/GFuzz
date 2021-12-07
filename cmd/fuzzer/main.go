@@ -86,8 +86,10 @@ func main() {
 	log.Printf("Using Random mutation energy: %v", config.RandMutateEnergy)
 
 	// Default: do not use score
-	config.IsUsingScore = opts.IsUsingScore
-	if config.IsUsingScore {
+	config.IsDisableScore = opts.IsDisableScore
+	if config.IsDisableScore {
+		log.Printf("Warning: Disabling score to prioritize fuzzing entries. ")
+	} else {
 		log.Printf("Using score to prioritize fuzzing entries. ")
 	}
 
