@@ -181,7 +181,7 @@ func HandleExec(ctx context.Context, i *api.Input, o *api.Output, fctx *api.Cont
 	}
 
 	// 4. update/add interest input
-	if i.Stage == api.InitStage && isFoundNewSelect {
+	if i.Stage == api.InitStage {
 		// if input is init, since init stage by default is interested input, so no need to check interest
 		// simply update output and hash
 		ii := fctx.Interests.Find(i)
@@ -197,7 +197,8 @@ func HandleExec(ctx context.Context, i *api.Input, o *api.Output, fctx *api.Cont
 		fctx.UpdateOrtOutputHash(hash.AsSha256(oSelectCopy))
 		return nil
 	}
-	isInteresed, err := interestHdl.IsInterested(i, o)
+
+	isInteresed, err := interestHdl.IsInterested(i, o, isFoundNewSelect)
 	if err != nil {
 		return nil
 	}

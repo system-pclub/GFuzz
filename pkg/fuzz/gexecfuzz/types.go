@@ -14,8 +14,10 @@ type GExecFuzz struct {
 	// Oracler runtime related
 	OrtConfigHashes []string
 	// All selects we have seen so far
-	OrtSelects map[string]output.SelectRecord
-	m          sync.RWMutex
+	OrtSelects  map[string]output.SelectRecord
+	OrtChannels map[string]output.ChanRecord
+	OrtTuples   map[uint32]uint32
+	m           sync.RWMutex
 }
 
 func NewGExecFuzz(exec gexec.Executable) *GExecFuzz {
@@ -41,6 +43,55 @@ func (e *GExecFuzz) UpdateSelectRecordsIfNew(records []output.SelectRecord) int 
 		}
 	}
 	return newSelects
+}
+
+func (e *GExecFuzz) UpdateChannelRecordsIfNew(records map[string]output.ChanRecord) int {
+	newChannels := 0
+
+	for k, v := range records {
+		if _, exists := e.OrtChannels[k]; !exists {
+			// If the channel hasn't been seen before
+			e.OrtChannels[k] = v
+			newChannels += 1
+		} else {
+			// If the channel has a new state.
+			curSavedRecord := e.OrtChannels[k]
+			isNewChannel := false
+			// If new notclosed.
+			if curSavedRecord.NotClosed == false && v.NotClosed == true {
+				curSavedRecord.NotClosed = true
+				isNewChannel = true
+			}
+			// If new closed
+			if curSavedRecord.Closed == false && v.Closed == true {
+				curSavedRecord.Closed = true
+				isNewChannel = true
+			}
+			// If new PeakBuf == CapBuf
+			if curSavedRecord.PeakBuf != v.PeakBuf && v.PeakBuf == v.CapBuf {
+				curSavedRecord.PeakBuf = v.PeakBuf
+				isNewChannel = true
+			}
+			if isNewChannel {
+				newChannels += 1
+			}
+		}
+	}
+
+	return newChannels
+}
+
+func (e *GExecFuzz) UpdateTupleRecordsIfNew(records map[uint32]uint32) int {
+	newTuples := 0
+
+	for k, v := range records {
+		if _, exists := e.OrtTuples[k]; !exists {
+			e.OrtTuples[k] = v
+			newTuples += 1
+		}
+	}
+
+	return newTuples
 }
 
 func (e *GExecFuzz) GetAllSelectRecords() []output.SelectRecord {

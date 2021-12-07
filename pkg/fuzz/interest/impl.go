@@ -19,11 +19,26 @@ func NewInterestHandlerImpl(fctx *api.Context) api.InterestHandler {
 		fctx: fctx,
 	}
 }
-func (h *InterestHandlerImpl) IsInterested(i *api.Input, o *api.Output) (bool, error) {
+func (h *InterestHandlerImpl) IsInterested(i *api.Input, o *api.Output, isFoundNewSelect bool) (bool, error) {
 
+	// If isIgnoreFeedback is true, we treat every feedback as interesting and directly return.
 	if h.fctx.Cfg.IsIgnoreFeedback == true {
-		// if isIgnoreFeedback is true, we treat every feedback as interesting and directly return.
 		return true, nil
+	}
+
+	isInteresting := false
+
+	// Check new tuple
+	entry := h.fctx.GetQueueEntryByGExecID(i.Exec.String())
+	if entry != nil && entry.UpdateTupleRecordsIfNew(o.OracleRtOutput.Tuples) > 0 {
+		// Has new tuples, interesting
+		isInteresting = true
+	}
+
+	// See if we found new channel or new channel state.
+	if entry != nil && entry.UpdateChannelRecordsIfNew(o.OracleRtOutput.Channels) > 0 {
+		// Has new channels, interesting
+		isInteresting = true
 	}
 
 	// Using SELECT record as feedback
@@ -41,22 +56,17 @@ func (h *InterestHandlerImpl) IsInterested(i *api.Input, o *api.Output) (bool, e
 		}
 	}
 
-	//oTupleCopy := make(map[uint32]uint32)
-	//for k, v := range o.OracleRtOutput.Tuples {
-	//	log2element := uint32(math.Log2(float64(v)))
-	//	if log2element > 0 {
-	//		oTupleCopy[k] = log2element
-	//	} else {
-	//		oTupleCopy[k] = 0
-	//	}
-	//}
-
 	ortCfgHash := hash.AsSha256(oSelectMap)
 	if h.fctx.UpdateOrtOutputHash(ortCfgHash) {
-		return true, nil
+		isInteresting = true
 	}
-	return false, nil
+	if isInteresting == true || isFoundNewSelect {
+		return true, nil
+	} else {
+		return false, nil
+	}
 }
+
 func (h *InterestHandlerImpl) HandleInterest(i *api.InterestInput) (ret bool, err error) {
 
 	// if init input has not been executed, execute first

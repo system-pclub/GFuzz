@@ -21,5 +21,5 @@ type InterestHandler interface {
 	// Return true if something handled, false otherwise(such as no selects to mutate, no oracle runtime output to handle, etc.)
 	HandleInterest(i *InterestInput) (bool, error)
 	// IsInterested will decide if this execution should be added into interest list
-	IsInterested(i *Input, o *Output) (bool, error)
+	IsInterested(i *Input, o *Output, isFoundNewSelect bool) (bool, error)
 }
