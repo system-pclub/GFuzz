@@ -205,6 +205,8 @@ func HandleExec(ctx context.Context, i *api.Input, o *api.Output, fctx *api.Cont
 	if isInteresed {
 		logger.Printf("%s is interesting", i.ID)
 		fctx.Interests.Add(api.NewExecutedInterestInput(i, o))
+
+		//log.Printf("interesting list length: %d", fctx.Interests.GetInterestingLength())
 	}
 
 	return nil

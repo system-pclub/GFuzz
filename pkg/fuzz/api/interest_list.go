@@ -38,6 +38,10 @@ func (i *InterestList) IsLooping() bool {
 	return atomic.LoadUint32(&i.looping) == 1
 }
 
+func (i *InterestList) GetInterestingLength() int {
+	return len(i.interestedInputs)
+}
+
 func (i *InterestList) Each(handler InterestHandler) (ret bool) {
 	i.rw.Lock()
 	currInterests := make([]*InterestInput, len(i.interestedInputs))
