@@ -206,7 +206,7 @@ func handleRandStageInput(fctx *api.Context, i *api.Input, o *api.Output) (bool,
 
 	randMutateEnergy := fctx.Cfg.RandMutateEnergy
 
-	if !fctx.Cfg.IsDisableScore {
+	if !fctx.Cfg.IsDisableScore && fctx.GlobalBestScore >= 100 {
 		var scoreFunc = score.NewScoreStrategyImpl(fctx)
 		curScore, _ := scoreFunc.Score(i, o)
 		if curScore > fctx.GlobalBestScore {
