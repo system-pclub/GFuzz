@@ -71,7 +71,7 @@ func main() {
 	}
 
 	config.IsNoMutation = opts.IsNoMutation
-	if config.IsIgnoreFeedback {
+	if config.IsNoMutation {
 		log.Printf("Warning: Do not apply mutations to all test cases. ")
 	}
 
