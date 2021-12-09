@@ -265,7 +265,7 @@ All grpc packages start with *google.golang.org/grpc*. If the bug is located in 
 ``` bash
 $ cd /playground
 $ git clone https://github.com/grpc/grpc-go.git
-$ cd /playground/grpc-go.git
+$ cd /playground/grpc-go
 
 # checkout the specific buggy version
 
