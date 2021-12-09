@@ -39,9 +39,25 @@ func (p *WgRecPass) GetPreApply(iCtx *inst.InstContext) func(*astutil.Cursor) bo
 
 	return func(c *astutil.Cursor) bool {
 		switch concrete := c.Node().(type) {
+		case *ast.AssignStmt:
+
 		case *ast.ExprStmt:
+
 			if callExpr, ok := concrete.X.(*ast.CallExpr); ok {
 				if selectorExpr, ok := callExpr.Fun.(*ast.SelectorExpr); ok { // like `mu.Lock()`
+					if callerIdent, ok := selectorExpr.X.(*ast.Ident); ok {
+						if callerIdent.Obj != nil {
+							if objStmt, ok := callerIdent.Obj.Decl.(*ast.AssignStmt); ok {
+								if objIdent, ok := objStmt.Lhs[0].(*ast.Ident); ok {
+									to := iCtx.Type.Defs[objIdent]
+									println(to.Name(), to.Type().String())
+								}
+							}
+						}
+						//fmt.Printf("!!! %s\n", obj.Type().String())
+
+					}
+
 					var matched bool = true
 					var op string
 					switch selectorExpr.Sel.Name {
