@@ -24,8 +24,11 @@ func getSelectorCallerType(iCtx *inst.InstContext, selExpr *ast.SelectorExpr) st
 	return ""
 }
 
-func SelectorCallerHasTypes(iCtx *inst.InstContext, selExpr *ast.SelectorExpr, tys ...string) bool {
+func SelectorCallerHasTypes(iCtx *inst.InstContext, selExpr *ast.SelectorExpr, trueIfUnknown bool, tys ...string) bool {
 	t := getSelectorCallerType(iCtx, selExpr)
+	if t == "" && trueIfUnknown {
+		return true
+	}
 	for _, ty := range tys {
 		if ty == t {
 			return true

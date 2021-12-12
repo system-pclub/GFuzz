@@ -176,6 +176,9 @@ func GetListOfBugIDFromStdoutContent(c string) ([]string, error) {
 			}
 
 			for i := idPrimLoc + 1; i < idPrimLocEnd; i++ {
+				if strings.HasPrefix(linesThisBug[i], "[oraclert]") {
+					continue
+				}
 				bug.vecPrimCreateLoc = append(bug.vecPrimCreateLoc, linesThisBug[i])
 			}
 
@@ -215,6 +218,9 @@ func GetListOfBugIDFromStdoutContent(c string) ([]string, error) {
 				}
 
 				for i := idStack + 1; i < idStackEnd; i++ {
+					if strings.HasPrefix(linesThisBug[i], "[oraclert]") {
+						continue
+					}
 					bug.strStack += linesThisBug[i]
 				}
 			}

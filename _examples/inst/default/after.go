@@ -5,7 +5,9 @@ import (
 	aaa "sync"
 )
 
-type aa struct{}
+type aa struct {
+	m aaa.Mutex
+}
 
 func (_ *aa) abcde() {
 	println(3)
@@ -37,7 +39,13 @@ func Hello() {
 	c.Wait()
 
 	w := aaa.WaitGroup{}
-	oraclert.StoreOpInfo("Wait", 4)
+	oraclert.StoreOpInfo("Wait", 5)
 
 	w.Wait()
+
+	a := aa{}
+	oraclert.StoreOpInfo("Lock", 4)
+
+	a.m.Lock()
+
 }

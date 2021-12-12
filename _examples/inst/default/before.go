@@ -2,7 +2,9 @@ package defaultp
 
 import aaa "sync"
 
-type aa struct{}
+type aa struct {
+	m aaa.Mutex
+}
 
 func (_ *aa) abcde() {
 	println(3)
@@ -28,4 +30,9 @@ func Hello() {
 	w := aaa.WaitGroup{}
 
 	w.Wait()
+
+	a := aa{}
+
+	a.m.Lock()
+
 }
