@@ -31,11 +31,6 @@ func NewInstContext(goSrcFile string) (*InstContext, error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	for i, t := range info.Defs {
-		println(i, i.Name, t)
-	}
-
 	return &InstContext{
 		File:            goSrcFile,
 		OriginalContent: oldSource,

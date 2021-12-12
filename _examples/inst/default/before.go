@@ -2,6 +2,16 @@ package defaultp
 
 import aaa "sync"
 
+type aa struct{}
+
+func (_ *aa) abcde() {
+	println(3)
+}
+
+func (a *aa) abcd() {
+	b := 2
+	println(a, b)
+}
 func Hello() {
 	m := aaa.Mutex{}
 

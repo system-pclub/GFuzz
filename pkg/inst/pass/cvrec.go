@@ -42,6 +42,9 @@ func (p *CvRecPass) GetPreApply(iCtx *inst.InstContext) func(*astutil.Cursor) bo
 		case *ast.ExprStmt:
 			if callExpr, ok := concrete.X.(*ast.CallExpr); ok {
 				if selectorExpr, ok := callExpr.Fun.(*ast.SelectorExpr); ok { // like `mu.Lock()`
+					if !SelectorCallerHasTypes(iCtx, selectorExpr, "sync.Cond", "*sync.Cond") {
+						return true
+					}
 					var matched bool = true
 					var op string
 					switch selectorExpr.Sel.Name {
