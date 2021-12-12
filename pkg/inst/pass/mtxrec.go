@@ -41,6 +41,9 @@ func (p *MtxRecPass) GetPreApply(iCtx *inst.InstContext) func(*astutil.Cursor) b
 		case *ast.ExprStmt:
 			if callExpr, ok := concrete.X.(*ast.CallExpr); ok {
 				if selectorExpr, ok := callExpr.Fun.(*ast.SelectorExpr); ok { // like `mu.Lock()`
+					if !SelectorCallerHasTypes(iCtx, selectorExpr, true, "sync.Mutex", "*sync.Mutex", "sync.RWMutex", "*sync.RWMutex") {
+						return true
+					}
 					var matched bool = true
 					var op string
 					switch selectorExpr.Sel.Name {

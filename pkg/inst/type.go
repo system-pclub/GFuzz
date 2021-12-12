@@ -3,6 +3,7 @@ package inst
 import (
 	"go/ast"
 	"go/token"
+	"go/types"
 
 	"golang.org/x/tools/go/ast/astutil"
 )
@@ -13,6 +14,7 @@ type InstContext struct {
 	OriginalContent []byte
 	FS              *token.FileSet
 	AstFile         *ast.File
+	Type            *types.Info
 	Metadata        map[string]interface{} // user can set custom metadata come along with instrumentation context
 }
 

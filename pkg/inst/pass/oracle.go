@@ -127,7 +127,7 @@ func (p *OraclePass) GetPreApply(iCtx *inst.InstContext) func(*astutil.Cursor) b
 					recvField := concrete.Recv.List[0]
 					if len(recvField.Names) == 1 {
 						ident := recvField.Names[0]
-						if ident.Name != "" {
+						if ident.Name != "" && ident.Name != "_" {
 							recvAndFirstStmt := &RecvAndFirstStmt{
 								recvName:  ident.Name,
 								firstStmt: concrete.Body.List[0],

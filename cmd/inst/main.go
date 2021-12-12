@@ -101,7 +101,7 @@ func main() {
 			for src := range toInstSrcCh {
 				err := HandleSrcFile(src, reg, passes)
 				if err != nil {
-					log.Printf("%s: %s", src, err)
+					log.Printf("HandleSrcFile %s: %s", src, err)
 				}
 			}
 
