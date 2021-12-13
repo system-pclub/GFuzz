@@ -24,7 +24,7 @@ bugs in Go programs. For artifact evaluation, we release
 - (4) execution overhead of GFuzz's sanitizer, 
 - (5) study results of whether 
 GFuzz can help detect bugs in two public concurrency bug sets,
-- (6) scripts to compare the effectiveness of GFuzz's different features.  
+- and (6) scripts to compare the effectiveness of GFuzz's different features.  
 
 
 Item (1) can be checked out by executing the following commands
@@ -83,14 +83,16 @@ $ ./benchmark.sh count-tests --dir /builder/etcd/native
 
 ## 3. Tab Table-2-Bug 
 
-This tab shows the detailed information of the detected bugs, including at which application
-version we find a bug (Column B), where we report a bug (Column E), what is the current 
-status of a filed bug report (Columns G-J), bug categories (Columns L-V), whether 
-GCatch can detect a bug (Column X), the reasons why GCatch fails (Columns Y-AC), 
-and the unit test we used to find a bug (columns AE-AF). 
+This tab shows the detailed information of each detected bugs, including at which application
+version we find the bug (Column B), where we report the bug (Column E), what is the current 
+status of the filed bug report (Columns G-J), which category the bug belongs to (Columns L-V), whether 
+GCatch can detect the bug (Column X), what is the reason if GCatch fails (Columns Y-AC), 
+and the unit test we used to find the bug (columns AE-AF). 
+
+### 3.1. Kubernetes
 
 Users can execute the following command to apply GFuzz to 
-fuzz an application (e.g., Kubernetes) of a particular version 
+fuzz Kubernetes at a particular version 
 (e.g., 97d40890d00acf721ecabb8c9a6fec3b3234b74b):
 
 ``` bash
@@ -106,6 +108,9 @@ to inspect whether GFuzz can still detect the bug at row 4.
 ``` bash
 $ ./scripts/fuzz-git.sh https://github.com/kubernetes/kubernetes 97d40890d00acf721ecabb8c9a6fec3b3234b74b $(pwd)/tmp/out --pkg k8s.io/kubernetes/pkg/kubelet/cm/devicemanager --func TestAllocate
 ```
+
+### 3.2. Docker
+
 
 GFuzz needs to build unit tests first and then conducts the fuzzing. 
 Since etcd is monorepo of many Golang modules, you need to manually build its tests using the commands in [docker/builder/entrypoint.sh](docker/builder/entrypoint.sh). 
@@ -133,6 +138,79 @@ then to use the following command to do the fuzzing.
 $ ./scripts/fuzz-testbins.sh <testbin dir> <output dir> [optional flags for fuzzer]
 ```
 
+### 3.3. Prometheus
+
+To apply GFuzz, we need to change one testing setting of Prometheus. Since all detected bugs of Prometheus are from two versions, we create two repositories for the two versions ([Prometheus-1](https://github.com/gfuzz-asplos/prometheus-e0f1506254688cec85276cc939aeb536a4e029d1) and [Prometheus-2](https://github.com/gfuzz-asplos/prometheus-f08c89e569b2421bcc8ef7caf585fd8d3c2ccaba)) and conduct the required change. To reproduce the experiments on Prometheus, users can directly use the two created repositories. 
+
+The first version is e0f1506254688cec85276cc939aeb536a4e029d1. Users can execute the following command to apply GFuzz to the version. 
+
+``` bash
+$ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/prometheus-e0f1506254688cec85276cc939aeb536a4e029d1 ba019add3f94b5ef224fbf2e537afe4f3878ffbe $(pwd)/tmp/out
+```
+
+To only use one unit test in the first version, users can execute the following command.
+
+``` bash
+$ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/prometheus-e0f1506254688cec85276cc939aeb536a4e029d1 ba019add3f94b5ef224fbf2e537afe4f3878ffbe $(pwd)/tmp/out --pkg <pkg_name> --func <pkg_name> 
+```
+
+
+The second version is f08c89e569b2421bcc8ef7caf585fd8d3c2ccaba. Users can execute the following command to apply GFuzz to that version. 
+
+``` bash
+$ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/prometheus-f08c89e569b2421bcc8ef7caf585fd8d3c2ccaba 141e016e260734ade6b2ba2cbdc8435bfce70262 $(pwd)/tmp/out
+```
+
+To only use one unit test in the first version, users can execute the following command.
+
+``` bash
+$ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/prometheus-f08c89e569b2421bcc8ef7caf585fd8d3c2ccaba 141e016e260734ade6b2ba2cbdc8435bfce70262 $(pwd)/tmp/out --pkg <pkg_name> --func <pkg_name> 
+```
+
+### 3.4. etcd
+
+
+### 3.5. Go-Ethereum
+
+Users can execute the following command to apply GFuzz to 
+Go-Ethereum at a particular version:
+
+``` bash
+$ ./scripts/fuzz-git.sh https://github.com/ethereum/go-ethereum <commit_hash> $(pwd)/tmp/out
+
+# e.g., 
+# ./scripts/fuzz-git.sh https://github.com/ethereum/go-ethereum 56e9001a1a8ddecc478943170b00207ef46109b9 $(pwd)/tmp/out
+```
+
+Users can execute the following command
+to force GFuzz to only use one unit test. 
+
+``` bash
+$ ./scripts/fuzz-git.sh https://github.com/ethereum/go-ethereum <commit_hash> $(pwd)/tmp/out --pkg <pkg_name> --func <func_name>
+
+# e.g.,
+# ./scripts/fuzz-git.sh https://github.com/ethereum/go-ethereum 56e9001a1a8ddecc478943170b00207ef46109b9 $(pwd)/tmp/out --pkg github.com/ethereum/go-ethereum/console --func TestInteractive
+```
+
+
+### 3.6. TiDB
+
+The following command applies GFuzz to 
+a particular version of TiDB:
+
+``` bash
+$ ./scripts/fuzz-git.sh https://github.com/pingcap/tidb <commit_hash> $(pwd)/tmp/out
+
+```
+
+Users can execute the following command
+to only fuzz one unit test. 
+
+``` bash
+$ ./scripts/fuzz-git.sh https://github.com/pingcap/tidb <commit_hash> $(pwd)/tmp/out --pkg <pkg_name> --func <func_name>
+```
+
+### 3.7. gRPC-go
 
 For gRPC and prometheus, some testing settings need to be changed firstly. 
 Details can be found at [docs/fuzz-trick.md](docs/fuzz-trick.md). 

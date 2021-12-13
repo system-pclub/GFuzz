@@ -9,12 +9,12 @@ then
 fi
 
 mkdir -p $DEST_DIR
-cd $DEST_DIR
+#cd $DEST_DIR
 
-cloc ./etcd
-cloc ./grpc-go
-cloc ./go-ethereum
-cloc ./prometheus
-cloc ./tidb
-cloc ./kubernetes
-cloc ./moby
+./cloc ./${DEST_DIR}/etcd
+./cloc ./${DEST_DIR}/grpc-go
+./cloc ./${DEST_DIR}/go-ethereum
+./cloc ./${DEST_DIR}/prometheus
+./cloc ./${DEST_DIR}/tidb
+./cloc ./${DEST_DIR}/kubernetes
+./cloc ./${DEST_DIR}/moby
