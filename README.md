@@ -142,30 +142,24 @@ $ ./scripts/fuzz-testbins.sh <testbin dir> <output dir> [optional flags for fuzz
 
 To apply GFuzz, we need to change one testing setting of Prometheus. Since all detected bugs of Prometheus are from two versions, we create two repositories for the two versions ([Prometheus-1](https://github.com/gfuzz-asplos/prometheus-e0f1506254688cec85276cc939aeb536a4e029d1) and [Prometheus-2](https://github.com/gfuzz-asplos/prometheus-f08c89e569b2421bcc8ef7caf585fd8d3c2ccaba)) and conduct the required change. To reproduce the experiments on Prometheus, users can directly use the two created repositories. 
 
-- (1) The first version is e0f1506254688cec85276cc939aeb536a4e029d1. Users can execute the following command to apply GFuzz to the version. 
+- (1) The first version is e0f1506254688cec85276cc939aeb536a4e029d1. Users can execute the following commands to apply GFuzz to the version or one unit test in the version. 
 
 ``` bash
+# fuzz the whole version
 $ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/prometheus-e0f1506254688cec85276cc939aeb536a4e029d1 ba019add3f94b5ef224fbf2e537afe4f3878ffbe $(pwd)/tmp/out
+# fuzz one unit test
+$ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/prometheus-e0f1506254688cec85276cc939aeb536a4e029d1 ba019add3f94b5ef224fbf2e537afe4f3878ffbe $(pwd)/tmp/out --pkg <pkg_name> --func <pkg_name>
 ```
 
-To only use one unit test in the first version, users can execute the following command.
+- (2) The second version is f08c89e569b2421bcc8ef7caf585fd8d3c2ccaba. Users can execute the following commands to apply GFuzz to the version or one unit test in the version. 
 
 ``` bash
-$ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/prometheus-e0f1506254688cec85276cc939aeb536a4e029d1 ba019add3f94b5ef224fbf2e537afe4f3878ffbe $(pwd)/tmp/out --pkg <pkg_name> --func <pkg_name> 
-```
-
-
-- (2) The second version is f08c89e569b2421bcc8ef7caf585fd8d3c2ccaba. Users can execute the following command to apply GFuzz to that version. 
-
-``` bash
+# fuzz the whole version
 $ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/prometheus-f08c89e569b2421bcc8ef7caf585fd8d3c2ccaba 141e016e260734ade6b2ba2cbdc8435bfce70262 $(pwd)/tmp/out
-```
-
-To only use one unit test in the first version, users can execute the following command.
-
-``` bash
+# fuzz one unit test
 $ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/prometheus-f08c89e569b2421bcc8ef7caf585fd8d3c2ccaba 141e016e260734ade6b2ba2cbdc8435bfce70262 $(pwd)/tmp/out --pkg <pkg_name> --func <pkg_name> 
 ```
+
 
 ### 3.4. etcd
 
