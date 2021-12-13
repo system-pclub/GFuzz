@@ -6,6 +6,7 @@ TESTBINS_DIR=$1
 OUT_DIR=$2
 shift 2
 
+
 docker build -f docker/fuzzer-bin/Dockerfile -t gfuzzbin:latest .
 
 docker run -it \
