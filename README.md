@@ -213,43 +213,34 @@ respectively ([grpc-go-1](https://github.com/gfuzz-asplos/grpc-go-0bc741730b8171
 and [grpc-go-3](https://github.com/gfuzz-asplos/grpc-go-9280052d36656451dd7568a18a836c2a74edaf6c)) 
 and conduct the required changes. 
 
-- (1) The first version is 0bc741730b8171fc51cdaf826caea5119c411009. Users can execute the following command to apply GFuzz to the version. 
+- The first version is 0bc741730b8171fc51cdaf826caea5119c411009. Users can execute the following command to apply GFuzz to the version or one unit test in the version. 
 
 ``` bash
+# fuzz the whole application
 $ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/grpc-go-0bc741730b8171fc51cdaf826caea5119c411009 fe42d65231bf2c83c940db3b46849e250c3bdf2b $(pwd)/tmp/out
-```
-
-To only use one unit test in the first version, users can execute the following command.
-
-``` bash
+# fuzz one unit test
 $  ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/grpc-go-0bc741730b8171fc51cdaf826caea5119c411009 fe42d65231bf2c83c940db3b46849e250c3bdf2b $(pwd)/tmp/out --pkg <pkg_name> --func <pkg_name> 
 ```
 
-- (2) The second version is 83f9def5feb388c4fd7e6586bd55cf6bf6d46a01. Users can execute the following command to apply GFuzz to the version. 
+- The second version is 83f9def5feb388c4fd7e6586bd55cf6bf6d46a01. Users can execute the following command to apply GFuzz to the version or one unit test in the version. 
 
 ``` bash
+# fuzz the whole application
 $ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/grpc-go-83f9def5feb388c4fd7e6586bd55cf6bf6d46a01 b95c0c0923d938b8acb7c841f0a04ade8f7d5fbf $(pwd)/tmp/out
+# fuzz one unit test
+$ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/grpc-go-83f9def5feb388c4fd7e6586bd55cf6bf6d46a01 b95c0c0923d938b8acb7c841f0a04ade8f7d5fbf $(pwd)/tmp/out --pkg <pkg_name> --func <pkg_name> 
 ```
 
-To only use one unit test in the second version, users can execute the following command.
+
+- The third version is 9280052d36656451dd7568a18a836c2a74edaf6c. Users can execute the following command to apply GFuzz to the version or one unit test in the version. 
 
 ``` bash
-$ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/grpc-go-83f9def5feb388c4fd7e6586bd55cf6bf6d46a01 b95c0c0923d938b8acb7c841f0a04ade8f7d5fbf $(pwd)/tmp/out
- --pkg <pkg_name> --func <pkg_name> 
-```
-
-- (3) The third version is 9280052d36656451dd7568a18a836c2a74edaf6c. Users can execute the following command to apply GFuzz to the version. 
-
-``` bash
+# fuzz the whole application
 $ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/grpc-go-9280052d36656451dd7568a18a836c2a74edaf6c b95c0c0923d938b8acb7c841f0a04ade8f7d5fbf $(pwd)/tmp/out
+# fuzz one unit test
+$ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/grpc-go-9280052d36656451dd7568a18a836c2a74edaf6c 93d5a0f32dadc51585082f0d7786605b65fa6160 $(pwd)/tmp/out --pkg <pkg_name> --func <pkg_name> 
 ```
 
-To only use one unit test in the thre version, users can execute the following command.
-
-``` bash
-$ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/grpc-go-9280052d36656451dd7568a18a836c2a74edaf6c 93d5a0f32dadc51585082f0d7786605b65fa6160 $(pwd)/tmp/out
- --pkg <pkg_name> --func <pkg_name> 
-```
 
 
 
