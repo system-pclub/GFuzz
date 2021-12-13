@@ -27,9 +27,10 @@ func NewInstContext(goSrcFile string) (*InstContext, error) {
 		Types: make(map[ast.Expr]types.TypeAndValue),
 		Defs:  make(map[*ast.Ident]types.Object),
 	}
-	_, err = conf.Check("mypkg", fs, []*ast.File{astF}, info)
+
+	_, err = conf.Check(astF.Name.Name, fs, []*ast.File{astF}, info)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("type checker: %s", err)
 	}
 	return &InstContext{
 		File:            goSrcFile,

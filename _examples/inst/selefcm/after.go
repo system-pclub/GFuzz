@@ -9,7 +9,7 @@ import (
 func SelectWithCh() {
 	ch1 := make(chan int)
 	ch2 := make(chan struct{})
-	switch oraclert.GetSelEfcmSwitchCaseIdx("/Users/xsh/code/GFuzz/_examples/inst/selefcm/before.go", "12", 2) {
+	switch oraclert.GetSelEfcmSwitchCaseIdx("/home/xsh/code/GFuzz/_examples/inst/selefcm/before.go", "12", 2) {
 	case 0:
 		select {
 		case <-ch1:
@@ -50,7 +50,7 @@ func SelectWithCh() {
 func SelectWithDefault() {
 	ch1 := make(chan int)
 	ch2 := make(chan struct{})
-	switch oraclert.GetSelEfcmSwitchCaseIdx("/Users/xsh/code/GFuzz/_examples/inst/selefcm/before.go", "24", 3) {
+	switch oraclert.GetSelEfcmSwitchCaseIdx("/home/xsh/code/GFuzz/_examples/inst/selefcm/before.go", "24", 3) {
 	case 0:
 		select {
 		case <-ch1:
@@ -97,7 +97,7 @@ func SelectWithDefault() {
 func SelectWithTimeout() {
 	ch1 := make(chan int)
 	ch2 := make(chan struct{})
-	switch oraclert.GetSelEfcmSwitchCaseIdx("/Users/xsh/code/GFuzz/_examples/inst/selefcm/before.go", "38", 3) {
+	switch oraclert.GetSelEfcmSwitchCaseIdx("/home/xsh/code/GFuzz/_examples/inst/selefcm/before.go", "38", 3) {
 	case 0:
 		select {
 		case <-ch1:
@@ -175,7 +175,7 @@ func (t *token) assignTokenToUser() { //Goroutine1
 }
 func (k *keeper) run() { //Goroutine2
 	ticker := time.NewTicker()
-	switch oraclert.GetSelEfcmSwitchCaseIdx("/Users/xsh/code/GFuzz/_examples/inst/selefcm/before.go", "65",
+	switch oraclert.GetSelEfcmSwitchCaseIdx("/home/xsh/code/GFuzz/_examples/inst/selefcm/before.go", "65",
 
 		// t is created before
 		2) {

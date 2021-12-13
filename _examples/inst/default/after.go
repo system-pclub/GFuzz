@@ -3,6 +3,8 @@ package defaultp
 import (
 	oraclert "gfuzz/pkg/oraclert"
 	aaa "sync"
+
+	_ "github.com/go-kit/log"
 )
 
 type aa struct {
@@ -35,16 +37,18 @@ func Hello() {
 
 		//asdfadfas
 		3)
+	oraclert.StoreOpInfo("Wait", 6)
 
 	c.Wait()
 
 	w := aaa.WaitGroup{}
-	oraclert.StoreOpInfo("Wait", 5)
+	oraclert.StoreOpInfo("Wait", 4)
+	oraclert.StoreOpInfo("Wait", 7)
 
 	w.Wait()
 
 	a := aa{}
-	oraclert.StoreOpInfo("Lock", 4)
+	oraclert.StoreOpInfo("Lock", 5)
 
 	a.m.Lock()
 
