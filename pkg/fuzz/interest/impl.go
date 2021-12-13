@@ -58,6 +58,11 @@ func (h *InterestHandlerImpl) IsInterested(i *api.Input, o *api.Output, isFoundN
 		}
 	}
 
+	if len(oSelectMap) == 0 {
+		/* No selects detected. Return not interesting.  */
+		return false, nil
+	}
+
 	ortCfgHash := hash.AsSha256(oSelectMap)
 	if h.fctx.UpdateOrtOutputHash(ortCfgHash) {
 		isInteresting = true
