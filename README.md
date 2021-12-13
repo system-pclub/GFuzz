@@ -24,7 +24,7 @@ bugs in Go programs. For artifact evaluation, we release
 - (4) execution overhead of GFuzz's sanitizer, 
 - (5) study results of whether 
 GFuzz can help detect bugs in two public concurrency bug sets,
-- (6) scripts to compare the effectiveness of GFuzz's different features.  
+- and (6) scripts to compare the effectiveness of GFuzz's different features.  
 
 
 Item (1) can be checked out by executing the following commands
@@ -83,11 +83,13 @@ $ ./benchmark.sh count-tests --dir /builder/etcd/native
 
 ## 3. Tab Table-2-Bug 
 
-This tab shows the detailed information of the detected bugs, including at which application
-version we find a bug (Column B), where we report a bug (Column E), what is the current 
-status of a filed bug report (Columns G-J), bug categories (Columns L-V), whether 
-GCatch can detect a bug (Column X), the reasons why GCatch fails (Columns Y-AC), 
-and the unit test we used to find a bug (columns AE-AF). 
+This tab shows the detailed information of each detected bugs, including at which application
+version we find the bug (Column B), where we report the bug (Column E), what is the current 
+status of the filed bug report (Columns G-J), which category the bug belongs to (Columns L-V), whether 
+GCatch can detect the bug (Column X), what is the reason if GCatch fails (Columns Y-AC), 
+and the unit test we used to find the bug (columns AE-AF). 
+
+### 3.1. Kubernetes
 
 Users can execute the following command to apply GFuzz to 
 fuzz an application (e.g., Kubernetes) of a particular version 
