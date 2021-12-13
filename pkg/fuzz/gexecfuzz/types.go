@@ -3,6 +3,8 @@ package gexecfuzz
 import (
 	"gfuzz/pkg/gexec"
 	"gfuzz/pkg/oraclert/output"
+	"gfuzz/pkg/selefcm"
+	"gfuzz/pkg/utils/hash"
 	"sync"
 )
 
@@ -14,10 +16,11 @@ type GExecFuzz struct {
 	// Oracler runtime related
 	OrtConfigHashes []string
 	// All selects we have seen so far
-	OrtSelects  map[string]output.SelectRecord
-	OrtChannels map[string]output.ChanRecord
-	OrtTuples   map[uint32]uint32
-	m           sync.RWMutex
+	OrtSelects       map[string]output.SelectRecord
+	OrtChannels      map[string]output.ChanRecord
+	OrtTuples        map[uint32]uint32
+	InputSelectsHash map[string]struct{}
+	m                sync.RWMutex
 }
 
 func NewGExecFuzz(exec gexec.Executable) *GExecFuzz {
@@ -32,6 +35,32 @@ func NewGExecFuzz(exec gexec.Executable) *GExecFuzz {
 
 func (e *GExecFuzz) String() string {
 	return e.Exec.String()
+}
+
+func (e *GExecFuzz) UpdateInputSelectEfcmsIfNew(Efcms []selefcm.SelEfcm) int {
+	iSelectMap := make(map[string][]int)
+	newSelectNum := 0
+
+	for _, v := range Efcms {
+		vSelectId := v.ID
+		vSelectChosen := v.Case
+
+		if val, ok := iSelectMap[vSelectId]; ok {
+			val = append(val, vSelectChosen)
+			iSelectMap[vSelectId] = val
+		} else {
+			val := []int{vSelectChosen}
+			iSelectMap[vSelectId] = val
+		}
+	}
+
+	ortCfgHash := hash.AsSha256(iSelectMap)
+	if _, exist := e.InputSelectsHash[ortCfgHash]; !exist {
+		e.InputSelectsHash[ortCfgHash] = struct{}{}
+		newSelectNum += 1
+	}
+
+	return newSelectNum
 }
 
 func (e *GExecFuzz) UpdateSelectRecordsIfNew(records []output.SelectRecord) int {

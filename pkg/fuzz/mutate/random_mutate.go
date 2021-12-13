@@ -15,6 +15,7 @@ type RandomMutateStrategy struct{}
 func (d *RandomMutateStrategy) Mutate(g *gexecfuzz.GExecFuzz, curr *config.Config, o *output.Output, energy int) ([]*config.Config, error) {
 	var cfgs []*config.Config
 
+	// TODO:: If we remove redundant cases, should we count redundant cases into the energy?
 	for mutate_idx := 0; mutate_idx < energy; mutate_idx++ {
 		cfg := config.NewConfig()
 		cfg.SelEfcm.SelTimeout = curr.SelEfcm.SelTimeout
@@ -59,7 +60,19 @@ func (d *RandomMutateStrategy) Mutate(g *gexecfuzz.GExecFuzz, curr *config.Confi
 				})
 			}
 		}
-		cfgs = append(cfgs, cfg)
+
+		/* Check select enforcements, see if they are redundant cases. */
+		selectEfcms := cfg.SelEfcm.Efcms
+		if g.UpdateInputSelectEfcmsIfNew(selectEfcms) > 0 {
+			cfgs = append(cfgs, cfg)
+		} else if getRandomWithMax(10) < 1 {
+			/* If this is redundant case, give 10% chance to rerun. */
+			cfgs = append(cfgs, cfg)
+		} else if mutate_idx == (energy-1) && len(cfgs) == 0 {
+			/* Keep one case */
+			//cfgs = append(cfgs, cfg)
+			return nil, nil
+		}
 	}
 
 	return cfgs, nil
