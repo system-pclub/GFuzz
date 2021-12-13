@@ -142,7 +142,7 @@ $ ./scripts/fuzz-testbins.sh <testbin dir> <output dir> [optional flags for fuzz
 
 To apply GFuzz, we need to change one testing setting of Prometheus. Since all detected bugs of Prometheus are from two versions, we create two repositories for the two versions ([Prometheus-1](https://github.com/gfuzz-asplos/prometheus-e0f1506254688cec85276cc939aeb536a4e029d1) and [Prometheus-2](https://github.com/gfuzz-asplos/prometheus-f08c89e569b2421bcc8ef7caf585fd8d3c2ccaba)) and conduct the required change. To reproduce the experiments on Prometheus, users can directly use the two created repositories. 
 
-The first version is e0f1506254688cec85276cc939aeb536a4e029d1. Users can execute the following command to apply GFuzz to the version. 
+- (1) The first version is e0f1506254688cec85276cc939aeb536a4e029d1. Users can execute the following command to apply GFuzz to the version. 
 
 ``` bash
 $ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/prometheus-e0f1506254688cec85276cc939aeb536a4e029d1 ba019add3f94b5ef224fbf2e537afe4f3878ffbe $(pwd)/tmp/out
@@ -155,7 +155,7 @@ $ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/prometheus-e0f1506254688
 ```
 
 
-The second version is f08c89e569b2421bcc8ef7caf585fd8d3c2ccaba. Users can execute the following command to apply GFuzz to that version. 
+- (2) The second version is f08c89e569b2421bcc8ef7caf585fd8d3c2ccaba. Users can execute the following command to apply GFuzz to that version. 
 
 ``` bash
 $ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/prometheus-f08c89e569b2421bcc8ef7caf585fd8d3c2ccaba 141e016e260734ade6b2ba2cbdc8435bfce70262 $(pwd)/tmp/out
@@ -219,7 +219,7 @@ respectively ([grpc-go-1](https://github.com/gfuzz-asplos/grpc-go-0bc741730b8171
 and [grpc-go-3](https://github.com/gfuzz-asplos/grpc-go-9280052d36656451dd7568a18a836c2a74edaf6c)) 
 and conduct the required changes. 
 
-- a. The first version is 0bc741730b8171fc51cdaf826caea5119c411009. Users can execute the following command to apply GFuzz to the version. 
+- (1) The first version is 0bc741730b8171fc51cdaf826caea5119c411009. Users can execute the following command to apply GFuzz to the version. 
 
 ``` bash
 $ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/grpc-go-0bc741730b8171fc51cdaf826caea5119c411009 fe42d65231bf2c83c940db3b46849e250c3bdf2b $(pwd)/tmp/out
@@ -231,7 +231,7 @@ To only use one unit test in the first version, users can execute the following 
 $  ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/grpc-go-0bc741730b8171fc51cdaf826caea5119c411009 fe42d65231bf2c83c940db3b46849e250c3bdf2b $(pwd)/tmp/out --pkg <pkg_name> --func <pkg_name> 
 ```
 
-- b. The second version is 83f9def5feb388c4fd7e6586bd55cf6bf6d46a01. Users can execute the following command to apply GFuzz to the version. 
+- (2) The second version is 83f9def5feb388c4fd7e6586bd55cf6bf6d46a01. Users can execute the following command to apply GFuzz to the version. 
 
 ``` bash
 $ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/grpc-go-83f9def5feb388c4fd7e6586bd55cf6bf6d46a01 b95c0c0923d938b8acb7c841f0a04ade8f7d5fbf $(pwd)/tmp/out
@@ -244,7 +244,7 @@ $ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/grpc-go-83f9def5feb388c4
  --pkg <pkg_name> --func <pkg_name> 
 ```
 
-- c. The third version is 9280052d36656451dd7568a18a836c2a74edaf6c. Users can execute the following command to apply GFuzz to the version. 
+- (3) The third version is 9280052d36656451dd7568a18a836c2a74edaf6c. Users can execute the following command to apply GFuzz to the version. 
 
 ``` bash
 $ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/grpc-go-9280052d36656451dd7568a18a836c2a74edaf6c b95c0c0923d938b8acb7c841f0a04ade8f7d5fbf $(pwd)/tmp/out
