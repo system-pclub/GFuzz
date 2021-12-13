@@ -10,7 +10,7 @@ func getSelectorCallerType(iCtx *inst.InstContext, selExpr *ast.SelectorExpr) st
 		if callerIdent.Obj != nil {
 			if objStmt, ok := callerIdent.Obj.Decl.(*ast.AssignStmt); ok {
 				if objIdent, ok := objStmt.Lhs[0].(*ast.Ident); ok {
-					if to := iCtx.Type.Defs[objIdent]; to == nil {
+					if to := iCtx.Type.Defs[objIdent]; to == nil || to.Type() == nil {
 						return ""
 					} else {
 						return to.Type().String()

@@ -6,6 +6,7 @@ import (
 	"gfuzz/pkg/inst/pass"
 	"gfuzz/pkg/inst/stats"
 	"gfuzz/pkg/utils/fs"
+	"gfuzz/pkg/utils/gofmt"
 	"log"
 	"os"
 	"runtime/pprof"
@@ -75,6 +76,12 @@ func main() {
 			log.Panic(err)
 		}
 		goSrcFiles = append(goSrcFiles, files...)
+
+		// try to run go get ./... since dependencies might needed for type checking
+		err = gofmt.GoModDownload(opts.Dir)
+		if err != nil {
+			log.Printf("prepare dependencies: %s", err)
+		}
 	}
 
 	if opts.File != "" {
