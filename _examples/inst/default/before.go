@@ -1,6 +1,10 @@
 package defaultp
 
-import aaa "sync"
+import (
+	aaa "sync"
+
+	_ "github.com/go-kit/log"
+)
 
 type aa struct {
 	m aaa.Mutex
