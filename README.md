@@ -96,7 +96,7 @@ fuzz Kubernetes at a particular version
 (e.g., 97d40890d00acf721ecabb8c9a6fec3b3234b74b):
 
 ``` bash
-$ ./scripts/fuzz-git.sh https://github.com/kubernetes/kubernetes 97d40890d00acf721ecabb8c9a6fec3b3234b74b $(pwd)/tmp/out
+$ ./scripts/fuzz-git.sh https://github.com/kubernetes/kubernetes 97d40890d00acf721ecabb8c9a6fec3b3234b74b $(PWD)/tmp/out
 
 ```
 
@@ -106,7 +106,7 @@ test (columns AE-AF). For example, users can execute the following command
 to inspect whether GFuzz can still detect the bug at row 4. 
 
 ``` bash
-$ ./scripts/fuzz-git.sh https://github.com/kubernetes/kubernetes 97d40890d00acf721ecabb8c9a6fec3b3234b74b $(pwd)/tmp/out --pkg k8s.io/kubernetes/pkg/kubelet/cm/devicemanager --func TestAllocate
+$ ./scripts/fuzz-git.sh https://github.com/kubernetes/kubernetes 97d40890d00acf721ecabb8c9a6fec3b3234b74b $(PWD)/tmp/out --pkg k8s.io/kubernetes/pkg/kubelet/cm/devicemanager --func TestAllocate
 ```
 
 ### 3.2. Docker
@@ -146,22 +146,40 @@ To apply GFuzz, we need to change one testing setting of Prometheus. Since all d
 
 ``` bash
 # fuzz the whole version
-$ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/prometheus-e0f1506254688cec85276cc939aeb536a4e029d1 ba019add3f94b5ef224fbf2e537afe4f3878ffbe $(pwd)/tmp/out
+$ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/prometheus-e0f1506254688cec85276cc939aeb536a4e029d1 ba019add3f94b5ef224fbf2e537afe4f3878ffbe $(PWD)/tmp/out
 # fuzz one unit test
-$ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/prometheus-e0f1506254688cec85276cc939aeb536a4e029d1 ba019add3f94b5ef224fbf2e537afe4f3878ffbe $(pwd)/tmp/out --pkg <pkg_name> --func <pkg_name>
+$ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/prometheus-e0f1506254688cec85276cc939aeb536a4e029d1 ba019add3f94b5ef224fbf2e537afe4f3878ffbe $(PWD)/tmp/out --pkg <pkg_name> --func <func_name>
 ```
 
 - The second version is f08c89e569b2421bcc8ef7caf585fd8d3c2ccaba. Users can execute the following commands to apply GFuzz to the version or one unit test in the version. 
 
 ``` bash
 # fuzz the whole version
-$ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/prometheus-f08c89e569b2421bcc8ef7caf585fd8d3c2ccaba 141e016e260734ade6b2ba2cbdc8435bfce70262 $(pwd)/tmp/out
+$ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/prometheus-f08c89e569b2421bcc8ef7caf585fd8d3c2ccaba 141e016e260734ade6b2ba2cbdc8435bfce70262 $(PWD)/tmp/out
 # fuzz one unit test
-$ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/prometheus-f08c89e569b2421bcc8ef7caf585fd8d3c2ccaba 141e016e260734ade6b2ba2cbdc8435bfce70262 $(pwd)/tmp/out --pkg <pkg_name> --func <pkg_name> 
+$ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/prometheus-f08c89e569b2421bcc8ef7caf585fd8d3c2ccaba 141e016e260734ade6b2ba2cbdc8435bfce70262 $(PWD)/tmp/out --pkg <pkg_name> --func <func_name> 
 ```
 
 
 ### 3.4. etcd
+
+For etcd, the recommended way is to use the following command to build its tests firstly. 
+
+``` bash
+# build all etcd tests at a particular version
+$ ./scripts/prepare-etcd.sh <COMMIT_HASH>
+# e.g.,
+# ./scripts/prepare-etcd.sh 6bb26ef008f5465bd11b078f0a2e3ae95fdc6d4a
+```
+
+Then, users can use the following commands to fuzz the whole built etcd or one unit test in etcd. 
+
+``` bash
+# fuzz the whole etcd
+$ ./scripts/fuzz-testbins.sh $(PWD)/tmp/builder/etcd/inst $(PWD)/tmp/out
+# fuzz one unit test
+$ ./scripts/fuzz-testbins.sh $(PWD)/tmp/builder/etcd/inst $(PWD)/tmp/out --func <func_name>
+```
 
 
 ### 3.5. Go-Ethereum
@@ -170,20 +188,20 @@ Users can execute the following command to apply GFuzz to
 Go-Ethereum at a particular version:
 
 ``` bash
-$ ./scripts/fuzz-git.sh https://github.com/ethereum/go-ethereum <commit_hash> $(pwd)/tmp/out
+$ ./scripts/fuzz-git.sh https://github.com/ethereum/go-ethereum <commit_hash> $(PWD)/tmp/out
 
 # e.g., 
-# ./scripts/fuzz-git.sh https://github.com/ethereum/go-ethereum 56e9001a1a8ddecc478943170b00207ef46109b9 $(pwd)/tmp/out
+# ./scripts/fuzz-git.sh https://github.com/ethereum/go-ethereum 56e9001a1a8ddecc478943170b00207ef46109b9 $(PWD)/tmp/out
 ```
 
 Users can execute the following command
 to force GFuzz to only use one unit test. 
 
 ``` bash
-$ ./scripts/fuzz-git.sh https://github.com/ethereum/go-ethereum <commit_hash> $(pwd)/tmp/out --pkg <pkg_name> --func <func_name>
+$ ./scripts/fuzz-git.sh https://github.com/ethereum/go-ethereum <commit_hash> $(PWD)/tmp/out --pkg <pkg_name> --func <func_name>
 
 # e.g.,
-# ./scripts/fuzz-git.sh https://github.com/ethereum/go-ethereum 56e9001a1a8ddecc478943170b00207ef46109b9 $(pwd)/tmp/out --pkg github.com/ethereum/go-ethereum/console --func TestInteractive
+# ./scripts/fuzz-git.sh https://github.com/ethereum/go-ethereum 56e9001a1a8ddecc478943170b00207ef46109b9 $(PWD)/tmp/out --pkg github.com/ethereum/go-ethereum/console --func TestInteractive
 ```
 
 
@@ -193,7 +211,7 @@ The following command applies GFuzz to
 a particular version of TiDB:
 
 ``` bash
-$ ./scripts/fuzz-git.sh https://github.com/pingcap/tidb <commit_hash> $(pwd)/tmp/out
+$ ./scripts/fuzz-git.sh https://github.com/pingcap/tidb <commit_hash> $(PWD)/tmp/out
 
 ```
 
@@ -201,7 +219,7 @@ Users can execute the following command
 to only fuzz one unit test. 
 
 ``` bash
-$ ./scripts/fuzz-git.sh https://github.com/pingcap/tidb <commit_hash> $(pwd)/tmp/out --pkg <pkg_name> --func <func_name>
+$ ./scripts/fuzz-git.sh https://github.com/pingcap/tidb <commit_hash> $(PWD)/tmp/out --pkg <pkg_name> --func <func_name>
 ```
 
 ### 3.7. gRPC-go
@@ -217,18 +235,18 @@ and conduct the required changes.
 
 ``` bash
 # fuzz the whole application
-$ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/grpc-go-0bc741730b8171fc51cdaf826caea5119c411009 fe42d65231bf2c83c940db3b46849e250c3bdf2b $(pwd)/tmp/out
+$ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/grpc-go-0bc741730b8171fc51cdaf826caea5119c411009 fe42d65231bf2c83c940db3b46849e250c3bdf2b $(PWD)/tmp/out
 # fuzz one unit test
-$  ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/grpc-go-0bc741730b8171fc51cdaf826caea5119c411009 fe42d65231bf2c83c940db3b46849e250c3bdf2b $(pwd)/tmp/out --pkg <pkg_name> --func <pkg_name> 
+$  ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/grpc-go-0bc741730b8171fc51cdaf826caea5119c411009 fe42d65231bf2c83c940db3b46849e250c3bdf2b $(PWD)/tmp/out --pkg <pkg_name> --func <func_name> 
 ```
 
 - The second version is 83f9def5feb388c4fd7e6586bd55cf6bf6d46a01. Users can execute the following command to apply GFuzz to the version or one unit test in the version. 
 
 ``` bash
 # fuzz the whole application
-$ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/grpc-go-83f9def5feb388c4fd7e6586bd55cf6bf6d46a01 b95c0c0923d938b8acb7c841f0a04ade8f7d5fbf $(pwd)/tmp/out
+$ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/grpc-go-83f9def5feb388c4fd7e6586bd55cf6bf6d46a01 b95c0c0923d938b8acb7c841f0a04ade8f7d5fbf $(PWD)/tmp/out
 # fuzz one unit test
-$ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/grpc-go-83f9def5feb388c4fd7e6586bd55cf6bf6d46a01 b95c0c0923d938b8acb7c841f0a04ade8f7d5fbf $(pwd)/tmp/out --pkg <pkg_name> --func <pkg_name> 
+$ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/grpc-go-83f9def5feb388c4fd7e6586bd55cf6bf6d46a01 b95c0c0923d938b8acb7c841f0a04ade8f7d5fbf $(PWD)/tmp/out --pkg <pkg_name> --func <func_name> 
 ```
 
 
@@ -236,9 +254,9 @@ $ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/grpc-go-83f9def5feb388c4
 
 ``` bash
 # fuzz the whole application
-$ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/grpc-go-9280052d36656451dd7568a18a836c2a74edaf6c b95c0c0923d938b8acb7c841f0a04ade8f7d5fbf $(pwd)/tmp/out
+$ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/grpc-go-9280052d36656451dd7568a18a836c2a74edaf6c b95c0c0923d938b8acb7c841f0a04ade8f7d5fbf $(PWD)/tmp/out
 # fuzz one unit test
-$ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/grpc-go-9280052d36656451dd7568a18a836c2a74edaf6c 93d5a0f32dadc51585082f0d7786605b65fa6160 $(pwd)/tmp/out --pkg <pkg_name> --func <pkg_name> 
+$ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/grpc-go-9280052d36656451dd7568a18a836c2a74edaf6c 93d5a0f32dadc51585082f0d7786605b65fa6160 $(PWD)/tmp/out --pkg <pkg_name> --func <func_name> 
 ```
 
 We compare GFuzz with GCatch in our evaluation. To check whether 
