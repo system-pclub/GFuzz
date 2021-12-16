@@ -321,6 +321,12 @@ func CheckBlockBug(CS []PrimInfo) (finished bool) {
 			if chI.OKToCheck == false {
 				return true
 			}
+			if chI.Chan.closed == 1 {
+				if BoolDebug {
+					println("Abort checking because this prim is closed")
+				}
+				return true
+			}
 		}
 		if Index(primI.StringDebug(), strSDKPath) >= 0 {
 			if BoolDebug {
@@ -370,7 +376,7 @@ loopGS:
 			primI := blockInfo.Prim
 			if _, exist := mapCS[primI]; !exist {
 				if BoolDebug {
-					println("\t\tNot existing prim in CS:", blockInfo.Prim.StringDebug())
+					println("\t\tNot existing prim in CS:", blockInfo.Prim.StringDebug(), blockInfo.StrOp)
 				}
 				mapCS[primI] = struct{}{} // update CS
 				primI.Lock()

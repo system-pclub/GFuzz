@@ -416,9 +416,7 @@ func closechan(c *hchan) {
 	lock(&c.lock)
 
 	///MYCODE
-	if BoolRecord {
-		RecordChOp(c)
-	}
+
 	if c.chInfo != nil {
 		if GlobalEnableOracle && c.chInfo.OKToCheck && okToCheck(c) {
 			currentGo := CurrentGoInfo()
@@ -441,6 +439,11 @@ func closechan(c *hchan) {
 	}
 
 	c.closed = 1
+
+	///MYCODE
+	if BoolRecord {
+		RecordChOp(c)
+	}
 
 	var glist gList
 
