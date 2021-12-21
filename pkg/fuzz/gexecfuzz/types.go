@@ -27,12 +27,13 @@ type GExecFuzz struct {
 
 func NewGExecFuzz(exec gexec.Executable) *GExecFuzz {
 	return &GExecFuzz{
-		Exec:             exec,
-		BestScore:        0,
-		OrtSelects:       make(map[string]output.SelectRecord),
-		OrtChannels:      make(map[string]output.ChanRecord),
-		OrtTuples:        make(map[uint32]uint32),
-		InputSelectsHash: make(map[string]struct{}),
+		Exec:                exec,
+		BestScore:           0,
+		OrtSelects:          make(map[string]output.SelectRecord),
+		OrtChannels:         make(map[string]output.ChanRecord),
+		OrtTuples:           make(map[uint32]uint32),
+		InputSelectsHash:    make(map[string]struct{}),
+		EfcmHash2TimeoutCnt: make(map[string]uint32),
 	}
 }
 
