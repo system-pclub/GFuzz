@@ -254,7 +254,7 @@ $ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/grpc-go-83f9def5feb388c4
 
 ``` bash
 # fuzz the whole application
-$ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/grpc-go-9280052d36656451dd7568a18a836c2a74edaf6c b95c0c0923d938b8acb7c841f0a04ade8f7d5fbf $(PWD)/tmp/out
+$ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/grpc-go-9280052d36656451dd7568a18a836c2a74edaf6c 93d5a0f32dadc51585082f0d7786605b65fa6160 $(PWD)/tmp/out
 # fuzz one unit test
 $ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/grpc-go-9280052d36656451dd7568a18a836c2a74edaf6c 93d5a0f32dadc51585082f0d7786605b65fa6160 $(PWD)/tmp/out --pkg <pkg_name> --func <func_name> 
 ```
