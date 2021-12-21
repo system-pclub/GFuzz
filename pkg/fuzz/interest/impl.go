@@ -23,13 +23,7 @@ func NewInterestHandlerImpl(fctx *api.Context) api.InterestHandler {
 	}
 }
 func (h *InterestHandlerImpl) IsInterested(i *api.Input, o *api.Output, isFoundNewSelect bool) (bool, error) {
-	start := time.Now()
 
-	defer func() {
-		// Code to measure
-		duration := time.Since(start)
-		log.Printf("IsInterested: %s", duration)
-	}()
 	// If isIgnoreFeedback is true, we treat every feedback as interesting and directly return.
 	if h.fctx.Cfg.IsIgnoreFeedback {
 		return true, nil
