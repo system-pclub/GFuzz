@@ -23,9 +23,15 @@ func NewInterestHandlerImpl(fctx *api.Context) api.InterestHandler {
 	}
 }
 func (h *InterestHandlerImpl) IsInterested(i *api.Input, o *api.Output, isFoundNewSelect bool) (bool, error) {
+	start := time.Now()
 
+	defer func() {
+		// Code to measure
+		duration := time.Since(start)
+		log.Printf("IsInterested: %s", duration)
+	}()
 	// If isIgnoreFeedback is true, we treat every feedback as interesting and directly return.
-	if h.fctx.Cfg.IsIgnoreFeedback == true {
+	if h.fctx.Cfg.IsIgnoreFeedback {
 		return true, nil
 	}
 
@@ -68,7 +74,7 @@ func (h *InterestHandlerImpl) IsInterested(i *api.Input, o *api.Output, isFoundN
 	if h.fctx.UpdateOrtOutputHash(ortCfgHash) {
 		isInteresting = true
 	}
-	if isInteresting == true || isFoundNewSelect {
+	if isInteresting || isFoundNewSelect {
 		return true, nil
 	} else {
 		return false, nil
@@ -223,6 +229,7 @@ func handleRandStageInput(fctx *api.Context, i *api.Input, o *api.Output) (bool,
 		rand.Seed(time.Now().UnixNano())
 		if rand.Intn(100) >= randMutateChances {
 			// Skip the test case based on rand possibilities.
+			log.Printf("handle %d, skip because of score", execID)
 			return true, nil
 		}
 	}
@@ -235,7 +242,7 @@ func handleRandStageInput(fctx *api.Context, i *api.Input, o *api.Output) (bool,
 
 	for _, cfg := range cfgs {
 		if g.HasTimeoutEfcm(hash.AsSha256(cfg.SelEfcm.Efcms)) {
-			log.Printf("skip generated config from exec %d becuase of timeout", execID)
+			log.Printf("handle %d, skip a generated config becuase of timeout", execID)
 			continue
 		}
 		randInputs = append(randInputs, api.NewExecInput(fctx.GetAutoIncGlobalID(), execID, fctx.Cfg.OutputDir, g.Exec, cfg, api.RandStage))

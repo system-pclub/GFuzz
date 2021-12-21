@@ -13,8 +13,6 @@ type GExecFuzz struct {
 	BestScore int
 	Exec      gexec.Executable
 
-	// Oracle runtime related
-	OrtConfigHashes []string
 	// mapping from oracle config hash to timeout count
 	EfcmHash2TimeoutCnt map[string]uint32
 	// All selects we have seen so far
@@ -146,8 +144,8 @@ func (e *GExecFuzz) RecordTimeoutEfcm(efcm string) {
 }
 
 func (e *GExecFuzz) HasTimeoutEfcm(efcm string) bool {
-	e.m.Lock()
-	defer e.m.Unlock()
+	e.m.RLock()
+	defer e.m.RUnlock()
 	_, exist := e.EfcmHash2TimeoutCnt[efcm]
 	return exist
 }
