@@ -145,9 +145,26 @@ func HandleExec(ctx context.Context, i *api.Input, o *api.Output, fctx *api.Cont
 	if o.OracleRtOutput == nil {
 		return fmt.Errorf("cannot handle an exec without oracle runtime output")
 	}
+
+	entry := fctx.GetQueueEntryByGExecID(i.Exec.String())
+	if entry == nil {
+		return fmt.Errorf("cannot find queue entry for %s", i.Exec.String())
+	}
+
 	logger := getWorkerLogger(ctx)
 	// 1. ignore this exec if timeout
 	if o.Timeout {
+
+		if i.OracleRtConfig != nil && i.OracleRtConfig.SelEfcm.Efcms != nil {
+			efcmHash := hash.AsSha256(i.OracleRtConfig.SelEfcm.Efcms)
+			entry.RecordTimeoutEfcm(efcmHash)
+		}
+
+		// update init record in interest queue
+		if i.Stage == api.InitStage {
+			ii := fctx.Interests.FindInit(i)
+			ii.Timeout = true
+		}
 		return fmt.Errorf("ignore because of timeout")
 	}
 
@@ -170,10 +187,7 @@ func HandleExec(ctx context.Context, i *api.Input, o *api.Output, fctx *api.Cont
 
 	// 3. update if any new select records found
 	isFoundNewSelect := false
-	entry := fctx.GetQueueEntryByGExecID(i.Exec.String())
-	if entry == nil {
-		return fmt.Errorf("cannot find queue entry for %s", i.Exec.String())
-	}
+
 	newSelects := entry.UpdateSelectRecordsIfNew(o.OracleRtOutput.Selects)
 	if newSelects != 0 {
 		logger.Printf("found %d new selects", newSelects)
@@ -184,7 +198,7 @@ func HandleExec(ctx context.Context, i *api.Input, o *api.Output, fctx *api.Cont
 	if i.Stage == api.InitStage {
 		// if input is init, since init stage by default is interested input, so no need to check interest
 		// simply update output and hash
-		ii := fctx.Interests.Find(i)
+		ii := fctx.Interests.FindInit(i)
 		ii.Output = o
 
 		// Use SELECT Record as feedback.

@@ -6,6 +6,7 @@ import (
 	"gfuzz/pkg/fuzz/mutate"
 	"gfuzz/pkg/fuzz/score"
 	"gfuzz/pkg/utils/hash"
+	"log"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -203,6 +204,7 @@ func handleCalibStageInput(fctx *api.Context, i *api.Input, o *api.Output) (bool
 func handleRandStageInput(fctx *api.Context, i *api.Input, o *api.Output) (bool, error) {
 	g := fctx.GetQueueEntryByGExecID(i.Exec.String())
 	execID, err := getExecIDFromInputID(i.ID)
+
 	if err != nil {
 		return false, err
 	}
@@ -232,6 +234,10 @@ func handleRandStageInput(fctx *api.Context, i *api.Input, o *api.Output) (bool,
 	}
 
 	for _, cfg := range cfgs {
+		if g.HasTimeoutEfcm(hash.AsSha256(cfg.SelEfcm.Efcms)) {
+			log.Printf("skip generated config from exec %d becuase of timeout", execID)
+			continue
+		}
 		randInputs = append(randInputs, api.NewExecInput(fctx.GetAutoIncGlobalID(), execID, fctx.Cfg.OutputDir, g.Exec, cfg, api.RandStage))
 	}
 

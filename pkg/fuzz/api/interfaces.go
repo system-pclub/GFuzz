@@ -9,6 +9,7 @@ type ScoreStrategy interface {
 // InterestInput is created if the input is interested(identify by score strategy) or it is init stage input
 type InterestInput struct {
 	Executed   bool
+	Timeout    bool // Timeout usually only used in init stage, since other stage timeout will not be added into interest queue.
 	HandledCnt uint32
 	Input      *Input
 	Output     *Output // Output will be nil if executed is false

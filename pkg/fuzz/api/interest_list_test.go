@@ -10,7 +10,7 @@ type TestInterestHandler struct {
 	t          *testing.T
 }
 
-func (m *TestInterestHandler) IsInterested(i *Input, o *Output) (bool, error) {
+func (m *TestInterestHandler) IsInterested(i *Input, o *Output, isFoundNewSelect bool) (bool, error) {
 	return false, nil
 }
 
@@ -33,9 +33,21 @@ func (m *TestInterestHandler) Check() {
 func TestConcurrentInterestListEachAndAdd(t *testing.T) {
 	it := &InterestList{}
 
-	input1 := &InterestInput{}
-	input2 := &InterestInput{}
-	input3 := &InterestInput{}
+	input1 := &InterestInput{
+		Input: &Input{
+			Stage: InitStage,
+		},
+	}
+	input2 := &InterestInput{
+		Input: &Input{
+			Stage: InitStage,
+		},
+	}
+	input3 := &InterestInput{
+		Input: &Input{
+			Stage: InitStage,
+		},
+	}
 
 	it.Add(input1)
 	it.Add(input2)
@@ -54,15 +66,109 @@ func TestConcurrentInterestListEachAndAdd(t *testing.T) {
 	go func() {
 		// make sure it.Each called first
 		time.Sleep(100 * time.Millisecond)
-		it.Add(&InterestInput{})
-		it.Add(&InterestInput{})
-		it.Add(&InterestInput{})
+		it.Add(&InterestInput{
+			Input: &Input{
+				Stage: DeterStage,
+			},
+		})
+		it.Add(&InterestInput{
+			Input: &Input{
+				Stage: DeterStage,
+			},
+		})
+		it.Add(&InterestInput{
+			Input: &Input{
+				Stage: DeterStage,
+			},
+		})
 		done <- struct{}{}
 	}()
 	it.Each(th)
 	th.Check()
 	<-done
-	if len(it.interestedInputs) != 6 {
+	if len(it.interestedInputs) != 3 {
 		t.Fail()
 	}
+
+	if len(it.initInputs) != 3 {
+		t.Fail()
+	}
+}
+
+func TestInterestListEach(t *testing.T) {
+	it := &InterestList{}
+
+	input1 := &InterestInput{
+		Input: &Input{
+			Stage: InitStage,
+		},
+	}
+	input2 := &InterestInput{
+		Input: &Input{
+			Stage: InitStage,
+		},
+	}
+	input3 := &InterestInput{
+		Input: &Input{
+			Stage: InitStage,
+		},
+	}
+
+	it.Add(input1)
+	it.Add(input2)
+	it.Add(input3)
+
+	th := &TestInterestHandler{
+		shoulTouch: make(map[*InterestInput]bool),
+		t:          t,
+	}
+
+	th.shoulTouch[input1] = false
+	th.shoulTouch[input2] = false
+	th.shoulTouch[input3] = false
+
+	it.Each(th)
+	th.Check()
+}
+
+func TestInterestListAdd(t *testing.T) {
+	it := &InterestList{}
+
+	input1 := &InterestInput{
+		Input: &Input{
+			Stage: InitStage,
+		},
+	}
+	input2 := &InterestInput{
+		Input: &Input{
+			Stage: DeterStage,
+		},
+	}
+	th := &TestInterestHandler{
+		shoulTouch: make(map[*InterestInput]bool),
+		t:          t,
+	}
+	th.shoulTouch[input1] = false
+	th.shoulTouch[input2] = false
+	it.Add(input1)
+
+	if it.initInputs[0] != input1 {
+		t.Fail()
+	}
+
+	if len(it.interestedInputs) != 0 {
+		t.Fail()
+	}
+
+	it.Each(th)
+
+	it.Add(input2)
+	if it.interestedInputs[0] != input2 {
+		t.Fail()
+	}
+	it.Each(th)
+	if len(it.interestedInputs) != 0 {
+		t.Fail()
+	}
+
 }

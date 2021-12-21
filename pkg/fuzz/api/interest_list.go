@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"log"
 	"sync"
 	"sync/atomic"
@@ -9,24 +10,35 @@ import (
 type InterestList struct {
 	// interestedInputs contains a list of interested input
 	interestedInputs []*InterestInput
-	rw               sync.RWMutex
-	Dirty            bool   // inputs changed before HandleEach
-	looping          uint32 // atomic boolean
+	// initInputs contains only init stage
+	initInputs []*InterestInput
+	rw         sync.RWMutex
+	Dirty      bool   // inputs changed before HandleEach
+	looping    uint32 // atomic boolean
 }
 
-func (i *InterestList) Add(input *InterestInput) {
+func (i *InterestList) Add(input *InterestInput) error {
 	i.rw.Lock()
 	defer i.rw.Unlock()
 	if !i.Dirty {
 		i.Dirty = true
 	}
-	i.interestedInputs = append(i.interestedInputs, input)
+	if input == nil || input.Input == nil {
+		return fmt.Errorf("input is nil")
+	}
+	if input.Input.Stage == InitStage {
+		i.initInputs = append(i.initInputs, input)
+	} else {
+		i.interestedInputs = append(i.interestedInputs, input)
+	}
+	return nil
 }
 
-func (i *InterestList) Find(input *Input) *InterestInput {
+func (i *InterestList) FindInit(input *Input) *InterestInput {
+	// only init stage's interest need/should be updated/fetched
 	i.rw.Lock()
 	defer i.rw.Unlock()
-	for _, ii := range i.interestedInputs {
+	for _, ii := range i.initInputs {
 		if ii.Input == input {
 			return ii
 		}
@@ -44,13 +56,25 @@ func (i *InterestList) GetInterestingLength() int {
 
 func (i *InterestList) Each(handler InterestHandler) (ret bool) {
 	i.rw.Lock()
-	currInterests := make([]*InterestInput, len(i.interestedInputs))
+	var currInterests []*InterestInput
+
+	if len(i.interestedInputs) == 0 {
+		currInterests = i.initInputs
+	} else {
+		currInterests = make([]*InterestInput, len(i.interestedInputs))
+		copy(currInterests, i.interestedInputs)
+		// clear interest inputs list each time after copying all of them
+		i.interestedInputs = nil
+	}
 	i.Dirty = false
-	copy(currInterests, i.interestedInputs)
 	i.looping += 1
 	i.rw.Unlock()
 	log.Printf("interesting list length: %d", len(currInterests))
 	for _, i := range currInterests {
+		if i.Timeout {
+			log.Printf("handling interest %s: skip because of it marked with timeout before", i.Input.ID)
+			continue
+		}
 		handled, err := handler.HandleInterest(i)
 		if err != nil {
 			log.Printf("handling interest %s: %s", i.Input.ID, err)
