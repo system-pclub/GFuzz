@@ -234,7 +234,15 @@ func handleRandStageInput(fctx *api.Context, i *api.Input, o *api.Output) (bool,
 		return false, err
 	}
 
+	if len(cfgs) == 0 {
+		// if no configuration, it implies there is no selects for fuzzer to mutate
+		// if no feedback mode,  we should not consider it and simply rerun it
+		if fctx.Cfg.IsIgnoreFeedback {
+			cfgs = append(cfgs, i.OracleRtConfig)
+		}
+	}
 	for _, cfg := range cfgs {
+		// skip if configuration caused timeout
 		if g.HasTimeoutEfcm(hash.AsSha256(cfg.SelEfcm.Efcms)) {
 			log.Printf("handle %d, skip a generated config becuase of timeout", execID)
 			continue
