@@ -112,22 +112,22 @@ func (h *InterestHandlerImpl) HandleInterest(i *api.InterestInput) (ret bool, er
 
 		// Yu:: Directly jump to RandStage if we see the init_stage for the second time.
 		// Yu :: The first time of execution should be covered by !i.Executed.
-		ret, err = handleRandStageInput(h.fctx, i.Input, i.Output)
+		ret, err = handleRandStageInput(h.fctx, i)
 	case api.DeterStage:
 		// we are handling the output from the input with deter stage
 		//err = handleDeterStageInput(h.fctx, i.Input, i.Output)
 
 		// Yu:: Should not be seen in the exec. But if seen, treat it as rand.
-		ret, err = handleRandStageInput(h.fctx, i.Input, i.Output)
+		ret, err = handleRandStageInput(h.fctx, i)
 	case api.CalibStage:
 		// we are handling the output from the input with calib stage
-		//err = handleCalibStageInput(h.fctx, i.Input, i.Output)
+		//err = handleCalibStageInput(h.fctx,  i)
 
 		// Yu:: Should not be seen in the exec. But if seen, treat it as rand.
-		ret, err = handleRandStageInput(h.fctx, i.Input, i.Output)
+		ret, err = handleRandStageInput(h.fctx, i)
 	case api.RandStage:
 		// we are handling the output from the input with rand stage
-		ret, err = handleRandStageInput(h.fctx, i.Input, i.Output)
+		ret, err = handleRandStageInput(h.fctx, i)
 	case api.ReplayStage:
 		// no need to handle replay
 
@@ -201,7 +201,24 @@ func handleCalibStageInput(fctx *api.Context, i *api.Input, o *api.Output) (bool
 	return true, nil
 }
 
-func handleRandStageInput(fctx *api.Context, i *api.Input, o *api.Output) (bool, error) {
+// segment chance into 4 interval
+func segmentChance(chance int) int {
+	if chance <= 20 {
+		return 20
+	} else if chance <= 40 {
+		return 40
+	} else if chance <= 60 {
+		return 60
+	} else if chance <= 80 {
+		return 80
+	}
+
+	return 100
+}
+
+func handleRandStageInput(fctx *api.Context, ii *api.InterestInput) (bool, error) {
+	i := ii.Input
+	o := ii.Output
 	g := fctx.GetQueueEntryByGExecID(i.Exec.String())
 	execID, err := getExecIDFromInputID(i.ID)
 
@@ -219,11 +236,17 @@ func handleRandStageInput(fctx *api.Context, i *api.Input, o *api.Output) (bool,
 		if curScore > fctx.GlobalBestScore {
 			fctx.GlobalBestScore = curScore
 		}
-		randMutateChances := int(100.0 * (float64(curScore) / float64(fctx.GlobalBestScore)))
+		origChance := int(100.0 * (float64(curScore) / float64(fctx.GlobalBestScore)))
+		randMutateChance := segmentChance(origChance)
+		log.Printf("handle %d, current score %d, max score %d, execution chance %d%%(%d%%)", execID, curScore, fctx.GlobalBestScore, randMutateChance, origChance)
 		rand.Seed(time.Now().UnixNano())
-		if rand.Intn(100) >= randMutateChances {
+		if rand.Intn(100) >= randMutateChance {
 			// Skip the test case based on rand possibilities.
 			log.Printf("handle %d, skip because of score", execID)
+			// add it back to interest queue since right now queue is not persistant
+			if ii.Input.Stage != api.InitStage {
+				fctx.Interests.Add(ii)
+			}
 			return true, nil
 		}
 	}
