@@ -66,8 +66,10 @@ func main() {
 	log.Printf("Running with MaxParallel: %v", config.MaxParallel)
 
 	config.IsIgnoreFeedback = opts.IsIgnoreFeedback
+	config.IsDisableScore = opts.IsDisableScore
 	if config.IsIgnoreFeedback {
 		log.Printf("Warning: Ignoring feedback from the oracle. ")
+		config.IsDisableScore = true
 	}
 
 	config.IsNoMutation = opts.IsNoMutation
@@ -85,8 +87,6 @@ func main() {
 	}
 	log.Printf("Using Random mutation energy: %v", config.RandMutateEnergy)
 
-	// Default: do not use score
-	config.IsDisableScore = opts.IsDisableScore
 	if config.IsDisableScore {
 		log.Printf("Warning: Disabling score to prioritize fuzzing entries. ")
 	} else {
