@@ -54,6 +54,7 @@ func (i *InterestList) GetInterestingLength() int {
 	return len(i.interestedInputs)
 }
 
+// Each loops the whole interest queue once
 func (i *InterestList) Each(handler InterestHandler) (ret bool) {
 	i.rw.Lock()
 	var currInterests []*InterestInput
@@ -65,6 +66,12 @@ func (i *InterestList) Each(handler InterestHandler) (ret bool) {
 		copy(currInterests, i.interestedInputs)
 		// clear interest inputs list each time after copying all of them
 		i.interestedInputs = nil
+	}
+
+	// if current interest queue is too short, loop init also
+	if len(currInterests) < len(i.initInputs)/2 {
+		currInterests = append(currInterests, i.initInputs...)
+		log.Printf("handling interest: loop init becuase of short interest list")
 	}
 	i.Dirty = false
 	i.looping += 1
