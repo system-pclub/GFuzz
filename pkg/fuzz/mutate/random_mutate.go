@@ -32,12 +32,12 @@ func (d *RandomMutateStrategy) Mutate(g *gexecfuzz.GExecFuzz, curr *config.Confi
 
 		if mutateMethod < 8 {
 			// Mutate one select per time
-			mutateWhichSelect := getRandomWithMax(numOfSelects)
+			mutateWhichSelect := rand.GetRandomWithMax(numOfSelects)
 			numOfSelectCases := records[mutateWhichSelect].Cases
 			if numOfSelectCases == 0 {
 				return nil, fmt.Errorf("cannot randomly mutate an input with zero number of cases in select %d", mutateWhichSelect)
 			}
-			mutateToWhatValue := getRandomWithMax(int(numOfSelectCases))
+			mutateToWhatValue := rand.GetRandomWithMax(int(numOfSelectCases))
 
 			cfg.SelEfcm.Efcms = append(cfg.SelEfcm.Efcms, selefcm.SelEfcm{
 				ID:   records[mutateWhichSelect].ID,
@@ -45,14 +45,14 @@ func (d *RandomMutateStrategy) Mutate(g *gexecfuzz.GExecFuzz, curr *config.Confi
 			})
 		} else {
 			// Mutate random number of select
-			mutateChance := getRandomWithMax(numOfSelects)
+			mutateChance := rand.GetRandomWithMax(numOfSelects)
 			for mutateIdx := 0; mutateIdx < mutateChance; mutateIdx++ {
-				mutateWhichSelect := getRandomWithMax(numOfSelects)
+				mutateWhichSelect := rand.GetRandomWithMax(numOfSelects)
 				numOfSelectCases := records[mutateWhichSelect].Cases
 				if numOfSelectCases == 0 {
 					return nil, fmt.Errorf("cannot randomly mutate an input with zero number of cases in select %d", mutateWhichSelect)
 				}
-				mutateToWhatValue := getRandomWithMax(int(numOfSelectCases))
+				mutateToWhatValue := rand.GetRandomWithMax(int(numOfSelectCases))
 				cfg.SelEfcm.Efcms = append(cfg.SelEfcm.Efcms, selefcm.SelEfcm{
 					ID:   records[mutateWhichSelect].ID,
 					Case: mutateToWhatValue,

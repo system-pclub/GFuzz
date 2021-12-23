@@ -6,11 +6,10 @@ import (
 	"gfuzz/pkg/fuzz/mutate"
 	"gfuzz/pkg/fuzz/score"
 	"gfuzz/pkg/utils/hash"
+	"gfuzz/pkg/utils/rand"
 	"log"
-	"math/rand"
 	"strconv"
 	"strings"
-	"time"
 )
 
 type InterestHandlerImpl struct {
@@ -239,8 +238,7 @@ func handleRandStageInput(fctx *api.Context, ii *api.InterestInput) (bool, error
 		origChance := int(100.0 * (float64(curScore) / float64(fctx.GlobalBestScore)))
 		randMutateChance := segmentChance(origChance)
 		log.Printf("handle %d, current score %d, max score %d, execution chance %d%%(%d%%)", execID, curScore, fctx.GlobalBestScore, randMutateChance, origChance)
-		rand.Seed(time.Now().UnixNano())
-		if rand.Intn(100) >= randMutateChance {
+		if rand.GetRandomWithMax(100) >= randMutateChance {
 			// Skip the test case based on rand possibilities.
 			log.Printf("handle %d, skip because of score", execID)
 			// add it back to interest queue since right now queue is not persistant
@@ -279,19 +277,14 @@ func handleRandStageInput(fctx *api.Context, ii *api.InterestInput) (bool, error
 
 			/* Check select enforcements, see if they are redundant cases. */
 			selectEfcms := cfg.SelEfcm.Efcms
-			if g.UpdateInputSelectEfcmsIfNew(selectEfcms) > 0 {
-				cfgs = append(cfgs, cfg)
-			} else if getRandomWithMax(10) < 1 {
-				/* If this is redundant case, give 10% chance to rerun. */
-				cfgs = append(cfgs, cfg)
-			} else if mutate_idx == (energy-1) && len(cfgs) == 0 {
-				/* Keep one case */
-				//cfgs = append(cfgs, cfg)
-				return nil, nil
+			if g.UpdateInputSelectEfcmsIfNew(selectEfcms) == 0 {
+				continue
+			} else if rand.GetRandomWithMax(10) > 3 {
+				/* If this is redundant case, give some chance to rerun. */
+				continue
 			}
 		}
 
-		
 		g.RecordOrtCfgHash(hash.AsSha256(cfg))
 		randInputs = append(randInputs, api.NewExecInput(fctx.GetAutoIncGlobalID(), execID, fctx.Cfg.OutputDir, g.Exec, cfg, api.RandStage))
 	}

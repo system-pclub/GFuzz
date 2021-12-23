@@ -7,9 +7,10 @@ import (
 )
 
 func GetRandomWithMax(max int) int {
-	mutateMethod, err := rand.Int(rand.Reader, big.NewInt(int64(max)))
+	i, err := rand.Int(rand.Reader, big.NewInt(int64(max)))
 	if err != nil {
 		fmt.Println("Crypto/rand returned non-nil errors: ", err)
+		return 0
 	}
-	return int(mutateMethod.Int64())
+	return int(i.Int64())
 }
