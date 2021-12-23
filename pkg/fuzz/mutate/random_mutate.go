@@ -1,13 +1,12 @@
 package mutate
 
 import (
-	"crypto/rand"
 	"fmt"
 	"gfuzz/pkg/fuzz/gexecfuzz"
 	"gfuzz/pkg/oraclert/config"
 	"gfuzz/pkg/oraclert/output"
 	"gfuzz/pkg/selefcm"
-	"math/big"
+	"gfuzz/pkg/utils/rand"
 )
 
 type RandomMutateStrategy struct{}
@@ -23,7 +22,7 @@ func (d *RandomMutateStrategy) Mutate(g *gexecfuzz.GExecFuzz, curr *config.Confi
 		if cfg.SelEfcm.SelTimeout > 10000 {
 			cfg.SelEfcm.SelTimeout = 1000
 		}
-		mutateMethod := getRandomWithMax(10)
+		mutateMethod := rand.GetRandomWithMax(10)
 		// get all select records we have seen so far for this executable
 		records := g.GetAllSelectRecords()
 		numOfSelects := len(records)
@@ -61,27 +60,9 @@ func (d *RandomMutateStrategy) Mutate(g *gexecfuzz.GExecFuzz, curr *config.Confi
 			}
 		}
 
-		/* Check select enforcements, see if they are redundant cases. */
-		selectEfcms := cfg.SelEfcm.Efcms
-		if g.UpdateInputSelectEfcmsIfNew(selectEfcms) > 0 {
-			cfgs = append(cfgs, cfg)
-		} else if getRandomWithMax(10) < 1 {
-			/* If this is redundant case, give 10% chance to rerun. */
-			cfgs = append(cfgs, cfg)
-		} else if mutate_idx == (energy-1) && len(cfgs) == 0 {
-			/* Keep one case */
-			//cfgs = append(cfgs, cfg)
-			return nil, nil
-		}
+		cfgs = append(cfgs, cfg)
+
 	}
 
 	return cfgs, nil
-}
-
-func getRandomWithMax(max int) int {
-	mutateMethod, err := rand.Int(rand.Reader, big.NewInt(int64(max)))
-	if err != nil {
-		fmt.Println("Crypto/rand returned non-nil errors: ", err)
-	}
-	return int(mutateMethod.Int64())
 }

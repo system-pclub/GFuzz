@@ -265,17 +265,33 @@ func handleRandStageInput(fctx *api.Context, ii *api.InterestInput) (bool, error
 		}
 	}
 	for _, cfg := range cfgs {
-		// skip if configuration caused timeout
-		if !fctx.Cfg.IsIgnoreFeedback && g.HasTimeoutEfcm(hash.AsSha256(cfg.SelEfcm.Efcms)) {
-			log.Printf("handle %d, skip a generated config becuase of timeout", execID)
-			continue
+
+		if !fctx.Cfg.IsIgnoreFeedback {
+			if g.HasTimeoutEfcm(hash.AsSha256(cfg.SelEfcm.Efcms)) {
+				log.Printf("handle %d, skip a generated config becuase of timeout", execID)
+				continue
+			}
+
+			if g.HasOrtCfgHash(hash.AsSha256(cfg)) {
+				log.Printf("handle %d, skip a generated config becuase of duplication", execID)
+				continue
+			}
+
+			/* Check select enforcements, see if they are redundant cases. */
+			selectEfcms := cfg.SelEfcm.Efcms
+			if g.UpdateInputSelectEfcmsIfNew(selectEfcms) > 0 {
+				cfgs = append(cfgs, cfg)
+			} else if getRandomWithMax(10) < 1 {
+				/* If this is redundant case, give 10% chance to rerun. */
+				cfgs = append(cfgs, cfg)
+			} else if mutate_idx == (energy-1) && len(cfgs) == 0 {
+				/* Keep one case */
+				//cfgs = append(cfgs, cfg)
+				return nil, nil
+			}
 		}
 
-		// skip if duplicated configuration
-		if !fctx.Cfg.IsIgnoreFeedback && g.HasOrtCfgHash(hash.AsSha256(cfg)) {
-			log.Printf("handle %d, skip a generated config becuase of duplication", execID)
-			continue
-		}
+		
 		g.RecordOrtCfgHash(hash.AsSha256(cfg))
 		randInputs = append(randInputs, api.NewExecInput(fctx.GetAutoIncGlobalID(), execID, fctx.Cfg.OutputDir, g.Exec, cfg, api.RandStage))
 	}

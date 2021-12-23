@@ -3,9 +3,7 @@ import os
 import argparse
 from datetime import datetime
 from typing import List, Tuple
-import path
 import argparse
-import datetime
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import MultipleLocator
 import random
@@ -22,18 +20,6 @@ class ExecStat:
         self.start = start
         self.duration = duration
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--log', type=str)
-    parser.add_argument('--bug-time-graph', type=str)
-    parser.add_argument('--gfuzz-out-dir', type=str, nargs='*')
-    args = parser.parse_args()
-
-    if args.log is not None:
-        analyze_gfuzz_log(args.log)
-    
-    if args.bug_time_graph is not None:
-        generate_bug_time_graph(args.gfuzz_out_dir, args.bug_time_graph)
 
 
 def analyze_gfuzz_output_dir(output_dir):
@@ -108,18 +94,20 @@ def generate_bug_time_graph(output_dirs:List[str], graph_fp):
     legends = []
     for output_dir in output_dirs:
         log_fp = os.path.join(output_dir, "fuzzer.log")
-        times, nums = get_times_found_bug_nums(log_fp)
+        with open(log_fp) as log_f:
+            log_lines = log_f.readlines()
+            times, nums = get_times_found_bug_nums(log_lines)
         times_arr.append(times)
         nums_arr.append(nums)
         legends.append(os.path.basename(output_dir))
     
-    x_major_locator=MultipleLocator(0.5)
+    x_major_locator=MultipleLocator(1)
 
     plt.figure()
     ax = plt.subplot()
 
     for i in range(len(legends)):
-        ax.plot(times_arr[i], nums_arr[0], c=random_color())
+        ax.plot(times_arr[i], nums_arr[i], c=random_color())
     
     plt.title("GFuzz", fontsize=20)
     plt.xlabel("Time (h)", fontsize=20)
@@ -127,8 +115,7 @@ def generate_bug_time_graph(output_dirs:List[str], graph_fp):
     plt.xticks(fontsize=20)
     plt.yticks(fontsize=20)
     leg = plt.legend(legends, fontsize=14, handlelength=3)
-    plt.xlim([0,3])
-    plt.ylim([0, 20])
+    plt.xlim([0, 12])
     ax.xaxis.set_major_locator(x_major_locator)
 
     plt.grid()
@@ -142,7 +129,8 @@ def get_times_found_bug_nums(log_lines:List[str])->Tuple[List[int], List[int]]:
     num_of_unique_bug = 0
     times = []
     nums = []
-    for idx, line in log_lines:
+    prev_duration = -0.2
+    for idx, line in enumerate(log_lines):
         parts = line.split(" ")
         if line.startswith("2021"):
             time_str = parts[0] + " " + parts[1]
@@ -162,7 +150,7 @@ def get_times_found_bug_nums(log_lines:List[str])->Tuple[List[int], List[int]]:
                 else:
                     nums.append(0)
 
-            if "found unique bug:" in line:
+            if line.find("found unique bug:") != -1 and line.find("_testmain.go") == -1:
                 num_of_unique_bug += 1
                 continue
             # Restrict time frame
@@ -187,14 +175,19 @@ def get_entry_from_exec_id(exec_id:str):
     filtered = parts[2:-1]
     return '-'.join(filtered)
 
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--log', type=str)
+    parser.add_argument('--bug-time-graph', type=str)
+    parser.add_argument('--gfuzz-out-dir', type=str, nargs='*')
     args = parser.parse_args()
 
-    if args.log != None:
+    if args.log is not None:
         analyze_gfuzz_log(args.log)
+    
+    if args.bug_time_graph is not None:
+        generate_bug_time_graph(args.gfuzz_out_dir, args.bug_time_graph)
+
 
 if __name__ == "__main__":
     main()
