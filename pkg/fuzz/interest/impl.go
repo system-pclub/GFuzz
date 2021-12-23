@@ -266,10 +266,17 @@ func handleRandStageInput(fctx *api.Context, ii *api.InterestInput) (bool, error
 	}
 	for _, cfg := range cfgs {
 		// skip if configuration caused timeout
-		if g.HasTimeoutEfcm(hash.AsSha256(cfg.SelEfcm.Efcms)) {
+		if !fctx.Cfg.IsIgnoreFeedback && g.HasTimeoutEfcm(hash.AsSha256(cfg.SelEfcm.Efcms)) {
 			log.Printf("handle %d, skip a generated config becuase of timeout", execID)
 			continue
 		}
+
+		// skip if duplicated configuration
+		if !fctx.Cfg.IsIgnoreFeedback && g.HasOrtCfgHash(hash.AsSha256(cfg)) {
+			log.Printf("handle %d, skip a generated config becuase of duplication", execID)
+			continue
+		}
+		g.RecordOrtCfgHash(hash.AsSha256(cfg))
 		randInputs = append(randInputs, api.NewExecInput(fctx.GetAutoIncGlobalID(), execID, fctx.Cfg.OutputDir, g.Exec, cfg, api.RandStage))
 	}
 

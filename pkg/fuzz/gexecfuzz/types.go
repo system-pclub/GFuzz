@@ -15,6 +15,7 @@ type GExecFuzz struct {
 
 	// mapping from oracle config hash to timeout count
 	EfcmHash2TimeoutCnt map[string]uint32
+	ortCfgHash          map[string]struct{}
 	// All selects we have seen so far
 	OrtSelects       map[string]output.SelectRecord
 	OrtChannels      map[string]output.ChanRecord
@@ -32,6 +33,7 @@ func NewGExecFuzz(exec gexec.Executable) *GExecFuzz {
 		OrtTuples:           make(map[uint32]uint32),
 		InputSelectsHash:    make(map[string]struct{}),
 		EfcmHash2TimeoutCnt: make(map[string]uint32),
+		ortCfgHash:          make(map[string]struct{}),
 	}
 }
 
@@ -147,5 +149,18 @@ func (e *GExecFuzz) HasTimeoutEfcm(efcm string) bool {
 	e.m.RLock()
 	defer e.m.RUnlock()
 	_, exist := e.EfcmHash2TimeoutCnt[efcm]
+	return exist
+}
+
+func (e *GExecFuzz) RecordOrtCfgHash(h string) {
+	e.m.Lock()
+	defer e.m.Unlock()
+	e.ortCfgHash[h] = struct{}{}
+}
+
+func (e *GExecFuzz) HasOrtCfgHash(h string) bool {
+	e.m.RLock()
+	defer e.m.RUnlock()
+	_, exist := e.ortCfgHash[h]
 	return exist
 }
