@@ -38,6 +38,10 @@ func (p *CvRecPass) GetPostApply(iCtx *inst.InstContext) func(*astutil.Cursor) b
 
 func (p *CvRecPass) GetPreApply(iCtx *inst.InstContext) func(*astutil.Cursor) bool {
 	return func(c *astutil.Cursor) bool {
+		defer func() {
+			if r := recover(); r != nil {
+			}
+		}()
 		switch concrete := c.Node().(type) {
 		case *ast.ExprStmt:
 			if callExpr, ok := concrete.X.(*ast.CallExpr); ok {
