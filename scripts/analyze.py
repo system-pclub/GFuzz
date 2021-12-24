@@ -99,6 +99,8 @@ def generate_bug_time_graph(output_dirs:List[str], graph_fp):
             times, nums = get_times_found_bug_nums(log_lines)
         times_arr.append(times)
         nums_arr.append(nums)
+        if output_dir.endswith("/"):
+            output_dir = output_dir[:-1]
         legends.append(os.path.basename(output_dir))
     
     x_major_locator=MultipleLocator(1)
