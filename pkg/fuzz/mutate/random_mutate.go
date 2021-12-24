@@ -9,7 +9,9 @@ import (
 	"gfuzz/pkg/utils/rand"
 )
 
-type RandomMutateStrategy struct{}
+type RandomMutateStrategy struct {
+	SelEfcmTimeout int
+}
 
 func (d *RandomMutateStrategy) Mutate(g *gexecfuzz.GExecFuzz, curr *config.Config, o *output.Output, energy int) ([]*config.Config, error) {
 	var cfgs []*config.Config
@@ -17,11 +19,7 @@ func (d *RandomMutateStrategy) Mutate(g *gexecfuzz.GExecFuzz, curr *config.Confi
 	// TODO:: If we remove redundant cases, should we count redundant cases into the energy?
 	for mutate_idx := 0; mutate_idx < energy; mutate_idx++ {
 		cfg := config.NewConfig()
-		cfg.SelEfcm.SelTimeout = curr.SelEfcm.SelTimeout
-		cfg.SelEfcm.SelTimeout += 1000
-		if cfg.SelEfcm.SelTimeout > 10000 {
-			cfg.SelEfcm.SelTimeout = 1000
-		}
+		cfg.SelEfcm.SelTimeout = d.SelEfcmTimeout
 		mutateMethod := rand.GetRandomWithMax(10)
 		// get all select records we have seen so far for this executable
 		records := g.GetAllSelectRecords()

@@ -97,6 +97,7 @@ func NewExecInput(ID uint32, fromID uint32, outputDir string, ge gexec.Executabl
 
 func NewInitExecInput(fctx *Context, ge gexec.Executable) *Input {
 	ortCfg := config.NewConfig()
+	ortCfg.SelEfcm.SelTimeout = fctx.Cfg.SelEfcmTimeout
 	globalID := fctx.GetAutoIncGlobalID()
 	return NewExecInput(globalID, 0, fctx.Cfg.OutputDir, ge, ortCfg, InitStage)
 }

@@ -93,6 +93,10 @@ func main() {
 		log.Printf("Using score to prioritize fuzzing entries. ")
 	}
 
+	if config.SelEfcmTimeout == 0 {
+		config.SelEfcmTimeout = 500
+	}
+
 	// prepare fuzz targets
 	var execs []gexec.Executable
 	if opts.TestBinGlobs != nil {
