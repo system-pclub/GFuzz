@@ -239,8 +239,18 @@ func handleRandStageInput(fctx *api.Context, ii *api.InterestInput) (bool, error
 			fctx.GlobalBestScore = curScore
 		}
 		origChance := int(100.0 * (float64(curScore) / float64(fctx.GlobalBestScore)))
+		if origChance == 0 {
+			// if chance is less than 1%, return
+			log.Printf("handle %d, skip because of 0 score", execID)
+			return true, nil
+		}
 		randMutateChance := segmentChance(origChance)
-		log.Printf("handle %d, current score %d, max score %d, execution chance %d%%(%d%%)", execID, curScore, fctx.GlobalBestScore, randMutateChance, origChance)
+
+		if fctx.Cfg.ScoreBasedEnergy {
+			randMutateEnergy = int(randMutateChance / 20)
+		}
+		log.Printf("handle %d, current score %d, max score %d, execution chance %d%%(%d%%), energy %d",
+			execID, curScore, fctx.GlobalBestScore, randMutateChance, origChance, randMutateEnergy)
 		if rand.GetRandomWithMax(100) >= randMutateChance {
 			// Skip the test case based on rand possibilities.
 			log.Printf("handle %d, skip because of score", execID)

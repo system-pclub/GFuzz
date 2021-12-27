@@ -68,6 +68,11 @@ func main() {
 
 	config.IsIgnoreFeedback = opts.IsIgnoreFeedback
 	config.IsDisableScore = opts.IsDisableScore
+	config.ScoreBasedEnergy = opts.ScoreBasedEnergy
+
+	if config.ScoreBasedEnergy {
+		log.Printf("using score based energy")
+	}
 	if config.IsIgnoreFeedback {
 		log.Printf("Warning: Ignoring feedback from the oracle. ")
 		config.IsDisableScore = true

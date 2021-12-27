@@ -18,6 +18,7 @@ type Config struct {
 	IsNoMutation       bool // Disable mutations on all testing case.
 	SelEfcmTimeout     int  // timeout for select enforcement (ms)
 	AutoSelEfcmTimeout bool // increment timeout by 1000 each time
+	ScoreBasedEnergy   bool // energy reduced based on score
 }
 
 func NewConfig() *Config {
