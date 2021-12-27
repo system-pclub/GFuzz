@@ -25,6 +25,7 @@ var (
 func main() {
 	var err error
 	parseFlags()
+	fmt.Print(opts.AutoSelEfcmTimeout)
 
 	// flags sanity check
 	if opts.Version {
@@ -44,7 +45,7 @@ func main() {
 	}
 
 	if opts.GoModDir == "" && opts.TestBinGlobs == nil {
-		log.Fatal("Either --gomod or --testbin is required")
+		log.Fatal("Either --gomod or --bin is required")
 	}
 
 	gLog.SetupLogger(filepath.Join(opts.OutputDir, GFUZZ_LOG_FILE), true)
@@ -83,7 +84,6 @@ func main() {
 	if config.RandMutateEnergy == 0 {
 		// Default 5
 		config.RandMutateEnergy = 5
-		//config.RandMutateEnergy = 1
 	}
 	log.Printf("Using Random mutation energy: %v", config.RandMutateEnergy)
 
@@ -93,9 +93,14 @@ func main() {
 		log.Printf("Using score to prioritize fuzzing entries. ")
 	}
 
+	config.SelEfcmTimeout = opts.SelEfcmTimeout
+	config.AutoSelEfcmTimeout = opts.AutoSelEfcmTimeout
+
 	if config.SelEfcmTimeout == 0 {
 		config.SelEfcmTimeout = 500
 	}
+
+	log.Printf("SelEfcmTimeout: %d auto: %v", config.SelEfcmTimeout, config.AutoSelEfcmTimeout)
 
 	// prepare fuzz targets
 	var execs []gexec.Executable

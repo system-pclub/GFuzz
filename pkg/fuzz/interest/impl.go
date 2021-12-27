@@ -226,7 +226,8 @@ func handleRandStageInput(fctx *api.Context, ii *api.InterestInput) (bool, error
 	}
 	var randInputs []*api.Input
 	var mts mutate.OrtConfigMutateStrategy = &mutate.RandomMutateStrategy{
-		SelEfcmTimeout: fctx.Cfg.SelEfcmTimeout,
+		SelEfcmTimeout:     fctx.Cfg.SelEfcmTimeout,
+		AutoSelEfcmTimeout: fctx.Cfg.AutoSelEfcmTimeout,
 	}
 
 	randMutateEnergy := fctx.Cfg.RandMutateEnergy
