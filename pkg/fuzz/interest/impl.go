@@ -276,29 +276,20 @@ func handleRandStageInput(fctx *api.Context, ii *api.InterestInput) (bool, error
 		}
 	}
 	for _, cfg := range cfgs {
-
+		cfgHash := hash.AsSha256(cfg)
 		if !fctx.Cfg.IsIgnoreFeedback {
-			if g.HasTimeoutEfcm(hash.AsSha256(cfg.SelEfcm.Efcms)) {
+			if g.HasTimeoutOrtCfgHash(cfgHash) {
 				log.Printf("handle %d, skip a generated config because of timeout", execID)
 				continue
 			}
 
-			if !fctx.Cfg.AllowDupCfg && g.HasOrtCfgHash(hash.AsSha256(cfg)) {
+			if !fctx.Cfg.AllowDupCfg && g.HasOrtCfgHash(cfgHash) {
 				log.Printf("handle %d, skip a generated config because of duplication", execID)
-				continue
-			}
-
-			/* Check select enforcements, see if they are redundant cases. */
-			selectEfcms := cfg.SelEfcm.Efcms
-			if g.UpdateInputSelectEfcmsIfNew(selectEfcms) == 0 {
-				continue
-			} else if rand.GetRandomWithMax(10) > 3 {
-				/* If this is redundant case, give some chance to rerun. */
 				continue
 			}
 		}
 
-		g.RecordOrtCfgHash(hash.AsSha256(cfg))
+		g.RecordOrtCfgHash(cfgHash)
 		randInputs = append(randInputs, api.NewExecInput(fctx.GetAutoIncGlobalID(), execID, fctx.Cfg.OutputDir, g.Exec, cfg, api.RandStage))
 	}
 

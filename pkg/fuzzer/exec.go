@@ -156,8 +156,8 @@ func HandleExec(ctx context.Context, i *api.Input, o *api.Output, fctx *api.Cont
 	if o.Timeout {
 
 		if i.OracleRtConfig != nil && i.OracleRtConfig.SelEfcm.Efcms != nil {
-			efcmHash := hash.AsSha256(i.OracleRtConfig.SelEfcm.Efcms)
-			entry.RecordTimeoutEfcm(efcmHash)
+			cfgHash := hash.AsSha256(i.OracleRtConfig)
+			entry.RecordTimeoutOrtCfgHash(cfgHash)
 		}
 
 		// update init record in interest queue
