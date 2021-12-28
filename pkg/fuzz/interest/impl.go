@@ -242,7 +242,7 @@ func handleRandStageInput(fctx *api.Context, ii *api.InterestInput) (bool, error
 	// if this interest does not covered the enforcement, rerun
 	if bits.Has(bits.Bits(ii.Reason), bits.Bits(api.SelEfcmNotCovered)) {
 		newCfg := i.OracleRtConfig.Copy()
-		newCfg.SelEfcm.SelTimeout += 3000
+		newCfg.SelEfcm.SelTimeout += 1000
 		if newCfg.SelEfcm.SelTimeout < 10000 {
 			log.Printf("handle %d, new rerun with timeout %d becuase of uncovered efcm", execID, newCfg.SelEfcm.SelTimeout)
 			ni := api.NewExecInput(fctx.GetAutoIncGlobalID(), execID, fctx.Cfg.OutputDir, g.Exec, newCfg, api.RandStage)
@@ -250,11 +250,27 @@ func handleRandStageInput(fctx *api.Context, ii *api.InterestInput) (bool, error
 		}
 	}
 
+	if !bits.Has(bits.Bits(ii.Reason), bits.Bits(api.NewChannel)) &&
+		!bits.Has(bits.Bits(ii.Reason), bits.Bits(api.NewSelectFound)) &&
+		!bits.Has(bits.Bits(ii.Reason), bits.Bits(api.NewTuple)) &&
+		!bits.Has(bits.Bits(ii.Reason), bits.Bits(api.Other)) {
+		log.Printf("handle %v, skip mutating since no other interest reason", execID)
+		return true, nil
+	}
+
 	var randInputs []*api.Input
-	var mts mutate.OrtConfigMutateStrategy = &mutate.RandomMutateStrategy{
-		SelEfcmTimeout:      fctx.Cfg.SelEfcmTimeout,
-		FixedSelEfcmTimeout: fctx.Cfg.FixedSelEfcmTimeout,
-		IgnoreFeedback:      fctx.Cfg.IsIgnoreFeedback,
+	var mts mutate.OrtConfigMutateStrategy
+
+	if fctx.Cfg.IsIgnoreFeedback {
+		mts = &mutate.NfbRandomMutateStrategy{
+			SelEfcmTimeout:      fctx.Cfg.SelEfcmTimeout,
+			FixedSelEfcmTimeout: fctx.Cfg.FixedSelEfcmTimeout,
+		}
+	} else {
+		mts = &mutate.RandomMutateStrategy{
+			SelEfcmTimeout:      fctx.Cfg.SelEfcmTimeout,
+			FixedSelEfcmTimeout: fctx.Cfg.FixedSelEfcmTimeout,
+		}
 	}
 
 	randMutateEnergy := fctx.Cfg.RandMutateEnergy
@@ -299,7 +315,9 @@ func handleRandStageInput(fctx *api.Context, ii *api.InterestInput) (bool, error
 		// if no configuration, it implies there is no selects for fuzzer to mutate
 		// if no feedback mode,  we should not consider it and simply rerun it
 		if fctx.Cfg.IsIgnoreFeedback {
-			cfgs = append(cfgs, i.OracleRtConfig)
+			for idx := 0; idx < randMutateEnergy; idx++ {
+				cfgs = append(cfgs, i.OracleRtConfig.Copy())
+			}
 		}
 	}
 	for _, cfg := range cfgs {

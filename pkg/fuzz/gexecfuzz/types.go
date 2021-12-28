@@ -42,6 +42,8 @@ func (e *GExecFuzz) String() string {
 }
 
 func (e *GExecFuzz) UpdateInputSelectEfcmsIfNew(Efcms []selefcm.SelEfcm) int {
+	e.m.Lock()
+	defer e.m.Unlock()
 	iSelectMap := make(map[string][]int)
 	newSelectNum := 0
 
@@ -81,6 +83,8 @@ func (e *GExecFuzz) UpdateSelectRecordsIfNew(records []output.SelectRecord) int 
 }
 
 func (e *GExecFuzz) UpdateChannelRecordsIfNew(records map[string]output.ChanRecord) int {
+	e.m.Lock()
+	defer e.m.Unlock()
 	newChannels := 0
 
 	for k, v := range records {
@@ -117,6 +121,8 @@ func (e *GExecFuzz) UpdateChannelRecordsIfNew(records map[string]output.ChanReco
 }
 
 func (e *GExecFuzz) UpdateTupleRecordsIfNew(records map[uint32]uint32) int {
+	e.m.Lock()
+	defer e.m.Unlock()
 	newTuples := 0
 
 	for k, v := range records {
