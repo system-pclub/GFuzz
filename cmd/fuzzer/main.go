@@ -25,7 +25,7 @@ var (
 func main() {
 	var err error
 	parseFlags()
-	fmt.Print(opts.AutoSelEfcmTimeout)
+	log.Printf("%+v", opts)
 
 	// flags sanity check
 	if opts.Version {
@@ -69,6 +69,9 @@ func main() {
 	config.IsIgnoreFeedback = opts.IsIgnoreFeedback
 	config.IsDisableScore = opts.IsDisableScore
 	config.ScoreBasedEnergy = opts.ScoreBasedEnergy
+	config.AutoSelEfcmTimeout = opts.AutoSelEfcmTimeout
+	config.SelEfcmTimeout = opts.SelEfcmTimeout
+	config.AutoSelEfcmTimeout = opts.AutoSelEfcmTimeout
 
 	if config.ScoreBasedEnergy {
 		log.Printf("using score based energy")
@@ -90,16 +93,13 @@ func main() {
 		// Default 5
 		config.RandMutateEnergy = 5
 	}
-	log.Printf("Using Random mutation energy: %v", config.RandMutateEnergy)
+	log.Printf("default random mutation energy: %v", config.RandMutateEnergy)
 
 	if config.IsDisableScore {
 		log.Printf("Warning: Disabling score to prioritize fuzzing entries. ")
 	} else {
 		log.Printf("Using score to prioritize fuzzing entries. ")
 	}
-
-	config.SelEfcmTimeout = opts.SelEfcmTimeout
-	config.AutoSelEfcmTimeout = opts.AutoSelEfcmTimeout
 
 	if config.SelEfcmTimeout == 0 {
 		config.SelEfcmTimeout = 500

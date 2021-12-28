@@ -279,12 +279,12 @@ func handleRandStageInput(fctx *api.Context, ii *api.InterestInput) (bool, error
 
 		if !fctx.Cfg.IsIgnoreFeedback {
 			if g.HasTimeoutEfcm(hash.AsSha256(cfg.SelEfcm.Efcms)) {
-				log.Printf("handle %d, skip a generated config becuase of timeout", execID)
+				log.Printf("handle %d, skip a generated config because of timeout", execID)
 				continue
 			}
 
 			if g.HasOrtCfgHash(hash.AsSha256(cfg)) {
-				log.Printf("handle %d, skip a generated config becuase of duplication", execID)
+				log.Printf("handle %d, skip a generated config because of duplication", execID)
 				continue
 			}
 
