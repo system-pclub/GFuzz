@@ -1,7 +1,6 @@
 package mutate
 
 import (
-	"fmt"
 	"gfuzz/pkg/fuzz/gexecfuzz"
 	"gfuzz/pkg/oraclert/config"
 	"gfuzz/pkg/oraclert/output"
@@ -50,12 +49,14 @@ func (d *RandomMutateStrategy) Mutate(g *gexecfuzz.GExecFuzz, curr *config.Confi
 			selectedSel := records[mutateWhichSelect]
 			numOfSelectCases := selectedSel.Cases
 			if numOfSelectCases == 0 {
-				return nil, fmt.Errorf("cannot randomly mutate an input with zero number of cases in select %d", mutateWhichSelect)
+				log.Printf("cannot randomly mutate an input with zero number of cases in select %d", mutateWhichSelect)
+				continue
 			}
 
 			// use feedback to avoid random to duplicated case
 			for _, rec := range records {
 				if rec.ID == selectedSel.ID {
+					log.Println("used feedback to avoid redundent random generation")
 					prevIdxOffset := idxcache[rec.ID]
 					if prevIdxOffset == -1 {
 						// -1 means this ID has been generated all cases
@@ -67,7 +68,6 @@ func (d *RandomMutateStrategy) Mutate(g *gexecfuzz.GExecFuzz, curr *config.Confi
 						idxcache[rec.ID] = -1
 						break
 					}
-					log.Println("used feedback to avoid redundent random generation")
 					idxcache[rec.ID] += 1
 					cfg.SelEfcm.Efcms[mutateWhichSelect].Case = newCase
 					break

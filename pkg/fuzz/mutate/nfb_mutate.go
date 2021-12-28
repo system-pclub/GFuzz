@@ -1,12 +1,12 @@
 package mutate
 
 import (
-	"fmt"
 	"gfuzz/pkg/fuzz/gexecfuzz"
 	"gfuzz/pkg/oraclert/config"
 	"gfuzz/pkg/oraclert/output"
 	"gfuzz/pkg/selefcm"
 	"gfuzz/pkg/utils/rand"
+	"log"
 )
 
 // NfbRandomMutateStrategy is for rand stage with non-feedback mode
@@ -40,7 +40,8 @@ func (d *NfbRandomMutateStrategy) Mutate(g *gexecfuzz.GExecFuzz, curr *config.Co
 			selectedSel := records[mutateIdx]
 			randCase := rand.GetRandomWithMax(int(selectedSel.Cases))
 			if selectedSel.Cases == 0 {
-				return nil, fmt.Errorf("cannot randomly mutate an input with zero number of cases in select %s", selectedSel.ID)
+				log.Printf("cannot randomly mutate an input with zero number of cases in select %s", selectedSel.ID)
+				continue
 			}
 			cfg.SelEfcm.Efcms = append(cfg.SelEfcm.Efcms, selefcm.SelEfcm{
 				ID:   selectedSel.ID,
