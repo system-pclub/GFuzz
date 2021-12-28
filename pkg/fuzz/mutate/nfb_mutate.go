@@ -21,7 +21,7 @@ func (d *NfbRandomMutateStrategy) Mutate(g *gexecfuzz.GExecFuzz, curr *config.Co
 		cfg := config.NewConfig()
 		if !d.FixedSelEfcmTimeout {
 			cfg.SelEfcm.SelTimeout = curr.SelEfcm.SelTimeout + 1000
-			if cfg.SelEfcm.SelTimeout > 10000 {
+			if cfg.SelEfcm.SelTimeout > 10500 {
 				cfg.SelEfcm.SelTimeout = 500
 			}
 		} else {
@@ -35,13 +35,12 @@ func (d *NfbRandomMutateStrategy) Mutate(g *gexecfuzz.GExecFuzz, curr *config.Co
 		}
 
 		// Mutate random number of select
-		mutateChance := rand.GetRandomWithMax(numOfSelects)
-		for mutateIdx := 0; mutateIdx < mutateChance; mutateIdx++ {
-			mutateWhichSelect := rand.GetRandomWithMax(numOfSelects)
-			selectedSel := records[mutateWhichSelect]
+		// mutateChance := rand.GetRandomWithMax(numOfSelects)
+		for mutateIdx := 0; mutateIdx < numOfSelects; mutateIdx++ {
+			selectedSel := records[mutateIdx]
 			randCase := rand.GetRandomWithMax(int(selectedSel.Cases))
 			if selectedSel.Cases == 0 {
-				return nil, fmt.Errorf("cannot randomly mutate an input with zero number of cases in select %d", mutateWhichSelect)
+				return nil, fmt.Errorf("cannot randomly mutate an input with zero number of cases in select %s", selectedSel.ID)
 			}
 			cfg.SelEfcm.Efcms = append(cfg.SelEfcm.Efcms, selefcm.SelEfcm{
 				ID:   selectedSel.ID,

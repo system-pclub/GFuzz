@@ -42,6 +42,7 @@ func (h *InterestHandlerImpl) IsInterested(i *api.Input, o *api.Output, isFoundN
 
 	if !IsEfcmCovered(i.OracleRtConfig.SelEfcm.Efcms, o.OracleRtOutput.Selects) {
 		reason = api.InterestReason(bits.Set(bits.Bits(reason), bits.Bits(api.SelEfcmNotCovered)))
+		isInteresting = true
 	}
 
 	// Check new tuple
@@ -243,24 +244,26 @@ func handleRandStageInput(fctx *api.Context, ii *api.InterestInput) (bool, error
 		return false, err
 	}
 
-	// if this interest does not covered the enforcement, rerun
-	if bits.Has(bits.Bits(ii.Reason), bits.Bits(api.SelEfcmNotCovered)) {
-		newCfg := i.OracleRtConfig.Copy()
-		newCfg.SelEfcm.SelTimeout += 1000
-		if newCfg.SelEfcm.SelTimeout < 10000 {
-			log.Printf("handle %d, new rerun with timeout %d becuase of uncovered efcm", execID, newCfg.SelEfcm.SelTimeout)
-			ni := api.NewExecInput(fctx.GetAutoIncGlobalID(), execID, fctx.Cfg.OutputDir, g.Exec, newCfg, api.RandStage)
-			fctx.ExecInputCh <- ni
+	if !fctx.Cfg.IsIgnoreFeedback {
+		// if this interest does not covered the enforcement, rerun
+		if bits.Has(bits.Bits(ii.Reason), bits.Bits(api.SelEfcmNotCovered)) {
+			newCfg := i.OracleRtConfig.Copy()
+			newCfg.SelEfcm.SelTimeout += 1000
+			if newCfg.SelEfcm.SelTimeout < 10000 {
+				log.Printf("handle %d, new rerun with timeout %d becuase of uncovered efcm", execID, newCfg.SelEfcm.SelTimeout)
+				ni := api.NewExecInput(fctx.GetAutoIncGlobalID(), execID, fctx.Cfg.OutputDir, g.Exec, newCfg, api.RandStage)
+				fctx.ExecInputCh <- ni
+			}
 		}
-	}
 
-	if !bits.Has(bits.Bits(ii.Reason), bits.Bits(api.NewChannel)) &&
-		!bits.Has(bits.Bits(ii.Reason), bits.Bits(api.NewSelectFound)) &&
-		!bits.Has(bits.Bits(ii.Reason), bits.Bits(api.NewTuple)) &&
-		!bits.Has(bits.Bits(ii.Reason), bits.Bits(api.InitStg)) &&
-		!bits.Has(bits.Bits(ii.Reason), bits.Bits(api.Other)) {
-		log.Printf("handle %v, skip mutating since no other interest reason", execID)
-		return true, nil
+		if !bits.Has(bits.Bits(ii.Reason), bits.Bits(api.NewChannel)) &&
+			!bits.Has(bits.Bits(ii.Reason), bits.Bits(api.NewSelectFound)) &&
+			!bits.Has(bits.Bits(ii.Reason), bits.Bits(api.NewTuple)) &&
+			!bits.Has(bits.Bits(ii.Reason), bits.Bits(api.InitStg)) &&
+			!bits.Has(bits.Bits(ii.Reason), bits.Bits(api.Other)) {
+			log.Printf("handle %v, skip mutating since no other interest reason", execID)
+			return true, nil
+		}
 	}
 
 	var randInputs []*api.Input
