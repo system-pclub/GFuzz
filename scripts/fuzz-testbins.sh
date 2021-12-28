@@ -8,7 +8,7 @@ shift 2
 
 docker build -f docker/fuzzer-bin/Dockerfile -t gfuzzbin:latest .
 
-container_id=$(docker run --rm -it -d \
+container_id=$(docker run -it -d \
 -v $TESTBINS_DIR:/fuzz/target \
 -v $OUT_DIR:/fuzz/output \
 -v $(pwd)/tmp/pkgmod:/go/pkg/mod \

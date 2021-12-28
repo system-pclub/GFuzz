@@ -10,8 +10,8 @@ import (
 )
 
 type RandomMutateStrategy struct {
-	SelEfcmTimeout     int
-	AutoSelEfcmTimeout bool
+	SelEfcmTimeout      int
+	FixedSelEfcmTimeout bool
 }
 
 func (d *RandomMutateStrategy) Mutate(g *gexecfuzz.GExecFuzz, curr *config.Config, o *output.Output, energy int) ([]*config.Config, error) {
@@ -20,7 +20,7 @@ func (d *RandomMutateStrategy) Mutate(g *gexecfuzz.GExecFuzz, curr *config.Confi
 	// TODO:: If we remove redundant cases, should we count redundant cases into the energy?
 	for mutate_idx := 0; mutate_idx < energy; mutate_idx++ {
 		cfg := config.NewConfig()
-		if d.AutoSelEfcmTimeout {
+		if !d.FixedSelEfcmTimeout {
 			cfg.SelEfcm.SelTimeout = curr.SelEfcm.SelTimeout + 1000
 			if cfg.SelEfcm.SelTimeout > 10000 {
 				cfg.SelEfcm.SelTimeout = 1000

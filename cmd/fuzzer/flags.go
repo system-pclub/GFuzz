@@ -22,18 +22,19 @@ var opts struct {
 	Version   bool   `long:"version" description:"Print version and exit"`
 
 	// Fuzzing
-	GlobalTuple        bool `long:"globalTuple" description:"Whether prev_location is global or per channel"`
-	ScoreSdk           bool `long:"scoreSdk" description:"Recording/scoring if channel comes from Go SDK"`
-	ScoreAllPrim       bool `long:"scoreAllPrim" description:"Recording/scoring other primitives like Mutex together with channel"`
-	TimeDivideBy       int  `long:"timeDivideBy" description:"Durations in time/sleep.go will be divided by this int number"`
-	OracleRtDebug      bool `long:"oraclertdebug"`
-	SelEfcmTimeout     int  `long:"selefcmtimeout" default:"500"`
-	AutoSelEfcmTimeout bool `long:"autoselefcmtimeout"`
-	ScoreBasedEnergy   bool `long:"scoreenergy"`
-	IsIgnoreFeedback   bool `long:"ignorefeedback" description:"Is ignoring the feedback, and save every mutated seed into the fuzzing queue"`
-	RandMutateEnergy   int  `long:"randMutateEnergy" description:"Determine the energy of random mutations. If == 100 (default), then each seed would mutate 100 times in the rand mutation stage"`
-	IsDisableScore     bool `long:"isDisableScore" description:"Is disable score to priority testing case. "`
-	IsNoMutation       bool `long:"isNoMutation" description:"Disable mutations on all testing case. "`
+	GlobalTuple         bool `long:"globalTuple" description:"Whether prev_location is global or per channel"`
+	ScoreSdk            bool `long:"scoreSdk" description:"Recording/scoring if channel comes from Go SDK"`
+	ScoreAllPrim        bool `long:"scoreAllPrim" description:"Recording/scoring other primitives like Mutex together with channel"`
+	TimeDivideBy        int  `long:"timeDivideBy" description:"Durations in time/sleep.go will be divided by this int number"`
+	OracleRtDebug       bool `long:"oraclertdebug"`
+	SelEfcmTimeout      int  `long:"setimeout" default:"500" description:"default select enforcement timeout"`
+	FixedSelEfcmTimeout bool `long:"fixedsetimeout" description:"disable automatically select enforcement timeout mutating"`
+	ScoreBasedEnergy    bool `long:"scoreenergy"`
+	AllowDupCfg         bool `long:"allowdupcfg" description:"allow duplicated randomly generated configuration to be run"`
+	IsIgnoreFeedback    bool `long:"ignorefeedback" description:"Is ignoring the feedback, and save every mutated seed into the fuzzing queue"`
+	RandMutateEnergy    int  `long:"randMutateEnergy" description:"Determine the energy of random mutations. If == 100 (default), then each seed would mutate 100 times in the rand mutation stage"`
+	IsDisableScore      bool `long:"isDisableScore" description:"Is disable score to priority testing case. "`
+	IsNoMutation        bool `long:"isNoMutation" description:"Disable mutations on all testing case. "`
 }
 
 func parseFlags() {

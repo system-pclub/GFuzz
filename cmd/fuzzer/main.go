@@ -69,9 +69,9 @@ func main() {
 	config.IsIgnoreFeedback = opts.IsIgnoreFeedback
 	config.IsDisableScore = opts.IsDisableScore
 	config.ScoreBasedEnergy = opts.ScoreBasedEnergy
-	config.AutoSelEfcmTimeout = opts.AutoSelEfcmTimeout
+	config.FixedSelEfcmTimeout = opts.FixedSelEfcmTimeout
 	config.SelEfcmTimeout = opts.SelEfcmTimeout
-	config.AutoSelEfcmTimeout = opts.AutoSelEfcmTimeout
+	config.AllowDupCfg = opts.AllowDupCfg
 
 	if config.ScoreBasedEnergy {
 		log.Printf("using score based energy")
@@ -105,7 +105,7 @@ func main() {
 		config.SelEfcmTimeout = 500
 	}
 
-	log.Printf("SelEfcmTimeout: %d auto: %v", config.SelEfcmTimeout, config.AutoSelEfcmTimeout)
+	log.Printf("SelEfcmTimeout: %d", config.SelEfcmTimeout)
 
 	// prepare fuzz targets
 	var execs []gexec.Executable
@@ -158,11 +158,11 @@ func main() {
 	if opts.Ortconfig != "" {
 		ortcfgbytes, err := ioutil.ReadFile(opts.Ortconfig)
 		if err != nil {
-			fmt.Errorf("read %s: %s", opts.Ortconfig, err)
+			log.Printf("read %s: %s", opts.Ortconfig, err)
 		}
 		ortconfig, err := ortconfig.Deserilize(ortcfgbytes)
 		if err != nil {
-			fmt.Errorf("parse %s: %s", opts.Ortconfig, err)
+			log.Printf("parse %s: %s", opts.Ortconfig, err)
 		}
 		fuzzer.Replay(fctx, filteredExecs[0], config, ortconfig)
 		return

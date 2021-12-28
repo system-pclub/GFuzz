@@ -226,8 +226,8 @@ func handleRandStageInput(fctx *api.Context, ii *api.InterestInput) (bool, error
 	}
 	var randInputs []*api.Input
 	var mts mutate.OrtConfigMutateStrategy = &mutate.RandomMutateStrategy{
-		SelEfcmTimeout:     fctx.Cfg.SelEfcmTimeout,
-		AutoSelEfcmTimeout: fctx.Cfg.AutoSelEfcmTimeout,
+		SelEfcmTimeout:      fctx.Cfg.SelEfcmTimeout,
+		FixedSelEfcmTimeout: fctx.Cfg.FixedSelEfcmTimeout,
 	}
 
 	randMutateEnergy := fctx.Cfg.RandMutateEnergy
@@ -283,7 +283,7 @@ func handleRandStageInput(fctx *api.Context, ii *api.InterestInput) (bool, error
 				continue
 			}
 
-			if g.HasOrtCfgHash(hash.AsSha256(cfg)) {
+			if !fctx.Cfg.AllowDupCfg && g.HasOrtCfgHash(hash.AsSha256(cfg)) {
 				log.Printf("handle %d, skip a generated config because of duplication", execID)
 				continue
 			}
