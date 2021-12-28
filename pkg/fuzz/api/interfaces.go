@@ -18,7 +18,8 @@ const (
 	NewSelectFound
 	NewTuple
 	NewChannel
-	Other //todo: should be replaced by more detailed description
+	InitStg // inil stage always interest
+	Other   //todo: should be replaced by more detailed description
 )
 
 // InterestInput is created if the input is interested(identify by score strategy) or it is init stage input

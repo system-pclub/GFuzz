@@ -40,6 +40,10 @@ func (h *InterestHandlerImpl) IsInterested(i *api.Input, o *api.Output, isFoundN
 		reason = api.InterestReason(bits.Set(bits.Bits(reason), bits.Bits(api.NewSelectFound)))
 	}
 
+	if !IsEfcmCovered(i.OracleRtConfig.SelEfcm.Efcms, o.OracleRtOutput.Selects) {
+		reason = api.InterestReason(bits.Set(bits.Bits(reason), bits.Bits(api.SelEfcmNotCovered)))
+	}
+
 	// Check new tuple
 	entry := h.fctx.GetQueueEntryByGExecID(i.Exec.String())
 	if entry != nil && entry.UpdateTupleRecordsIfNew(o.OracleRtOutput.Tuples) > 0 {
@@ -253,6 +257,7 @@ func handleRandStageInput(fctx *api.Context, ii *api.InterestInput) (bool, error
 	if !bits.Has(bits.Bits(ii.Reason), bits.Bits(api.NewChannel)) &&
 		!bits.Has(bits.Bits(ii.Reason), bits.Bits(api.NewSelectFound)) &&
 		!bits.Has(bits.Bits(ii.Reason), bits.Bits(api.NewTuple)) &&
+		!bits.Has(bits.Bits(ii.Reason), bits.Bits(api.InitStg)) &&
 		!bits.Has(bits.Bits(ii.Reason), bits.Bits(api.Other)) {
 		log.Printf("handle %v, skip mutating since no other interest reason", execID)
 		return true, nil

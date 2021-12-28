@@ -39,7 +39,9 @@ func Main(fctx *api.Context, execs []gexec.Executable, config *config.Config,
 	// initialize interested inputs by generating init stage input for each executables
 	fctx.EachGExecFuzz(func(g *gexecfuzz.GExecFuzz) {
 		i := api.NewInitExecInput(fctx, g.Exec)
-		fctx.Interests.Add(api.NewUnexecutedInterestInput(i))
+		ii := api.NewUnexecutedInterestInput(i)
+		ii.Reason = api.InitStg
+		fctx.Interests.Add(ii)
 	})
 
 	exitCh := make(chan struct{})
