@@ -18,12 +18,11 @@ type RandomMutateStrategy struct {
 func (d *RandomMutateStrategy) Mutate(g *gexecfuzz.GExecFuzz, curr *config.Config, o *output.Output, energy int) ([]*config.Config, error) {
 	var cfgs []*config.Config
 	idxcache := make(map[string]int)
-	// TODO:: If we remove redundant cases, should we count redundant cases into the energy?
 	for mutate_idx := 0; mutate_idx < energy; mutate_idx++ {
 		cfg := config.NewConfig()
 		if !d.FixedSelEfcmTimeout {
 			cfg.SelEfcm.SelTimeout = curr.SelEfcm.SelTimeout + 1000
-			if cfg.SelEfcm.SelTimeout > 10000 {
+			if cfg.SelEfcm.SelTimeout > 10500 {
 				cfg.SelEfcm.SelTimeout = 500
 			}
 		} else {
@@ -37,6 +36,14 @@ func (d *RandomMutateStrategy) Mutate(g *gexecfuzz.GExecFuzz, curr *config.Confi
 			return nil, nil
 		}
 
+		// copy output's selects into new cfg
+		for _, sel := range o.Selects {
+			cfg.SelEfcm.Efcms = append(cfg.SelEfcm.Efcms, selefcm.SelEfcm{
+				ID:   sel.ID,
+				Case: int(sel.Chosen),
+			})
+		}
+
 		if mutateMethod < 8 {
 			// Mutate one select per time
 			mutateWhichSelect := rand.GetRandomWithMax(numOfSelects)
@@ -45,39 +52,26 @@ func (d *RandomMutateStrategy) Mutate(g *gexecfuzz.GExecFuzz, curr *config.Confi
 			if numOfSelectCases == 0 {
 				return nil, fmt.Errorf("cannot randomly mutate an input with zero number of cases in select %d", mutateWhichSelect)
 			}
-			mutateToWhatValue := rand.GetRandomWithMax(int(numOfSelectCases))
 
 			// use feedback to avoid random to duplicated case
-			selectedInCurr := false
-			for _, ef := range curr.SelEfcm.Efcms {
-				if ef.ID == selectedSel.ID {
-					selectedInCurr = true
-					prevIdxOffset := idxcache[ef.ID]
+			for _, rec := range records {
+				if rec.ID == selectedSel.ID {
+					prevIdxOffset := idxcache[rec.ID]
 					if prevIdxOffset == -1 {
 						// -1 means this ID has been generated all cases
 						break
 					}
-					newCase := (ef.Case + prevIdxOffset + 1) % int(selectedSel.Cases)
+					newCase := (int(rec.Chosen) + prevIdxOffset + 1) % int(selectedSel.Cases)
 
-					if newCase == ef.Case {
-						idxcache[ef.ID] = -1
+					if newCase == int(rec.Chosen) {
+						idxcache[rec.ID] = -1
 						break
 					}
 					log.Println("used feedback to avoid redundent random generation")
-					idxcache[ef.ID] += 1
-					cfg.SelEfcm.Efcms = append(cfg.SelEfcm.Efcms, selefcm.SelEfcm{
-						ID:   selectedSel.ID,
-						Case: newCase,
-					})
+					idxcache[rec.ID] += 1
+					cfg.SelEfcm.Efcms[mutateWhichSelect].Case = newCase
 					break
 				}
-			}
-
-			if !selectedInCurr {
-				cfg.SelEfcm.Efcms = append(cfg.SelEfcm.Efcms, selefcm.SelEfcm{
-					ID:   selectedSel.ID,
-					Case: mutateToWhatValue,
-				})
 			}
 
 		} else {
@@ -88,12 +82,10 @@ func (d *RandomMutateStrategy) Mutate(g *gexecfuzz.GExecFuzz, curr *config.Confi
 				selectedSel := records[mutateWhichSelect]
 				numOfSelectCases := selectedSel.Cases
 				if numOfSelectCases == 0 {
-					return nil, fmt.Errorf("cannot randomly mutate an input with zero number of cases in select %d", mutateWhichSelect)
+					log.Printf("cannot randomly mutate an input with zero number of cases in select %d", mutateWhichSelect)
+					continue
 				}
-				cfg.SelEfcm.Efcms = append(cfg.SelEfcm.Efcms, selefcm.SelEfcm{
-					ID:   selectedSel.ID,
-					Case: (int(selectedSel.Chosen) + 1) % int(selectedSel.Cases),
-				})
+				cfg.SelEfcm.Efcms[mutateWhichSelect].Case = (int(selectedSel.Chosen) + 1) % int(selectedSel.Cases)
 			}
 		}
 

@@ -249,7 +249,7 @@ func handleRandStageInput(fctx *api.Context, ii *api.InterestInput) (bool, error
 		if bits.Has(bits.Bits(ii.Reason), bits.Bits(api.SelEfcmNotCovered)) {
 			newCfg := i.OracleRtConfig.Copy()
 			newCfg.SelEfcm.SelTimeout += 1000
-			if newCfg.SelEfcm.SelTimeout < 10000 {
+			if newCfg.SelEfcm.SelTimeout < 10500 {
 				log.Printf("handle %d, new rerun with timeout %d becuase of uncovered efcm", execID, newCfg.SelEfcm.SelTimeout)
 				ni := api.NewExecInput(fctx.GetAutoIncGlobalID(), execID, fctx.Cfg.OutputDir, g.Exec, newCfg, api.RandStage)
 				fctx.ExecInputCh <- ni
@@ -282,13 +282,13 @@ func handleRandStageInput(fctx *api.Context, ii *api.InterestInput) (bool, error
 	}
 
 	randMutateEnergy := fctx.Cfg.RandMutateEnergy
-
+	var scoreFunc = score.NewScoreStrategyImpl(fctx)
+	curScore, _ := scoreFunc.Score(i, o)
+	if curScore > fctx.GlobalBestScore {
+		fctx.GlobalBestScore = curScore
+	}
 	if !fctx.Cfg.IsDisableScore && fctx.GlobalBestScore >= 100 {
-		var scoreFunc = score.NewScoreStrategyImpl(fctx)
-		curScore, _ := scoreFunc.Score(i, o)
-		if curScore > fctx.GlobalBestScore {
-			fctx.GlobalBestScore = curScore
-		}
+
 		origChance := int(100.0 * (float64(curScore) / float64(fctx.GlobalBestScore)))
 		if origChance == 0 {
 			// if chance is less than 1%, return
@@ -296,13 +296,12 @@ func handleRandStageInput(fctx *api.Context, ii *api.InterestInput) (bool, error
 			return true, nil
 		}
 		randMutateChance := segmentChance(origChance)
-
+		log.Printf("handle %d, current score %d, max score %d, execution chance %d%%(%d%%)",
+			execID, curScore, fctx.GlobalBestScore, randMutateChance, origChance)
 		if fctx.Cfg.ScoreBasedEnergy {
 			randMutateEnergy = int(randMutateChance / 20)
-		}
-		log.Printf("handle %d, current score %d, max score %d, execution chance %d%%(%d%%), energy %d",
-			execID, curScore, fctx.GlobalBestScore, randMutateChance, origChance, randMutateEnergy)
-		if rand.GetRandomWithMax(100) >= randMutateChance {
+			log.Printf("handle %d, energy %d", execID, randMutateEnergy)
+		} else if rand.GetRandomWithMax(100) >= randMutateChance {
 			// Skip the test case based on rand possibilities.
 			log.Printf("handle %d, skip because of score", execID)
 			// add it back to interest queue since right now queue is not persistant
