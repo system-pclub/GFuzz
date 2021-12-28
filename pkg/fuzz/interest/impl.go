@@ -5,6 +5,7 @@ import (
 	"gfuzz/pkg/fuzz/api"
 	"gfuzz/pkg/fuzz/mutate"
 	"gfuzz/pkg/fuzz/score"
+	"gfuzz/pkg/utils/bits"
 	"gfuzz/pkg/utils/hash"
 	"gfuzz/pkg/utils/rand"
 	"log"
@@ -21,26 +22,37 @@ func NewInterestHandlerImpl(fctx *api.Context) api.InterestHandler {
 		fctx: fctx,
 	}
 }
-func (h *InterestHandlerImpl) IsInterested(i *api.Input, o *api.Output, isFoundNewSelect bool) (bool, error) {
+
+//todo: move new select detection from exec.go to here
+func (h *InterestHandlerImpl) IsInterested(i *api.Input, o *api.Output, isFoundNewSelect bool) (bool, api.InterestReason, error) {
 
 	// If isIgnoreFeedback is true, we treat every feedback as interesting and directly return.
 	if h.fctx.Cfg.IsIgnoreFeedback {
-		return true, nil
+		return true, api.NoInterest, nil
 	}
 
+	var reason api.InterestReason
+
 	isInteresting := false
+
+	if isFoundNewSelect {
+		isInteresting = true
+		reason = api.InterestReason(bits.Set(bits.Bits(reason), bits.Bits(api.NewSelectFound)))
+	}
 
 	// Check new tuple
 	entry := h.fctx.GetQueueEntryByGExecID(i.Exec.String())
 	if entry != nil && entry.UpdateTupleRecordsIfNew(o.OracleRtOutput.Tuples) > 0 {
 		// Has new tuples, interesting
 		isInteresting = true
+		reason = api.InterestReason(bits.Set(bits.Bits(reason), bits.Bits(api.NewTuple)))
 	}
 
 	// See if we found new channel or new channel state.
 	if entry != nil && entry.UpdateChannelRecordsIfNew(o.OracleRtOutput.Channels) > 0 {
 		// Has new channels, interesting
 		isInteresting = true
+		reason = api.InterestReason(bits.Set(bits.Bits(reason), bits.Bits(api.NewChannel)))
 	}
 
 	// Using SELECT record as feedback
@@ -60,17 +72,19 @@ func (h *InterestHandlerImpl) IsInterested(i *api.Input, o *api.Output, isFoundN
 
 	if len(oSelectMap) == 0 {
 		/* No selects detected. Return not interesting.  */
-		return false, nil
+		return false, api.NoInterest, nil
 	}
 
-	ortCfgHash := hash.AsSha256(oSelectMap)
-	if h.fctx.UpdateOrtOutputHash(ortCfgHash) {
+	selectHash := hash.AsSha256(oSelectMap)
+	// fixme: should be entrypoint based right?
+	if h.fctx.UpdateOrtOutputHash(selectHash) {
 		isInteresting = true
+		reason = api.InterestReason(bits.Set(bits.Bits(reason), bits.Bits(api.Other)))
 	}
-	if isInteresting || isFoundNewSelect {
-		return true, nil
+	if isInteresting {
+		return true, reason, nil
 	} else {
-		return false, nil
+		return false, api.NoInterest, nil
 	}
 }
 
@@ -93,7 +107,7 @@ func (h *InterestHandlerImpl) HandleInterest(i *api.InterestInput) (ret bool, er
 
 	if i.Output == nil {
 		// if executed is true but output is nil
-		// it could be still in channel pending to run
+		// it could be still in queue, pending to run
 		return false, nil
 	}
 
@@ -224,10 +238,23 @@ func handleRandStageInput(fctx *api.Context, ii *api.InterestInput) (bool, error
 	if err != nil {
 		return false, err
 	}
+
+	// if this interest does not covered the enforcement, rerun
+	if bits.Has(bits.Bits(ii.Reason), bits.Bits(api.SelEfcmNotCovered)) {
+		newCfg := i.OracleRtConfig.Copy()
+		newCfg.SelEfcm.SelTimeout += 3000
+		if newCfg.SelEfcm.SelTimeout < 10000 {
+			log.Printf("handle %d, new rerun with timeout %d becuase of uncovered efcm", execID, newCfg.SelEfcm.SelTimeout)
+			ni := api.NewExecInput(fctx.GetAutoIncGlobalID(), execID, fctx.Cfg.OutputDir, g.Exec, newCfg, api.RandStage)
+			fctx.ExecInputCh <- ni
+		}
+	}
+
 	var randInputs []*api.Input
 	var mts mutate.OrtConfigMutateStrategy = &mutate.RandomMutateStrategy{
 		SelEfcmTimeout:      fctx.Cfg.SelEfcmTimeout,
 		FixedSelEfcmTimeout: fctx.Cfg.FixedSelEfcmTimeout,
+		IgnoreFeedback:      fctx.Cfg.IsIgnoreFeedback,
 	}
 
 	randMutateEnergy := fctx.Cfg.RandMutateEnergy
