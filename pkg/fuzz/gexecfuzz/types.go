@@ -46,6 +46,7 @@ func (e *GExecFuzz) Clean() {
 	e.OrtChannels = make(map[string]output.ChanRecord)
 	e.OrtTuples = make(map[uint32]uint32)
 	e.ortCfgHash = make(map[string]struct{})
+	e.CaseRecords = make(map[string][]int)
 }
 
 func (e *GExecFuzz) RecordCase(rec output.SelectRecord) {
