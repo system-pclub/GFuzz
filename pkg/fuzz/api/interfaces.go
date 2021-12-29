@@ -40,4 +40,6 @@ type InterestHandler interface {
 	HandleInterest(i *InterestInput) (bool, error)
 	// IsInterested will decide if this execution should be added into interest list
 	IsInterested(i *Input, o *Output, isFoundNewSelect bool) (bool, InterestReason, error)
+
+	CleanAllGExecsRecords() error
 }

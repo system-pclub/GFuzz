@@ -33,7 +33,7 @@ var opts struct {
 	AllowDupCfg         bool `long:"allowdupcfg" description:"allow duplicated randomly generated configuration to be run"`
 	IsIgnoreFeedback    bool `long:"ignorefeedback" description:"Is ignoring the feedback, and save every mutated seed into the fuzzing queue"`
 	RandMutateEnergy    int  `long:"randMutateEnergy" description:"Determine the energy of random mutations. If == 100 (default), then each seed would mutate 100 times in the rand mutation stage"`
-	IsDisableScore      bool `long:"isDisableScore" description:"Is disable score to priority testing case. "`
+	IsDisableScore      bool `long:"disablescore" description:"Is disable score to priority testing case. "`
 	IsNoMutation        bool `long:"isNoMutation" description:"Disable mutations on all testing case. "`
 }
 

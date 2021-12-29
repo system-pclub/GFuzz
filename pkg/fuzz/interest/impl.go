@@ -3,6 +3,7 @@ package interest
 import (
 	"fmt"
 	"gfuzz/pkg/fuzz/api"
+	"gfuzz/pkg/fuzz/gexecfuzz"
 	"gfuzz/pkg/fuzz/mutate"
 	"gfuzz/pkg/fuzz/score"
 	"gfuzz/pkg/utils/bits"
@@ -248,8 +249,8 @@ func handleRandStageInput(fctx *api.Context, ii *api.InterestInput) (bool, error
 		// if this interest does not covered the enforcement, rerun
 		if bits.Has(bits.Bits(ii.Reason), bits.Bits(api.SelEfcmNotCovered)) {
 			newCfg := i.OracleRtConfig.Copy()
-			newCfg.SelEfcm.SelTimeout += 1000
-			if newCfg.SelEfcm.SelTimeout < 10500 {
+			newCfg.SelEfcm.SelTimeout += 3000
+			if newCfg.SelEfcm.SelTimeout < 12500 {
 				log.Printf("handle %d, new rerun with timeout %d becuase of uncovered efcm", execID, newCfg.SelEfcm.SelTimeout)
 				ni := api.NewExecInput(fctx.GetAutoIncGlobalID(), execID, fctx.Cfg.OutputDir, g.Exec, newCfg, api.RandStage)
 				fctx.ExecInputCh <- ni
@@ -312,6 +313,13 @@ func handleRandStageInput(fctx *api.Context, ii *api.InterestInput) (bool, error
 		}
 	}
 
+	var caseNums []int
+	for _, sel := range o.OracleRtOutput.Selects {
+		caseNums = append(caseNums, int(sel.Cases))
+	}
+
+	log.Printf("handle %d, cases: %v", execID, caseNums)
+
 	cfgs, err := mts.Mutate(g, i.OracleRtConfig, o.OracleRtOutput, randMutateEnergy)
 
 	if err != nil {
@@ -358,4 +366,11 @@ func getExecIDFromInputID(inputID string) (uint32, error) {
 		return 0, err
 	}
 	return uint32(id), nil
+}
+
+func (h *InterestHandlerImpl) CleanAllGExecsRecords() (err error) {
+	h.fctx.EachGExecFuzz(func(gf *gexecfuzz.GExecFuzz) {
+		gf.Clean()
+	})
+	return nil
 }

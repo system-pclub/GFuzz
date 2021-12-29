@@ -41,6 +41,16 @@ func (e *GExecFuzz) String() string {
 	return e.Exec.String()
 }
 
+func (e *GExecFuzz) Clean() {
+	e.m.Lock()
+	defer e.m.Unlock()
+	e.OrtSelects = make(map[string]output.SelectRecord)
+	e.OrtChannels = make(map[string]output.ChanRecord)
+	e.OrtTuples = make(map[uint32]uint32)
+	e.InputSelectsHash = make(map[string]struct{})
+	e.ortCfgHash = make(map[string]struct{})
+}
+
 func (e *GExecFuzz) UpdateInputSelectEfcmsIfNew(Efcms []selefcm.SelEfcm) int {
 	e.m.Lock()
 	defer e.m.Unlock()
