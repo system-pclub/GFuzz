@@ -38,7 +38,7 @@ var opts struct {
 
 	NfbRandEnergy         bool `long:"nfbrandenergy" description:"should energy be randomly generated in non-feedback"`
 	NfbRandSelEfcmTimeout bool `long:"nfbrandsetimeout" description:"should timeout of select enforcement be randomly generated in non-feedback"`
-	MemRandStrat          bool `long:"memrandstrat"`
+	MemRandStrat          bool `long:"memrandstrat" description:"prioritize generating non-triggered case in given energy"`
 }
 
 func parseFlags() {

@@ -31,14 +31,15 @@ func (d *NfbRandomMutateStrategy) Mutate(g *gexecfuzz.GExecFuzz, curr *config.Co
 	for mutate_idx := 0; mutate_idx < energy; mutate_idx++ {
 		cfg := baseCfg.Copy()
 		if !d.FixedSelEfcmTimeout {
-			defaultInc := 1000
 			if d.RandomTimeoutIncr {
-				defaultInc = rand.GetRandomWithMax(10500) + 1
+				cfg.SelEfcm.SelTimeout = rand.GetRandomWithMax(10500) + 1
+			} else {
+				cfg.SelEfcm.SelTimeout = curr.SelEfcm.SelTimeout + 1000
+				if cfg.SelEfcm.SelTimeout > 10500 {
+					cfg.SelEfcm.SelTimeout = 500
+				}
 			}
-			cfg.SelEfcm.SelTimeout = curr.SelEfcm.SelTimeout + defaultInc
-			if cfg.SelEfcm.SelTimeout > 10500 {
-				cfg.SelEfcm.SelTimeout = 500
-			}
+
 		} else {
 			cfg.SelEfcm.SelTimeout = d.SelEfcmTimeout
 		}

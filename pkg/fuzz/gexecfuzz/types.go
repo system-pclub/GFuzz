@@ -3,7 +3,6 @@ package gexecfuzz
 import (
 	"gfuzz/pkg/gexec"
 	"gfuzz/pkg/oraclert/output"
-	"gfuzz/pkg/selefcm"
 	"sync"
 )
 
@@ -49,25 +48,25 @@ func (e *GExecFuzz) Clean() {
 	e.ortCfgHash = make(map[string]struct{})
 }
 
-func (e *GExecFuzz) RecordSelEfcm(efcm *selefcm.SelEfcm) {
+func (e *GExecFuzz) RecordCase(rec output.SelectRecord) {
 	e.m.Lock()
 	defer e.m.Unlock()
 
-	if cases, ok := e.CaseRecords[efcm.ID]; ok {
+	if cases, ok := e.CaseRecords[rec.ID]; ok {
 		// since length cases usually small, we don't need map
 		for _, c := range cases {
 			// check is this case has been recorded
-			if c == efcm.Case {
+			if c == int(rec.Chosen) {
 				continue
 			}
 		}
 
-		cases = append(cases, efcm.Case)
+		cases = append(cases, int(rec.Chosen))
 
-		e.CaseRecords[efcm.ID] = cases
+		e.CaseRecords[rec.ID] = cases
 	} else {
-		cases := []int{efcm.Case}
-		e.CaseRecords[efcm.ID] = cases
+		cases := []int{int(rec.Chosen)}
+		e.CaseRecords[rec.ID] = cases
 	}
 
 }

@@ -278,17 +278,16 @@ func handleRandStageInput(fctx *api.Context, ii *api.InterestInput) (bool, error
 		}
 	} else {
 		// in feedback mode
-		randMts := &mutate.RandomMutateStrategy{
-			SelEfcmTimeout:      fctx.Cfg.SelEfcmTimeout,
-			FixedSelEfcmTimeout: fctx.Cfg.FixedSelEfcmTimeout,
-		}
-
-		if fctx.Cfg.MemRandStrat {
+		if len(o.OracleRtOutput.Selects) <= 5 && fctx.Cfg.MemRandStrat {
 			mts = &mutate.MemRandMutateStrategy{
-				BackUpStrat: randMts,
+				SelEfcmTimeout:      fctx.Cfg.SelEfcmTimeout,
+				FixedSelEfcmTimeout: fctx.Cfg.FixedSelEfcmTimeout,
 			}
 		} else {
-			mts = randMts
+			mts = &mutate.RandomMutateStrategy{
+				SelEfcmTimeout:      fctx.Cfg.SelEfcmTimeout,
+				FixedSelEfcmTimeout: fctx.Cfg.FixedSelEfcmTimeout,
+			}
 		}
 
 	}
