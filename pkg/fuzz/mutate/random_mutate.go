@@ -17,8 +17,18 @@ type RandomMutateStrategy struct {
 func (d *RandomMutateStrategy) Mutate(g *gexecfuzz.GExecFuzz, curr *config.Config, o *output.Output, energy int) ([]*config.Config, error) {
 	var cfgs []*config.Config
 	idxcache := make(map[string]int)
+
+	// baseCfg is based on output's select records
+	baseCfg := config.NewConfig()
+	// copy output's selects into new cfg
+	for _, sel := range o.Selects {
+		baseCfg.SelEfcm.Efcms = append(baseCfg.SelEfcm.Efcms, selefcm.SelEfcm{
+			ID:   sel.ID,
+			Case: int(sel.Chosen),
+		})
+	}
 	for mutate_idx := 0; mutate_idx < energy; mutate_idx++ {
-		cfg := config.NewConfig()
+		cfg := baseCfg.Copy()
 		if !d.FixedSelEfcmTimeout {
 			cfg.SelEfcm.SelTimeout = curr.SelEfcm.SelTimeout + 1000
 			if cfg.SelEfcm.SelTimeout > 10500 {
@@ -33,14 +43,6 @@ func (d *RandomMutateStrategy) Mutate(g *gexecfuzz.GExecFuzz, curr *config.Confi
 		numOfSelects := len(records)
 		if numOfSelects == 0 {
 			return nil, nil
-		}
-
-		// copy output's selects into new cfg
-		for _, sel := range o.Selects {
-			cfg.SelEfcm.Efcms = append(cfg.SelEfcm.Efcms, selefcm.SelEfcm{
-				ID:   sel.ID,
-				Case: int(sel.Chosen),
-			})
 		}
 
 		if mutateMethod < 8 {

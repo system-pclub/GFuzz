@@ -35,6 +35,10 @@ var opts struct {
 	RandMutateEnergy    int  `long:"randMutateEnergy" description:"Determine the energy of random mutations. If == 100 (default), then each seed would mutate 100 times in the rand mutation stage"`
 	IsDisableScore      bool `long:"disablescore" description:"Is disable score to priority testing case. "`
 	IsNoMutation        bool `long:"isNoMutation" description:"Disable mutations on all testing case. "`
+
+	NfbRandEnergy         bool `long:"nfbrandenergy" description:"should energy be randomly generated in non-feedback"`
+	NfbRandSelEfcmTimeout bool `long:"nfbrandsetimeout" description:"should timeout of select enforcement be randomly generated in non-feedback"`
+	MemRandStrat          bool `long:"memrandstrat"`
 }
 
 func parseFlags() {

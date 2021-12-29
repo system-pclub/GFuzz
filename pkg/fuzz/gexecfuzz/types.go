@@ -4,7 +4,6 @@ import (
 	"gfuzz/pkg/gexec"
 	"gfuzz/pkg/oraclert/output"
 	"gfuzz/pkg/selefcm"
-	"gfuzz/pkg/utils/hash"
 	"sync"
 )
 
@@ -17,11 +16,11 @@ type GExecFuzz struct {
 	ortCfg2TimeoutCnt map[string]uint32
 	ortCfgHash        map[string]struct{}
 	// All selects we have seen so far
-	OrtSelects       map[string]output.SelectRecord
-	OrtChannels      map[string]output.ChanRecord
-	OrtTuples        map[uint32]uint32
-	InputSelectsHash map[string]struct{}
-	m                sync.RWMutex
+	OrtSelects  map[string]output.SelectRecord
+	OrtChannels map[string]output.ChanRecord
+	OrtTuples   map[uint32]uint32
+	CaseRecords map[string][]int
+	m           sync.RWMutex
 }
 
 func NewGExecFuzz(exec gexec.Executable) *GExecFuzz {
@@ -31,7 +30,7 @@ func NewGExecFuzz(exec gexec.Executable) *GExecFuzz {
 		OrtSelects:        make(map[string]output.SelectRecord),
 		OrtChannels:       make(map[string]output.ChanRecord),
 		OrtTuples:         make(map[uint32]uint32),
-		InputSelectsHash:  make(map[string]struct{}),
+		CaseRecords:       make(map[string][]int),
 		ortCfg2TimeoutCnt: make(map[string]uint32),
 		ortCfgHash:        make(map[string]struct{}),
 	}
@@ -47,36 +46,30 @@ func (e *GExecFuzz) Clean() {
 	e.OrtSelects = make(map[string]output.SelectRecord)
 	e.OrtChannels = make(map[string]output.ChanRecord)
 	e.OrtTuples = make(map[uint32]uint32)
-	e.InputSelectsHash = make(map[string]struct{})
 	e.ortCfgHash = make(map[string]struct{})
 }
 
-func (e *GExecFuzz) UpdateInputSelectEfcmsIfNew(Efcms []selefcm.SelEfcm) int {
+func (e *GExecFuzz) RecordSelEfcm(efcm *selefcm.SelEfcm) {
 	e.m.Lock()
 	defer e.m.Unlock()
-	iSelectMap := make(map[string][]int)
-	newSelectNum := 0
 
-	for _, v := range Efcms {
-		vSelectId := v.ID
-		vSelectChosen := v.Case
-
-		if val, ok := iSelectMap[vSelectId]; ok {
-			val = append(val, vSelectChosen)
-			iSelectMap[vSelectId] = val
-		} else {
-			val := []int{vSelectChosen}
-			iSelectMap[vSelectId] = val
+	if cases, ok := e.CaseRecords[efcm.ID]; ok {
+		// since length cases usually small, we don't need map
+		for _, c := range cases {
+			// check is this case has been recorded
+			if c == efcm.Case {
+				continue
+			}
 		}
+
+		cases = append(cases, efcm.Case)
+
+		e.CaseRecords[efcm.ID] = cases
+	} else {
+		cases := []int{efcm.Case}
+		e.CaseRecords[efcm.ID] = cases
 	}
 
-	ortCfgHash := hash.AsSha256(iSelectMap)
-	if _, exist := e.InputSelectsHash[ortCfgHash]; !exist {
-		e.InputSelectsHash[ortCfgHash] = struct{}{}
-		newSelectNum += 1
-	}
-
-	return newSelectNum
 }
 
 func (e *GExecFuzz) UpdateSelectRecordsIfNew(records []output.SelectRecord) int {

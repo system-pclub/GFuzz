@@ -274,15 +274,31 @@ func handleRandStageInput(fctx *api.Context, ii *api.InterestInput) (bool, error
 		mts = &mutate.NfbRandomMutateStrategy{
 			SelEfcmTimeout:      fctx.Cfg.SelEfcmTimeout,
 			FixedSelEfcmTimeout: fctx.Cfg.FixedSelEfcmTimeout,
+			RandomTimeoutIncr:   fctx.Cfg.NfbRandSelEfcmTimeout,
 		}
 	} else {
-		mts = &mutate.RandomMutateStrategy{
+		// in feedback mode
+		randMts := &mutate.RandomMutateStrategy{
 			SelEfcmTimeout:      fctx.Cfg.SelEfcmTimeout,
 			FixedSelEfcmTimeout: fctx.Cfg.FixedSelEfcmTimeout,
 		}
+
+		if fctx.Cfg.MemRandStrat {
+			mts = &mutate.MemRandMutateStrategy{
+				BackUpStrat: randMts,
+			}
+		} else {
+			mts = randMts
+		}
+
 	}
 
-	randMutateEnergy := fctx.Cfg.RandMutateEnergy
+	mutateEnergy := fctx.Cfg.RandMutateEnergy
+	// if nfb, random 1-5 to be our energy
+	if fctx.Cfg.IsIgnoreFeedback && fctx.Cfg.NfbRandEnergy {
+		mutateEnergy = rand.GetRandomWithMax(5) + 1
+	}
+
 	var scoreFunc = score.NewScoreStrategyImpl(fctx)
 	curScore, _ := scoreFunc.Score(i, o)
 	if curScore > fctx.GlobalBestScore {
@@ -300,8 +316,8 @@ func handleRandStageInput(fctx *api.Context, ii *api.InterestInput) (bool, error
 		log.Printf("handle %d, current score %d, max score %d, execution chance %d%%(%d%%)",
 			execID, curScore, fctx.GlobalBestScore, randMutateChance, origChance)
 		if fctx.Cfg.ScoreBasedEnergy {
-			randMutateEnergy = int(randMutateChance / 20)
-			log.Printf("handle %d, energy %d", execID, randMutateEnergy)
+			mutateEnergy = int(randMutateChance / 20)
+			log.Printf("handle %d, energy %d", execID, mutateEnergy)
 		} else if rand.GetRandomWithMax(100) >= randMutateChance {
 			// Skip the test case based on rand possibilities.
 			log.Printf("handle %d, skip because of score", execID)
@@ -320,7 +336,7 @@ func handleRandStageInput(fctx *api.Context, ii *api.InterestInput) (bool, error
 
 	log.Printf("handle %d, cases: %v", execID, caseNums)
 
-	cfgs, err := mts.Mutate(g, i.OracleRtConfig, o.OracleRtOutput, randMutateEnergy)
+	cfgs, err := mts.Mutate(g, i.OracleRtConfig, o.OracleRtOutput, mutateEnergy)
 
 	if err != nil {
 		return false, err
@@ -330,7 +346,7 @@ func handleRandStageInput(fctx *api.Context, ii *api.InterestInput) (bool, error
 		// if no configuration, it implies there is no selects for fuzzer to mutate
 		// if no feedback mode,  we should not consider it and simply rerun it
 		if fctx.Cfg.IsIgnoreFeedback {
-			for idx := 0; idx < randMutateEnergy; idx++ {
+			for idx := 0; idx < mutateEnergy; idx++ {
 				cfgs = append(cfgs, i.OracleRtConfig.Copy())
 			}
 		}

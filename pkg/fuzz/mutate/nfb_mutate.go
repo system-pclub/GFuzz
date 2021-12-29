@@ -13,14 +13,29 @@ import (
 type NfbRandomMutateStrategy struct {
 	SelEfcmTimeout      int
 	FixedSelEfcmTimeout bool
+	RandomTimeoutIncr   bool
 }
 
 func (d *NfbRandomMutateStrategy) Mutate(g *gexecfuzz.GExecFuzz, curr *config.Config, o *output.Output, energy int) ([]*config.Config, error) {
 	var cfgs []*config.Config
+	// baseCfg is based on output's select records
+	baseCfg := config.NewConfig()
+	// copy output's selects into new cfg
+	for _, sel := range o.Selects {
+		baseCfg.SelEfcm.Efcms = append(baseCfg.SelEfcm.Efcms, selefcm.SelEfcm{
+			ID:   sel.ID,
+			Case: int(sel.Chosen),
+		})
+	}
+
 	for mutate_idx := 0; mutate_idx < energy; mutate_idx++ {
-		cfg := config.NewConfig()
+		cfg := baseCfg.Copy()
 		if !d.FixedSelEfcmTimeout {
-			cfg.SelEfcm.SelTimeout = curr.SelEfcm.SelTimeout + 1000
+			defaultInc := 1000
+			if d.RandomTimeoutIncr {
+				defaultInc = rand.GetRandomWithMax(10500) + 1
+			}
+			cfg.SelEfcm.SelTimeout = curr.SelEfcm.SelTimeout + defaultInc
 			if cfg.SelEfcm.SelTimeout > 10500 {
 				cfg.SelEfcm.SelTimeout = 500
 			}

@@ -72,6 +72,9 @@ func main() {
 	config.FixedSelEfcmTimeout = opts.FixedSelEfcmTimeout
 	config.SelEfcmTimeout = opts.SelEfcmTimeout
 	config.AllowDupCfg = opts.AllowDupCfg
+	config.NfbRandEnergy = opts.NfbRandEnergy
+	config.NfbRandSelEfcmTimeout = opts.NfbRandSelEfcmTimeout
+	config.MemRandStrat = opts.MemRandStrat
 
 	if config.ScoreBasedEnergy {
 		log.Printf("using score based energy")
