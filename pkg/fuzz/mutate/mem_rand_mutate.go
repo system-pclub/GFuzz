@@ -24,6 +24,12 @@ func (d *MemRandMutateStrategy) Mutate(g *gexecfuzz.GExecFuzz, curr *config.Conf
 		})
 	}
 
+	// make sure we have already record all currrent's efcm
+	// since some efcm might be generated from other strategy
+	for _, efcm := range curr.SelEfcm.Efcms {
+		g.RecordSelEfcm(&efcm)
+	}
+
 	for idx, sel := range o.Selects {
 		efcmToTest := &selefcm.SelEfcm{
 			ID: sel.ID,
