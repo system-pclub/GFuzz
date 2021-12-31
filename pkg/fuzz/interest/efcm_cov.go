@@ -9,7 +9,7 @@ func IsEfcmCovered(efcms []selefcm.SelEfcm, records []output.SelectRecord) bool 
 	records_cache := make(map[string]map[int]struct{})
 	for _, r := range records {
 		if _, exist := records_cache[r.ID]; !exist {
-			records_cache[r.ID] = map[int]struct{}{}
+			records_cache[r.ID] = make(map[int]struct{})
 		}
 
 		records_cache[r.ID][int(r.Chosen)] = struct{}{}

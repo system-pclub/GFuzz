@@ -28,6 +28,8 @@ def analyze_gfuzz_output_dir(output_dir):
 
 def analyze_gfuzz_log(log_fp):
     exec_stats = {}
+    log_start_time = None
+    log_end_time = None
     with open(log_fp, "r") as log_f:
         for line in log_f:
             try:
@@ -36,6 +38,10 @@ def analyze_gfuzz_log(log_fp):
                     time_str = parts[0] + " " + parts[1]
                     cur_time = datetime.strptime(time_str, '%Y/%m/%d %H:%M:%S')
 
+                    if log_start_time is None:
+                        log_start_time = cur_time
+                    
+                    log_end_time = cur_time
                     if line.find("] received ") != -1:
                         exec_id = parts[5]
                         exec_stats[exec_id] = ExecStat(exec_id, cur_time, None)
@@ -47,15 +53,18 @@ def analyze_gfuzz_log(log_fp):
     exec_stats_arr = exec_stats.values()
     entry_stats_arr = analyze_exec_stats_arr(exec_stats_arr)
     
+    num_of_runs = len(exec_stats_arr)
+    total_dur = (log_end_time - log_start_time).total_seconds()
     print(f"""
 total entries: {len(entry_stats_arr)}
-total runs: {len(exec_stats_arr)}
-
+total runs: {num_of_runs}
+total duration (sec): {total_dur}
+average (run/sec): {num_of_runs/total_dur:.2f}
     """)
 
     # Most time-consuming entries
     print("most time-consuming entries:")
-    for e in top_n_time_consuming_entries(entry_stats_arr, 100):
+    for e in top_n_time_consuming_entries(entry_stats_arr, 10):
         print(f"{e.entry}, {e.num_of_runs} runs, {e.total_duration} seconds\n")
 
 def top_n_time_consuming_entries(entry_stats_arr, top):

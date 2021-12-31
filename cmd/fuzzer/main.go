@@ -84,9 +84,9 @@ func main() {
 		config.IsDisableScore = true
 	}
 
-	config.IsNoMutation = opts.IsNoMutation
-	if config.IsNoMutation {
-		log.Printf("Warning: Do not apply mutations to all test cases. ")
+	config.NoSelEfcm = opts.NoSelEfcm
+	if config.NoSelEfcm {
+		log.Printf("Warning: no select enforcement ")
 	}
 
 	config.OracleRtDebug = opts.OracleRtDebug

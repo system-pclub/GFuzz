@@ -9,7 +9,7 @@ func init() {
 var GlobalEnableOracle = true
 
 // during benchmark, we don't need to print bugs to stdout
-var BoolReportBug = gogetenv("GF_BENCHMARK") != "1"
+var BoolReportBug = gogetenv("ORACLERT_BENCHMARK") != "1"
 var BoolDelayCheck = true
 
 var MuReportBug mutex

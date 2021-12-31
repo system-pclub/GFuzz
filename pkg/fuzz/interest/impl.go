@@ -41,7 +41,7 @@ func (h *InterestHandlerImpl) IsInterested(i *api.Input, o *api.Output, isFoundN
 		reason = api.InterestReason(bits.Set(bits.Bits(reason), bits.Bits(api.NewSelectFound)))
 	}
 
-	if !IsEfcmCovered(i.OracleRtConfig.SelEfcm.Efcms, o.OracleRtOutput.Selects) {
+	if !h.fctx.Cfg.NoSelEfcm && !IsEfcmCovered(i.OracleRtConfig.SelEfcm.Efcms, o.OracleRtOutput.Selects) {
 		reason = api.InterestReason(bits.Set(bits.Bits(reason), bits.Bits(api.SelEfcmNotCovered)))
 		isInteresting = true
 	}
@@ -100,13 +100,6 @@ func (h *InterestHandlerImpl) HandleInterest(i *api.InterestInput) (ret bool, er
 	if i.Input.Stage == api.InitStage && !i.Executed {
 		i.HandledCnt += 1
 		i.Executed = true
-		h.fctx.ExecInputCh <- i.Input
-		return true, nil
-	}
-
-	// If IsNoMuation, then we do not mutate the seeds. Directly runs the seed.
-	if h.fctx.Cfg.IsNoMutation {
-		i.HandledCnt += 1
 		h.fctx.ExecInputCh <- i.Input
 		return true, nil
 	}
@@ -245,7 +238,7 @@ func handleRandStageInput(fctx *api.Context, ii *api.InterestInput) (bool, error
 		return false, err
 	}
 
-	if !fctx.Cfg.IsIgnoreFeedback {
+	if !fctx.Cfg.IsIgnoreFeedback && !fctx.Cfg.NoSelEfcm {
 		// if this interest does not covered the enforcement, rerun
 		if bits.Has(bits.Bits(ii.Reason), bits.Bits(api.SelEfcmNotCovered)) {
 			newCfg := i.OracleRtConfig.Copy()
@@ -283,6 +276,8 @@ func handleRandStageInput(fctx *api.Context, ii *api.InterestInput) (bool, error
 				SelEfcmTimeout:      fctx.Cfg.SelEfcmTimeout,
 				FixedSelEfcmTimeout: fctx.Cfg.FixedSelEfcmTimeout,
 			}
+		} else if fctx.Cfg.NoSelEfcm {
+			mts = &mutate.NoMutateStrategy{}
 		} else {
 			mts = &mutate.RandomMutateStrategy{
 				SelEfcmTimeout:      fctx.Cfg.SelEfcmTimeout,

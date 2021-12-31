@@ -34,7 +34,7 @@ var opts struct {
 	IsIgnoreFeedback    bool `long:"ignorefeedback" description:"Is ignoring the feedback, and save every mutated seed into the fuzzing queue"`
 	RandMutateEnergy    int  `long:"randMutateEnergy" description:"Determine the energy of random mutations. If == 100 (default), then each seed would mutate 100 times in the rand mutation stage"`
 	IsDisableScore      bool `long:"disablescore" description:"Is disable score to priority testing case. "`
-	IsNoMutation        bool `long:"isNoMutation" description:"Disable mutations on all testing case. "`
+	NoSelEfcm           bool `long:"nose" description:"Disable select enforcement"`
 
 	NfbRandEnergy         bool `long:"nfbrandenergy" description:"should energy be randomly generated in non-feedback"`
 	NfbRandSelEfcmTimeout bool `long:"nfbrandsetimeout" description:"should timeout of select enforcement be randomly generated in non-feedback"`
