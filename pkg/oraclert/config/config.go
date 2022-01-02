@@ -30,7 +30,7 @@ func Serialize(l *Config) ([]byte, error) {
 		return []byte{}, nil
 	}
 
-	return json.Marshal(l)
+	return json.MarshalIndent(l, "", "  ")
 }
 
 func Deserilize(data []byte) (*Config, error) {

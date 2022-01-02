@@ -19,4 +19,7 @@ const (
 
 	// ORACLERT_OUTPUT_FILE is an environment variable dumps selects, channels, xorLoc usage
 	ORACLERT_OUTPUT_FILE = "ORACLERT_OUTPUT_FILE"
+
+	// ORACLERT_TIME_DIVIDE is used to shorten the timeout
+	ORACLERT_TIME_DIVIDE = "ORACLERT_TIME_DIVIDE"
 )

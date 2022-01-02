@@ -85,8 +85,12 @@ func NewChanInfo(ch *hchan) *ChanInfo {
 
 	// If this channel is in some special API, set special flag
 	//creationFunc := MyCaller(1)
-	if Index(strLoc, "time") >= 0 {
+	if !newChInfo.BoolInSDK && Index(strLoc, "/time") >= 0 {
 		newChInfo.SpecialFlag = TimeTicker
+	}
+
+	if BoolDebug {
+		println(strLoc, "SpecialFlag", newChInfo.SpecialFlag)
 	}
 
 	return newChInfo

@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strconv"
+	"time"
 )
 
 var (
@@ -29,6 +30,17 @@ func init() {
 	ortStdoutFile = os.Getenv(env.ORACLERT_STDOUT_FILE)
 	ortOutputFile = os.Getenv(env.ORACLERT_OUTPUT_FILE)
 	rtConfigFile := os.Getenv(env.ORACLERT_CONFIG_FILE)
+	timeDivStr := os.Getenv(env.ORACLERT_TIME_DIVIDE)
+	if timeDivStr == "" {
+		timeDivStr = "1"
+	}
+	var err error
+	time.DurDivideBy, err = strconv.Atoi(timeDivStr)
+	if err != nil {
+		time.DurDivideBy = 1
+		fmt.Println("Failed to set time.DurDivideBy. time.DurDivideBy is set to 1. Err:", err)
+	} 
+
 	if rtConfigFile == "" {
 		return
 	}

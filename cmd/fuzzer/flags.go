@@ -25,8 +25,8 @@ var opts struct {
 	GlobalTuple         bool `long:"globalTuple" description:"Whether prev_location is global or per channel"`
 	ScoreSdk            bool `long:"scoreSdk" description:"Recording/scoring if channel comes from Go SDK"`
 	ScoreAllPrim        bool `long:"scoreAllPrim" description:"Recording/scoring other primitives like Mutex together with channel"`
-	TimeDivideBy        int  `long:"timeDivideBy" description:"Durations in time/sleep.go will be divided by this int number"`
-	OracleRtDebug       bool `long:"oraclertdebug"`
+	TimeDivideBy        int  `long:"timedivideby" description:"Durations in time/sleep.go will be divided by this int number"`
+	OracleRtDebug       bool `long:"ortdebug"`
 	SelEfcmTimeout      int  `long:"setimeout" default:"500" description:"default select enforcement timeout"`
 	FixedSelEfcmTimeout bool `long:"fixedsetimeout" description:"disable automatically select enforcement timeout mutating"`
 	ScoreBasedEnergy    bool `long:"scoreenergy"`

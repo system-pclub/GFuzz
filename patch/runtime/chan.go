@@ -229,15 +229,19 @@ func chansend(c *hchan, ep unsafe.Pointer, block bool, callerpc uintptr) bool {
 	if GlobalEnableOracle && c.chInfo.OKToCheck && okToCheck(c) {
 		currentGo := CurrentGoInfo()
 		AddRefGoroutine(c.chInfo, currentGo)
-		currentGo.SetBlockAt(c.chInfo, Send)
-		CS := []PrimInfo{c.chInfo}
-		var checkEntry *CheckEntry
-		if BoolDelayCheck {
-			checkEntry = EnqueueCheckEntry(CS)
-		} else {
-			CheckBlockBug(CS)
+
+		if c.qcount >= c.dataqsiz {
+			currentGo.SetBlockAt(c.chInfo, Send)
+			CS := []PrimInfo{c.chInfo}
+			var checkEntry *CheckEntry
+			if BoolDelayCheck {
+				checkEntry = EnqueueCheckEntry(CS)
+			} else {
+				CheckBlockBug(CS)
+			}
+			defer currentGo.WithdrawBlock(checkEntry)
 		}
-		defer currentGo.WithdrawBlock(checkEntry)
+
 	}
 
 	///MYCODE
@@ -594,15 +598,18 @@ func chanrecv(c *hchan, ep unsafe.Pointer, block bool) (selected, received bool)
 	if GlobalEnableOracle && c.chInfo.OKToCheck && okToCheck(c) {
 		currentGo := CurrentGoInfo()
 		AddRefGoroutine(c.chInfo, currentGo)
-		currentGo.SetBlockAt(c.chInfo, Recv)
-		CS := []PrimInfo{c.chInfo}
-		var checkEntry *CheckEntry
-		if BoolDelayCheck {
-			checkEntry = EnqueueCheckEntry(CS)
-		} else {
-			CheckBlockBug(CS)
+		if c.qcount == 0 {
+			currentGo.SetBlockAt(c.chInfo, Recv)
+			CS := []PrimInfo{c.chInfo}
+			var checkEntry *CheckEntry
+			if BoolDelayCheck {
+				checkEntry = EnqueueCheckEntry(CS)
+			} else {
+				CheckBlockBug(CS)
+			}
+			defer currentGo.WithdrawBlock(checkEntry)
 		}
-		defer currentGo.WithdrawBlock(checkEntry)
+
 	}
 
 	///MYCODE

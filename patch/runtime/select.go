@@ -305,13 +305,19 @@ func selectgo(cas0 *scase, order0 *uint16, pc0 *uintptr, nsends, nrecvs int, blo
 		c0 := scases[o].c
 		if c0.chInfo != nil {
 			Monitor(c0.chInfo)
+		} else {
+			// if a select involves a channel
+			// without chinfo, it means
+			// we don't instrument this channel
+			// so we cannot sure whether this is timer/poller
+			boolInvolveChNotOK = true
 		}
 		if okToCheck(c0) == false {
 			boolInvolveChNotOK = true
 		}
 		vecHChan = append(vecHChan, c0)
 	}
-	if boolInvolveChNotOK{
+	if boolInvolveChNotOK {
 		goto outOfOracle
 	}
 	if LastMySwitchChoice() == -1 { // If LastMySwitchChoice is not -1, then we are blocked at our fabricate select. Don't report bug here
@@ -321,8 +327,6 @@ func selectgo(cas0 *scase, order0 *uint16, pc0 *uintptr, nsends, nrecvs int, blo
 		blockEntry := EnqueueBlockEntry(vecPrimInfo, Select)
 		defer DequeueBlockEntry(blockEntry)
 	}
-
-
 
 	if GlobalEnableOracle && LastMySwitchChoice() == -1 { // If LastMySwitchChoice is not -1, then we are blocked at our fabricate select. Don't report bug here
 		currentGo = CurrentGoInfo()
@@ -350,8 +354,7 @@ func selectgo(cas0 *scase, order0 *uint16, pc0 *uintptr, nsends, nrecvs int, blo
 		}
 		defer currentGo.WithdrawBlock(checkEntry)
 	}
-	outOfOracle:
-
+outOfOracle:
 
 	// pass 2 - enqueue on all chans
 	gp = getg()
