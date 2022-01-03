@@ -54,6 +54,9 @@ func RegisterIgnoreGoroutine(s string) {
 }
 
 func ignore(g string) bool {
+	if strings.Contains(g, "gfuzz/pkg/oraclert") {
+		return true
+	}
 	sl := strings.SplitN(g, "\n", 2)
 	if len(sl) != 2 {
 		return true
@@ -101,17 +104,17 @@ func check(efer Errorfer, timeout time.Duration) {
 
 	// Loop, waiting for goroutines to shut down.
 	// Wait up to timeout, but finish as quickly as possible.
-	// deadline := time.Now().Add(timeout)
-	// var leaked []string
-	// for time.Now().Before(deadline) {
-	// 	if leaked = interestingGoroutines(); len(leaked) == 0 {
-	// 		return
-	// 	}
-	// 	time.Sleep(50 * time.Millisecond)
-	// }
-	// for _, g := range leaked {
-	// 	efer.Errorf("Leaked goroutine: %v", g)
-	// }
+	deadline := time.Now().Add(timeout)
+	var leaked []string
+	for time.Now().Before(deadline) {
+		if leaked = interestingGoroutines(); len(leaked) == 0 {
+			return
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	for _, g := range leaked {
+		efer.Errorf("Leaked goroutine: %v", g)
+	}
 }
 
 // Check looks at the currently-running goroutines and checks if there are any

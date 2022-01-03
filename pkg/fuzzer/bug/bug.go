@@ -255,6 +255,8 @@ func GetListOfBugIDFromStdoutContent(c string) ([]string, error) {
 					}
 				}
 			}
+		} else if strings.HasPrefix(line, "-----NO BLOCKING") {
+			return nil, nil
 		}
 	}
 

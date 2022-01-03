@@ -133,7 +133,9 @@ func LightBeforeRun() *OracleEntry {
 
 // Start the endless loop that checks bug. Should be called at the beginning of unit test
 func CheckBugStart(entry *OracleEntry) {
-	go CheckBugLate()
+	// go CheckBugLate()
+	// cancelled CheckBugLate since we are going to ignore timeout result
+
 	if runtime.BoolDelayCheck {
 		if DelayCheckMod == DelayCheckModCount {
 			runtime.FnCheckCount = DelayCheckCounterFN
@@ -294,6 +296,9 @@ func CheckBugEnd(entry *OracleEntry) {
 		}
 
 		println("[oraclert] CheckBlockEntry ", ortStdoutFile, str == "")
+		if str == "" {
+			println("\n-----NO BLOCKING\n")
+		}
 		if ortStdoutFile != "" {
 			out, err := os.OpenFile(ortStdoutFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
 			if err != nil {

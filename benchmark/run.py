@@ -6,7 +6,7 @@ import os
 import argparse
 from shutil import copytree
 from time import time
-from typing import List
+from typing import List, Tuple
 from glob import glob
 
 PROJ_ROOT_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
@@ -70,7 +70,7 @@ def benchmark_custom(dir:str, mode:str, selected_bins: List[str] = None):
     
     run_benchmark_with_tests(tests, mode)
 
-def benchmark_custom_native_parallel(dir:str, selected_bins: List[str] = None):
+def benchmark_custom_native_parallel(dir:str, selected_bins: List[str] = None) -> Tuple[int, int]:
     if not selected_bins:
         selected_bins = glob(f"{dir}/*")
 
@@ -79,11 +79,36 @@ def benchmark_custom_native_parallel(dir:str, selected_bins: List[str] = None):
     for bin in selected_bins:
         ts = get_tests_from_test_bin(bin)
         num_of_tests = len(ts)
-        dur = benchmark(1, lambda: subprocess.run([bin, "-test.timeout", "10s", "-test.parallel","5"]))
+        dur = benchmark(1, lambda: subprocess.run([bin, "-test.timeout=5m", "-test.parallel","5"]))
         total_num_of_tests += num_of_tests
         total_duration += dur
     
-    print(f"total {total_num_of_tests} tests, total {total_duration} seconds")
+    return (total_num_of_tests, total_duration)
+
+def benchmark_all_native_parallel(dirs:List[str], repeat=3) -> Tuple[int, int]:
+    # 1. find common tests
+    #    in each dirs: find common both in inst/* and native/*
+    common_bins = []
+    for d in dirs:
+        native_bins = glob(f"{d}/native/*")
+        for nb in native_bins:
+            filename = os.path.basename(nb)
+            inst_version = os.path.join(d, "inst", filename)
+            if os.path.exists(inst_version):
+                common_bins.append(nb)
+
+    print(f"total {len(common_bins)} bins")
+    
+    # 2. loop three times by executing with parallel=5
+    total_num_of_tests = 0
+    total_duration = 0
+    for _ in range(repeat):
+        num_of_tests, dur = benchmark_custom_native_parallel(None, common_bins)
+        total_duration += dur
+        total_num_of_tests += num_of_tests
+    
+    return (total_num_of_tests, total_duration) 
+
 
     
     
@@ -138,6 +163,26 @@ def main():
     if args.repeat:
         REPEAT = args.repeat
 
+    if mode == "parallel-native":
+        dirs_to_test = [
+            "tmp/builder/etcd",
+            "tmp/builder/go-ethereum",
+            "tmp/builder/grpc-go",
+            "tmp/builder/kubernetes",
+            "tmp/builder/moby",
+            "tmp/builder/prometheus",
+            "tmp/builder/tidb"
+        ]
+        for d in dirs_to_test:
+            total_num_of_tests, total_duration = benchmark_all_native_parallel([
+                os.path.join(PROJ_ROOT_DIR, d)
+            ])
+            with open("result", 'a+') as f:
+                f.write(d+":\n")
+                f.write(f"total {total_num_of_tests} tests, total {total_duration} seconds\n")
+                f.write(f"average {total_num_of_tests/total_duration:.2f} test / sec\n")
+        return
+
     if args.action == "count-tests":
         cnt = count_tests_from_bins_dir(bins_dir)
         print(f"{bins_dir} contains {cnt} tests")
@@ -147,8 +192,7 @@ def main():
     if testsuite == "custom" and not bins_dir:
         raise Exception("--dir is required if testsuite is custom")
 
-    if mode == "parallel-native":
-        return benchmark_custom_native_parallel(bins_dir, selected_bins)
+    
     
     if testsuite == "simple":
         benchmark_simple(mode)

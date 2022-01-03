@@ -34,7 +34,7 @@ def analyze_gfuzz_log(log_fp):
         for line in log_f:
             try:
                 parts = line.split(" ")
-                if line.startswith("2021"):
+                if line.startswith("20"):
                     time_str = parts[0] + " " + parts[1]
                     cur_time = datetime.strptime(time_str, '%Y/%m/%d %H:%M:%S')
 
@@ -143,7 +143,7 @@ def get_times_found_bug_nums(log_lines:List[str])->Tuple[List[int], List[int]]:
     prev_duration = -0.2
     for idx, line in enumerate(log_lines):
         parts = line.split(" ")
-        if line.startswith("2021"):
+        if line.startswith("20"):
             time_str = parts[0] + " " + parts[1]
             cur_time = datetime.strptime(time_str, '%Y/%m/%d %H:%M:%S')
 
