@@ -552,6 +552,7 @@ func chanrecv(c *hchan, ep unsafe.Pointer, block bool) (selected, received bool)
 	}
 	if c.chInfo != nil {
 		Monitor(c.chInfo)
+
 	}
 
 	// Fast path: check for failed non-blocking operation without acquiring the lock.

@@ -187,7 +187,8 @@ func DequeueBlockEntry(entry *BlockEntry) {
 func Monitor(prim PrimInfo) {
 	if prim.LoadMonitor() == 1 {
 		prim.SetMonitor(0)
-		str := "-----Withdraw prim:" + FnPointer2String(prim) + "\n"
+		// newline in front of string is to avoid rare buggy print(previous content doesn't come with newline)
+		str := "\n-----Withdraw prim:" + FnPointer2String(prim) + "\n"
 		print(str)
 		lock(&MuWithdraw)
 		StrWithdraw += str

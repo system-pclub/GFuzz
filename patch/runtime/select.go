@@ -265,6 +265,14 @@ func selectgo(cas0 *scase, order0 *uint16, pc0 *uintptr, nsends, nrecvs int, blo
 		casi = int(casei)
 		cas = &scases[casi]
 		c = cas.c
+		if c.chInfo != nil {
+			Monitor(c.chInfo)
+		}
+	}
+	for _, casei := range pollorder {
+		casi = int(casei)
+		cas = &scases[casi]
+		c = cas.c
 
 		if casi >= nsends {
 			sg = c.sendq.dequeue()
@@ -303,14 +311,17 @@ func selectgo(cas0 *scase, order0 *uint16, pc0 *uintptr, nsends, nrecvs int, blo
 	///MYCODE
 	for _, o := range lockorder {
 		c0 := scases[o].c
-		if c0.chInfo != nil {
-			Monitor(c0.chInfo)
-		} else {
+		if c0.chInfo == nil {
 			// if a select involves a channel
 			// without chinfo, it means
 			// we don't instrument this channel
 			// so we cannot sure whether this is timer/poller
 			boolInvolveChNotOK = true
+
+			if BoolDebug {
+				_, strFile, line, _ := Caller(2)
+				println("[oraclert] skip select", strFile, line)
+			}
 		}
 		if okToCheck(c0) == false {
 			boolInvolveChNotOK = true

@@ -352,6 +352,10 @@ loopGS:
 	if BoolDebug {
 		println("Going through mapGS whose length is:", len(mapGS))
 	}
+	if len(mapCS) == 0 {
+		println("no linked goroutines, return true")
+		return true
+	}
 	for goInfo, _ := range mapGS {
 		if atomic.LoadUint32(&goInfo.BitCheckBugAtEnd) == 1 { // The goroutine is checking bug at the end of unit test
 			if BoolDebug {
@@ -385,6 +389,14 @@ loopGS:
 					}
 					return true
 				}
+
+				// if blocked at send
+				if blockInfo.StrOp == Send && chI.Chan.qcount < chI.Chan.dataqsiz {
+					return false
+				} else if blockInfo.StrOp == Recv && chI.Chan.qcount > 0 {
+					return false
+				}
+
 			}
 			if _, exist := mapCS[primI]; !exist {
 				if BoolDebug {
@@ -528,6 +540,15 @@ func ReportBug(mapCS map[PrimInfo]struct{}) {
 	if BoolReportBug == false {
 		return
 	}
+	if BoolDebug {
+		for primI, _ := range mapCS {
+			if chI, ok := primI.(*ChanInfo); ok {
+				println(chI.StringDebug(), "qcount", chI.Chan.qcount)
+			}
+		}
+
+	}
+
 	lock(&MuReportBug)
 	print("-----New Blocking Bug:\n")
 	print("---Primitive location:\n")
