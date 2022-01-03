@@ -295,34 +295,14 @@ func CheckBugEnd(entry *OracleEntry) {
 			return
 		}
 
-		println("[oraclert] CheckBlockEntry ", ortStdoutFile, str == "")
 		if str == "" {
 			println("\n-----NO BLOCKING\n")
+		} else {
+			println("\n-----FOUND BLOCKING\n")
 		}
-		if ortStdoutFile != "" {
-			out, err := os.OpenFile(ortStdoutFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
-			if err != nil {
-				fmt.Println("Failed to create file:", ortStdoutFile, err)
-				println(str)
-				return
-			}
-			defer out.Close()
+		//println(str) ignore this since we have stack trace
+		println(runtime.StrWithdraw)
 
-			w := bufio.NewWriter(out)
-			defer w.Flush()
-
-			_, err = w.WriteString(str)
-			if err != nil {
-				println(err)
-				println(str)
-			}
-			_, err = w.WriteString(runtime.StrWithdraw)
-			if err != nil {
-				println(err)
-				println(runtime.StrWithdraw)
-			}
-
-		}
 		// print stdout
 	}
 }

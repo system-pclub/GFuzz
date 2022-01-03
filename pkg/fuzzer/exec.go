@@ -215,15 +215,17 @@ func HandleExec(ctx context.Context, i *api.Input, o *api.Output, fctx *api.Cont
 		return nil
 	}
 
-	isInteresed, reason, err := interestHdl.IsInterested(i, o, isFoundNewSelect)
-	if err != nil {
-		return nil
-	}
-	if isInteresed {
-		logger.Printf("%s is interesting", i.ID)
-		ii := api.NewExecutedInterestInput(i, o)
-		ii.Reason = reason
-		fctx.Interests.Add(ii)
+	if interestHdl != nil {
+		isInteresed, reason, err := interestHdl.IsInterested(i, o, isFoundNewSelect)
+		if err != nil {
+			return nil
+		}
+		if isInteresed {
+			logger.Printf("%s is interesting", i.ID)
+			ii := api.NewExecutedInterestInput(i, o)
+			ii.Reason = reason
+			fctx.Interests.Add(ii)
+		}
 	}
 
 	return nil

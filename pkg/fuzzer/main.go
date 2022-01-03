@@ -21,7 +21,14 @@ var (
 func Replay(fctx *api.Context, ge gexec.Executable, config *config.Config, rtConfig *ortconfig.Config) {
 	ctx := context.Background()
 	i := api.NewExecInput(fctx.GetAutoIncGlobalID(), 0, config.OutputDir, ge, rtConfig, api.ReplayStage)
-	Run(ctx, config, i)
+	o, err := Run(ctx, fctx.Cfg, i)
+	if err != nil {
+		log.Printf("%s: %s", i.ID, err)
+	}
+	err = HandleExec(ctx, i, o, fctx, nil)
+	if err != nil {
+		log.Printf("%s: %s", i.ID, err)
+	}
 }
 
 // Main starts fuzzing with a given list of executables and configuration

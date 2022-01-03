@@ -159,6 +159,12 @@ func main() {
 	var interestHdl api.InterestHandler = interest.NewInterestHandlerImpl(fctx)
 
 	if opts.Ortconfig != "" {
+		if len(filteredExecs) == 0 {
+			log.Panicf("no executable found to replay, exit")
+		}
+		if len(filteredExecs) > 1 {
+			log.Panicf("more than 1 executable found to replay, exit")
+		}
 		ortcfgbytes, err := ioutil.ReadFile(opts.Ortconfig)
 		if err != nil {
 			log.Printf("read %s: %s", opts.Ortconfig, err)
@@ -167,7 +173,10 @@ func main() {
 		if err != nil {
 			log.Printf("parse %s: %s", opts.Ortconfig, err)
 		}
-		fuzzer.Replay(fctx, filteredExecs[0], config, ortconfig)
+
+		for i := 0; i < opts.Repeat; i++ {
+			fuzzer.Replay(fctx, filteredExecs[0], config, ortconfig)
+		}
 		return
 	}
 

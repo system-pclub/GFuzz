@@ -108,7 +108,7 @@ func parseGoCmdTestListOutput(output string) ([]string, error) {
 		// Only keep output like:
 		// TestParseInputFileHappy
 
-		if line != "" && strings.HasPrefix(line, "Test") && line != "Test" && !strings.ContainsAny(line, " ") {
+		if line != "" && strings.HasPrefix(line, "Test") && !strings.ContainsAny(line, " ") {
 			filtered = append(filtered, line)
 		}
 	}

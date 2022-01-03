@@ -13,7 +13,8 @@ var opts struct {
 	TestFunc     []string `long:"func" description:"Only run specific test function in the test"`
 	TestPkg      []string `long:"pkg" description:"Only run test functions in the specific package"`
 	TestBinGlobs []string `long:"bin" description:"A list of globs for Go test bins."`
-	Ortconfig    string   `long:"ortconfig" description:"Only run once with given ortconfig"`
+	Ortconfig    string   `long:"ortconfig" description:"Only run once with given ortconfig (replay)"`
+	Repeat       int      `long:"repeat" description:"how many replay" default:"1"`
 
 	// Fuzzer
 	OutputDir string `long:"out" description:"Directory for fuzzing output"`
