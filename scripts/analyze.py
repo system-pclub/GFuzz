@@ -13,6 +13,7 @@ import zipfile
 # Constants
 GFUZZ_LOG_FILE = "fuzzer.log"
 GFUZZ_EXEC_FOLDER = "exec"
+GFUZZ_EXEC_STDOUT = "stdout"
 
 class EntryStat:
     def __init__(self, entry, num_of_runs, total_duration) -> None:
@@ -235,6 +236,38 @@ def get_entry_from_exec_id(exec_id:str):
     filtered = parts[2:-1]
     return '-'.join(filtered)
 
+
+
+def test_bug_filter(gfuzz_out_dir:str, bug_filter:Callable[[str], bool]) -> List[str]:
+    """To test bug filter condition will filter out which bugs
+
+    Args:
+        gfuzz_out_dir (str): GFuzz's output directory
+    """
+    log_file = os.path.join(gfuzz_out_dir, GFUZZ_LOG_FILE)
+    logs = get_logs(log_file)
+    stats = get_exec_stats_from_logs(logs)
+
+    filtered_exec_ids = []
+
+    for e in stats:
+        if len(e.bugs) == 0:
+            continue
+        exec_base_dir = os.path.join(gfuzz_out_dir, GFUZZ_EXEC_FOLDER, e.exec_id)
+        stdout_file = os.path.join(exec_base_dir, GFUZZ_EXEC_STDOUT)
+        with open(stdout_file) as stdout_f:
+            s = stdout_f.read()
+            if bug_filter(s):
+                filtered_exec_ids.append(e.exec_id)
+
+    for id in filtered_exec_ids:
+        print(id)
+    return filtered_exec_ids
+    
+def bug_filter(stdout: str) -> bool:
+    return stdout.find("[IO wait]") != -1 or stdout.find("[syscall]") != -1
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--log', type=str)
@@ -247,23 +280,34 @@ def main():
     # Zipping only buggy exec to zip file
     parser.add_argument('--buggy-zip', type=str)
 
+    parser.add_argument('--test-bug-filter', type=bool)
+
     args = parser.parse_args()
 
     if args.log is not None:
         analyze_gfuzz_log(args.log)
     
+    if args.test_bug_filter:
+        if len(args.gfuzz_out_dir) != 1:
+            return print("expect --gfuzz-out-dir has exact one argument")
+        test_bug_filter(args.gfuzz_out_dir[0], bug_filter)
+        return
+    
     if args.bug_time_graph is not None:
         generate_bug_time_graph(args.gfuzz_out_dir, args.bug_time_graph)
+        return
 
     if args.buggy_dir is not None:
         if len(args.gfuzz_out_dir) != 1:
             return print("expect --gfuzz-out-dir has exact one argument")
         extract_buggy_to_dir(args.gfuzz_out_dir[0], args.buggy_dir)
+        return
 
     if args.buggy_zip is not None:
         if len(args.gfuzz_out_dir) != 1:
             return print("expect --gfuzz-out-dir has exact one argument")
         extract_buggy_to_zip(args.gfuzz_out_dir[0], args.buggy_zip)
+        return
 
 
 def extract_buggy_to_dir(gfuzz_out_dir:str, buggy_dst_dir:str):
