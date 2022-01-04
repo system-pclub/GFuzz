@@ -2,11 +2,17 @@
 import os
 import argparse
 from datetime import datetime
-from typing import List, Tuple
+from typing import Callable, List, Tuple
 import argparse
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import MultipleLocator
 import random
+import shutil
+import zipfile
+
+# Constants
+GFUZZ_LOG_FILE = "fuzzer.log"
+GFUZZ_EXEC_FOLDER = "exec"
 
 class EntryStat:
     def __init__(self, entry, num_of_runs, total_duration) -> None:
@@ -15,10 +21,11 @@ class EntryStat:
         self.total_duration = total_duration
 
 class ExecStat:
-    def __init__(self, exec_id, start, duration):
+    def __init__(self, exec_id, start):
         self.exec_id = exec_id
         self.start = start
-        self.duration = duration
+        self.duration = None
+        self.bugs = []
 
 
 
@@ -26,12 +33,60 @@ def analyze_gfuzz_output_dir(output_dir):
     log_fp = os.path.join(output_dir, "fuzzer.log")
     analyze_gfuzz_log(log_fp)
 
-def analyze_gfuzz_log(log_fp):
+def find_next_in_same_worker(logs:List[str], from_idx:int, worker_id:str, if_fn: Callable[[str], bool]) -> str:
+    for i in range(from_idx, len(logs)):
+        line = logs[i]
+        parts = line.split(" ")
+        curr_wid = parts[3].rstrip("]")
+        if curr_wid == worker_id:
+            if if_fn(line):
+                return line
+    return None
+
+def get_log_worker_id(log:str) -> str:
+    parts = log.split(" ")
+    return parts[3].rstrip("]")
+
+def get_log_time(log:str) -> datetime:
+    if log.startswith("20"):
+        parts = log.split(" ")
+        time_str = parts[0] + " " + parts[1]
+        return datetime.strptime(time_str, '%Y/%m/%d %H:%M:%S')
+    return None
+
+def get_logs(log_file:str) -> List[str]:
+    with open(log_file) as log_f:
+        log_lines = log_f.read().splitlines()
+    return log_lines
+
+def get_exec_stats_from_logs(logs:List[str]) -> List[ExecStat]:
     exec_stats = {}
+    workers_curr_exec = {}
+    for _, line in enumerate(logs):
+        parts = line.split(" ")
+        curr_t = get_log_time(line)
+        if curr_t:
+            if line.find("] received ") != -1:
+                exec_id = parts[5]
+                exec_stats[exec_id] = ExecStat(exec_id, curr_t)
+                worker_id = get_log_worker_id(line)
+                workers_curr_exec[worker_id] = exec_id
+            elif line.find("found unique bug: ") != -1:
+                bug = parts[-1]
+                worker_id = get_log_worker_id(line)
+                exec_id = workers_curr_exec[worker_id]
+                exec_stats[exec_id].bugs.append(bug)
+            elif line.find("] finished ") != -1:
+                exec_id = parts[5]
+                exec_stats[exec_id].duration = (curr_t - exec_stats[exec_id].start).total_seconds()
+    return exec_stats.values()
+
+def analyze_gfuzz_log(log_fp):
     log_start_time = None
     log_end_time = None
     with open(log_fp, "r") as log_f:
-        for line in log_f:
+        logs = log_f.readlines()
+        for line in logs:
             try:
                 parts = line.split(" ")
                 if line.startswith("20"):
@@ -42,15 +97,9 @@ def analyze_gfuzz_log(log_fp):
                         log_start_time = cur_time
                     
                     log_end_time = cur_time
-                    if line.find("] received ") != -1:
-                        exec_id = parts[5]
-                        exec_stats[exec_id] = ExecStat(exec_id, cur_time, None)
-                    elif line.find("] finished ") != -1:
-                        exec_id = parts[5]
-                        exec_stats[exec_id].duration = (cur_time - exec_stats[exec_id].start).total_seconds()
             except Exception as ex:
                 print(f"failed to parse line {line}: {ex}")
-    exec_stats_arr = exec_stats.values()
+        exec_stats_arr = get_exec_stats_from_logs(logs)
     entry_stats_arr = analyze_exec_stats_arr(exec_stats_arr)
     
     num_of_runs = len(exec_stats_arr)
@@ -191,6 +240,13 @@ def main():
     parser.add_argument('--log', type=str)
     parser.add_argument('--bug-time-graph', type=str)
     parser.add_argument('--gfuzz-out-dir', type=str, nargs='*')
+
+    # Copy only buggy exec to given folder
+    parser.add_argument('--buggy-dir', type=str)
+
+    # Zipping only buggy exec to zip file
+    parser.add_argument('--buggy-zip', type=str)
+
     args = parser.parse_args()
 
     if args.log is not None:
@@ -198,6 +254,61 @@ def main():
     
     if args.bug_time_graph is not None:
         generate_bug_time_graph(args.gfuzz_out_dir, args.bug_time_graph)
+
+    if args.buggy_dir is not None:
+        if len(args.gfuzz_out_dir) != 1:
+            return print("expect --gfuzz-out-dir has exact one argument")
+        extract_buggy_to_dir(args.gfuzz_out_dir[0], args.buggy_dir)
+
+    if args.buggy_zip is not None:
+        if len(args.gfuzz_out_dir) != 1:
+            return print("expect --gfuzz-out-dir has exact one argument")
+        extract_buggy_to_zip(args.gfuzz_out_dir[0], args.buggy_zip)
+
+
+def extract_buggy_to_dir(gfuzz_out_dir:str, buggy_dst_dir:str):
+    log_file = os.path.join(gfuzz_out_dir, GFUZZ_LOG_FILE)
+    logs = get_logs(log_file)
+    exec_stats = get_exec_stats_from_logs(logs)
+    buggy_execs = []
+    for e in exec_stats:
+        if len(e.bugs) > 0:
+            buggy_execs.append(e.exec_id)
+    
+    os.makedirs(os.path.join(buggy_dst_dir, GFUZZ_EXEC_FOLDER), exist_ok=True)
+    for be in buggy_execs:
+        src_exec_dir = os.path.join(gfuzz_out_dir, GFUZZ_EXEC_FOLDER, be)
+        dst_exec_dir = os.path.join(buggy_dst_dir, GFUZZ_EXEC_FOLDER, be)
+        shutil.copytree(src_exec_dir, dst_exec_dir)
+    
+    shutil.copy(log_file, os.path.join(buggy_dst_dir, GFUZZ_LOG_FILE))
+    
+    print(f"{len(buggy_execs)} buggy execs and fuzzer.log are copied")
+
+
+def extract_buggy_to_zip(gfuzz_out_dir:str, dst_zip:str):
+    zipf = zipfile.ZipFile(dst_zip, "w")    
+    log_file = os.path.join(gfuzz_out_dir, GFUZZ_LOG_FILE)
+    logs = get_logs(log_file)
+    exec_stats = get_exec_stats_from_logs(logs)
+    buggy_execs = []
+    for e in exec_stats:
+        if len(e.bugs) > 0:
+            buggy_execs.append(e.exec_id)
+    
+    base_dir = os.path.basename(gfuzz_out_dir)
+    for be in buggy_execs:
+        src_exec_dir = os.path.join(gfuzz_out_dir, GFUZZ_EXEC_FOLDER, be)
+        for _, _, children in os.walk(src_exec_dir):
+            for child in children:
+                src = os.path.join(src_exec_dir, child)
+                dst = os.path.join(base_dir, GFUZZ_EXEC_FOLDER, be, child)
+                zipf.write(src, dst)
+
+    zipf.write(log_file, os.path.join(base_dir, GFUZZ_LOG_FILE))
+    
+    zipf.close()
+    print(f"{len(buggy_execs)} buggy execs and fuzzer.log are zipped")
 
 
 if __name__ == "__main__":
