@@ -85,22 +85,22 @@ def get_exec_stats_from_logs(logs:List[str]) -> List[ExecStat]:
 def analyze_gfuzz_log(log_fp):
     log_start_time = None
     log_end_time = None
-    with open(log_fp, "r") as log_f:
-        logs = log_f.readlines()
-        for line in logs:
-            try:
-                parts = line.split(" ")
-                if line.startswith("20"):
-                    time_str = parts[0] + " " + parts[1]
-                    cur_time = datetime.strptime(time_str, '%Y/%m/%d %H:%M:%S')
+    logs = get_logs(log_fp)
+    
+    for line in logs:
+        try:
+            parts = line.split(" ")
+            if line.startswith("20"):
+                time_str = parts[0] + " " + parts[1]
+                cur_time = datetime.strptime(time_str, '%Y/%m/%d %H:%M:%S')
 
-                    if log_start_time is None:
-                        log_start_time = cur_time
-                    
-                    log_end_time = cur_time
-            except Exception as ex:
-                print(f"failed to parse line {line}: {ex}")
-        exec_stats_arr = get_exec_stats_from_logs(logs)
+                if log_start_time is None:
+                    log_start_time = cur_time
+                
+                log_end_time = cur_time
+        except Exception as ex:
+            print(f"failed to parse line {line}: {ex}")
+    exec_stats_arr = get_exec_stats_from_logs(logs)
     entry_stats_arr = analyze_exec_stats_arr(exec_stats_arr)
     
     num_of_runs = len(exec_stats_arr)
@@ -111,6 +111,18 @@ total runs: {num_of_runs}
 total duration (sec): {total_dur}
 average (run/sec): {num_of_runs/total_dur:.2f}
     """)
+
+    print("bug statistics:")
+    for i, e in enumerate(exec_stats_arr):
+        skip = False
+        for b in e.bugs:
+            if b.find("testmain.go") != -1:
+                skip = True 
+        if skip:
+            continue
+        t = e.start.strftime("%Y/%m/%d %H:%M:%S")
+        for b in e.bugs:
+            print(f"{t},{b},{e.exec_id}")
 
     # Most time-consuming entries
     print("most time-consuming entries:")
@@ -268,6 +280,35 @@ def bug_filter(stdout: str) -> bool:
     return stdout.find("[IO wait]") != -1 or stdout.find("[syscall]") != -1
 
 
+def analyze_exec_with_goleak(gfuzz_out_dir:str):
+    log_file = os.path.join(gfuzz_out_dir, GFUZZ_LOG_FILE)
+    logs = get_logs(log_file)
+    stats = get_exec_stats_from_logs(logs)
+    buggy_entries_cnt = {
+        # entry -> cnt
+    }
+    buggy_entries_time = {
+        # entry -> first buggy time
+    }
+    
+    for e in stats:
+        exec_base_dir = os.path.join(gfuzz_out_dir, GFUZZ_EXEC_FOLDER, e.exec_id)
+        stdout_file = os.path.join(exec_base_dir, GFUZZ_EXEC_STDOUT)
+        entry = get_entry_from_exec_id(e.exec_id)
+        with open(stdout_file) as stdout_f:
+            s = stdout_f.read()
+            if s.find("Leaked goroutine:") != -1:
+                if entry not in buggy_entries_cnt:
+                    buggy_entries_cnt[entry] = 0
+                buggy_entries_cnt[entry] += 1
+
+                if entry not in buggy_entries_time:
+                    buggy_entries_time[entry] = e.start
+    
+    for e, c in buggy_entries_cnt.items(): 
+        t = buggy_entries_time[e].strftime("%Y/%m/%d %H:%M:%S")
+        print(f"{t} {e} {c}")
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--log', type=str)
@@ -280,7 +321,9 @@ def main():
     # Zipping only buggy exec to zip file
     parser.add_argument('--buggy-zip', type=str)
 
-    parser.add_argument('--test-bug-filter', type=bool)
+    parser.add_argument('--test-bug-filter', default=False, action='store_true')
+
+    parser.add_argument('--analyze-goleak', default=False, action='store_true')
 
     args = parser.parse_args()
 
@@ -291,6 +334,12 @@ def main():
         if len(args.gfuzz_out_dir) != 1:
             return print("expect --gfuzz-out-dir has exact one argument")
         test_bug_filter(args.gfuzz_out_dir[0], bug_filter)
+        return
+    
+    if args.analyze_goleak:
+        if len(args.gfuzz_out_dir) != 1:
+            return print("expect --gfuzz-out-dir has exact one argument")
+        analyze_exec_with_goleak(args.gfuzz_out_dir[0])
         return
     
     if args.bug_time_graph is not None:
@@ -323,9 +372,15 @@ def extract_buggy_to_dir(gfuzz_out_dir:str, buggy_dst_dir:str):
     for be in buggy_execs:
         src_exec_dir = os.path.join(gfuzz_out_dir, GFUZZ_EXEC_FOLDER, be)
         dst_exec_dir = os.path.join(buggy_dst_dir, GFUZZ_EXEC_FOLDER, be)
-        shutil.copytree(src_exec_dir, dst_exec_dir)
+        if not os.path.exists(dst_exec_dir):
+            shutil.copytree(src_exec_dir, dst_exec_dir)
+        else:
+            print(f"skip {src_exec_dir} since destination already has one\n")
     
-    shutil.copy(log_file, os.path.join(buggy_dst_dir, GFUZZ_LOG_FILE))
+    dst_log_file = os.path.join(buggy_dst_dir, GFUZZ_LOG_FILE)
+    if os.path.exists(dst_log_file):
+        os.remove(dst_log_file)
+    shutil.copy(log_file, dst_log_file)
     
     print(f"{len(buggy_execs)} buggy execs and fuzzer.log are copied")
 
