@@ -9,6 +9,7 @@ from matplotlib.pyplot import MultipleLocator
 import random
 import shutil
 import zipfile
+import csv
 
 # Constants
 GFUZZ_LOG_FILE = "fuzzer.log"
@@ -312,7 +313,10 @@ def analyze_exec_with_goleak(gfuzz_out_dir:str):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--log', type=str)
-    parser.add_argument('--bug-time-graph', type=str)
+
+    # Bug Time Graph
+    parser.add_argument('--btg', type=str)
+
     parser.add_argument('--gfuzz-out-dir', type=str, nargs='*')
 
     # Copy only buggy exec to given folder
@@ -325,10 +329,15 @@ def main():
 
     parser.add_argument('--analyze-goleak', default=False, action='store_true')
 
+    parser.add_argument('--graph-from-csv', type=str)
+
     args = parser.parse_args()
+
+    
 
     if args.log is not None:
         analyze_gfuzz_log(args.log)
+        return
     
     if args.test_bug_filter:
         if len(args.gfuzz_out_dir) != 1:
@@ -342,8 +351,11 @@ def main():
         analyze_exec_with_goleak(args.gfuzz_out_dir[0])
         return
     
-    if args.bug_time_graph is not None:
-        generate_bug_time_graph(args.gfuzz_out_dir, args.bug_time_graph)
+    if args.btg is not None:
+        if args.graph_from_csv is not None:
+            draw_btg_from_csv(args.graph_from_csv, args.btg)
+            return
+        generate_bug_time_graph(args.gfuzz_out_dir, args.btg)
         return
 
     if args.buggy_dir is not None:
@@ -408,6 +420,91 @@ def extract_buggy_to_zip(gfuzz_out_dir:str, dst_zip:str):
     
     zipf.close()
     print(f"{len(buggy_execs)} buggy execs and fuzzer.log are zipped")
+
+def smooth_bugs_durs(bugs, durs):
+    oi = 0
+    new_bugs = [0]
+    new_durs = [0]
+    cumulative_dur = 0
+    for i in range(0, 1300, 2):
+        cumulative_dur += i/100
+        while oi < len(bugs) and durs[oi] < cumulative_dur:
+            new_bugs.append(bugs[oi])
+            new_durs.append(durs[oi])
+            oi += 1
+        
+        new_bugs.append(new_bugs[-1])
+        new_durs.append(cumulative_dur)
+
+    return (new_bugs[1:], new_durs[1:])
+
+def draw_btg_from_csv(csv_file:str, out:str):
+    """Draw bug-time-graph from csv file (google sheet)
+
+    Args:
+        csv_file (str): CSV file path
+        out (str): Output png file path
+    """
+    fb_bugs = []
+    fb_durs = []
+
+    nfb_bugs = []
+    nfb_durs = []
+
+    nose_bugs = []
+    nose_durs = []
+
+    goleak_bugs = []
+    goleak_durs = []
+    with open(csv_file) as csv_f:
+        csv_reader = csv.DictReader(csv_f)
+        for num, line in enumerate(csv_reader):
+            if 1 <= num <= 27:
+                if line["Bug"] == "1":
+                    fb_bugs.append(len(fb_bugs)+1)
+                    fb_durs.append(float(line["time spent"]))
+            elif 30 <= num <= 44:
+                if line["Bug"] == "1":
+                    nfb_bugs.append(len(nfb_bugs)+1)
+                    nfb_durs.append(float(line["time spent"]))
+            elif 47 <= num <= 59:
+                if line["Bug"] == "1":
+                    nose_bugs.append(len(nose_bugs)+1)
+                    nose_durs.append(float(line["time spent"]))
+            elif 62 <= num <= 65:
+                if line["Bug"] == "1":
+                    goleak_bugs.append(len(goleak_bugs)+1)
+                    goleak_durs.append(float(line["time spent"]))
+
+    
+    x_major_locator=MultipleLocator(1)
+
+    plt.figure()
+    ax = plt.subplot()
+
+    smoothed_fb_bugs, smoothed_fb_durs = smooth_bugs_durs(fb_bugs, fb_durs)
+    smoothed_nfb_bugs, smoothed_nfb_durs = smooth_bugs_durs(nfb_bugs, nfb_durs)
+    smoothed_nose_bugs, smoothed_nose_durs = smooth_bugs_durs(nose_bugs, nose_durs)
+    smoothed_goleak_bugs, smoothed_goleak_durs = smooth_bugs_durs(goleak_bugs, goleak_durs)
+
+    ax.plot(smoothed_fb_durs, smoothed_fb_bugs, c=random_color(), marker = 'p')
+    ax.plot(smoothed_nfb_durs, smoothed_nfb_bugs, c=random_color(), marker = 'o')
+    ax.plot(smoothed_nose_durs, smoothed_nose_bugs,  c=random_color(), marker = 's')
+    ax.plot(smoothed_goleak_durs, smoothed_goleak_bugs, c=random_color(), marker = '*')
+
+    plt.title("GFuzz", fontsize=20)
+    plt.xlabel("Time (h)", fontsize=20)
+    plt.ylabel("Num of Unique Bugs", fontsize=20)
+    plt.xticks(fontsize=20)
+    plt.yticks(fontsize=20)
+    leg = plt.legend(["FB","NFB", "NOSE", "GOLEAK"], fontsize=14, handlelength=3)
+    plt.xlim([0, 12])
+    ax.xaxis.set_major_locator(x_major_locator)
+
+    plt.grid()
+
+    plt.tight_layout()
+    plt.savefig(out, dpi = 200)
 
 
 if __name__ == "__main__":
