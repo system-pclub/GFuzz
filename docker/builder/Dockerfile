@@ -24,8 +24,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 		vim-common \
 	&& rm -rf /var/lib/apt/lists/*
 
-COPY benchmark/clone-repos.sh /gfuzz/benchmark/clone-repos.sh
-
 WORKDIR /repos
 
 COPY benchmark/repos/etcd ./etcd
@@ -45,6 +43,8 @@ COPY docker/builder/leakcheck-allow-oracle.go /repos/grpc-go-goleak/internal/lea
 
 # avoid gRPC testsuite
 RUN cd grpc-go && grep -rl 'func (s) Test' ./ | xargs sed -i 's/func (s)/func/g' && cd ..
+# Don't replace since goleak only will be called from testsuite way
+# RUN cd grpc-go-goleak && grep -rl 'func (s) Test' ./ | xargs sed -i 's/func (s)/func/g' && cd ..
 
 
 WORKDIR /gfuzz

@@ -6,7 +6,7 @@ func init() {
 	MapChToChanInfo = make(map[interface{}]PrimInfo)
 }
 
-var GlobalEnableOracle = true
+var GlobalEnableOracle = gogetenv("ORACLERT_NOORACLE") != "1"
 
 // during benchmark, we don't need to print bugs to stdout
 var BoolReportBug = gogetenv("ORACLERT_BENCHMARK") != "1"

@@ -76,6 +76,9 @@ func Run(ctx context.Context, cfg *config.Config, input *api.Input) (*api.Output
 	if cfg.TimeDivideBy > 1 {
 		env = append(env, fmt.Sprintf("%s=%d", ortEnv.ORACLERT_TIME_DIVIDE, cfg.TimeDivideBy))
 	}
+	if cfg.NoOracle {
+		env = append(env, fmt.Sprintf("%s=%d", ortEnv.ORACLERT_NOORACLE, 1))
+	}
 	cmd.Env = env
 
 	// redirect stdout to the file
