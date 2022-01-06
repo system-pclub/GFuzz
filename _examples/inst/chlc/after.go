@@ -1,0 +1,25 @@
+package defaultp
+
+func getChannel() chan string {
+	return make(chan string)
+}
+func Hello() {
+
+	ch1 := make(chan int)
+	ch2 := make(chan struct{})
+	ch3 := getChannel()
+	ch4 := ch1
+
+	for {
+		ch5 := make(chan int)
+		go func() {
+			ch5 <- 1
+		}()
+		oraclert.RemoveChRefFromG(ch5)
+	}
+	oraclert.RemoveChRefFromG(ch1)
+	oraclert.RemoveChRefFromG(ch2)
+	oraclert.RemoveChRefFromG(ch3)
+	oraclert.RemoveChRefFromG(ch4)
+
+}

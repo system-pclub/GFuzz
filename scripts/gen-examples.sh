@@ -5,3 +5,4 @@
 ./bin/inst --file _examples/inst/wgrec/before.go --out _examples/inst/wgrec/after.go --pass wgrec --check-syntax-err
 ./bin/inst --file _examples/inst/oracle/before.go --out _examples/inst/oracle/after.go --pass oracle --check-syntax-err
 ./bin/inst --file _examples/inst/default/before.go --out _examples/inst/default/after.go --check-syntax-err
+# ./bin/inst --file _examples/inst/chlc/before.go --out _examples/inst/chlc/after.go --pass chlc --check-syntax-err
