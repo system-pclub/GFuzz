@@ -22,7 +22,7 @@ func NewInstContext(goSrcFile string) (*InstContext, error) {
 	if err != nil {
 		return nil, err
 	}
-	conf := types.Config{Importer: importer.Default()}
+	conf := types.Config{Importer: importer.ForCompiler(fs, "source", nil)}
 	info := &types.Info{
 		Types: make(map[ast.Expr]types.TypeAndValue),
 		Defs:  make(map[*ast.Ident]types.Object),

@@ -47,6 +47,8 @@ func main() {
 	reg.AddPass(&pass.MtxRecPass{})
 	reg.AddPass(&pass.WgRecPass{})
 	reg.AddPass(&pass.OraclePass{})
+	// reg.AddPass(&pass.ChLifeCyclePass{})
+	// uncomment above if oraclert is ready
 
 	// prepare passes
 	var passes []string

@@ -355,6 +355,8 @@ def main():
         if args.graph_from_csv is not None:
             draw_btg_from_csv(args.graph_from_csv, args.btg)
             return
+        if len(args.gfuzz_out_dir) != 0:
+            return print("expect --gfuzz-out-dir has at least one argument")
         generate_bug_time_graph(args.gfuzz_out_dir, args.btg)
         return
 
@@ -426,7 +428,7 @@ def smooth_bugs_durs(bugs, durs):
     new_bugs = [0]
     new_durs = [0]
     cumulative_dur = 0
-    for i in range(0, 1300, 2):
+    for i in range(0, 1202, 2):
         cumulative_dur += i/100
         while oi < len(bugs) and durs[oi] < cumulative_dur:
             new_bugs.append(bugs[oi])
@@ -435,6 +437,11 @@ def smooth_bugs_durs(bugs, durs):
         
         new_bugs.append(new_bugs[-1])
         new_durs.append(cumulative_dur)
+    
+    while oi < len(bugs):
+        new_bugs.append(bugs[oi])
+        new_durs.append(durs[oi])
+        oi += 1
 
     return (new_bugs[1:], new_durs[1:])
 
@@ -454,8 +461,8 @@ def draw_btg_from_csv(csv_file:str, out:str):
     nose_bugs = []
     nose_durs = []
 
-    goleak_bugs = []
-    goleak_durs = []
+    nooracle_bug = []
+    nooracle_durs = []
     with open(csv_file) as csv_f:
         csv_reader = csv.DictReader(csv_f)
         for num, line in enumerate(csv_reader):
@@ -471,10 +478,10 @@ def draw_btg_from_csv(csv_file:str, out:str):
                 if line["Bug"] == "1":
                     nose_bugs.append(len(nose_bugs)+1)
                     nose_durs.append(float(line["time spent"]))
-            elif 62 <= num <= 65:
+            elif 67 <= num <= 69:
                 if line["Bug"] == "1":
-                    goleak_bugs.append(len(goleak_bugs)+1)
-                    goleak_durs.append(float(line["time spent"]))
+                    nooracle_bug.append(len(nooracle_bug)+1)
+                    nooracle_durs.append(float(line["time spent"]))
 
     
     x_major_locator=MultipleLocator(1)
@@ -485,19 +492,19 @@ def draw_btg_from_csv(csv_file:str, out:str):
     smoothed_fb_bugs, smoothed_fb_durs = smooth_bugs_durs(fb_bugs, fb_durs)
     smoothed_nfb_bugs, smoothed_nfb_durs = smooth_bugs_durs(nfb_bugs, nfb_durs)
     smoothed_nose_bugs, smoothed_nose_durs = smooth_bugs_durs(nose_bugs, nose_durs)
-    smoothed_goleak_bugs, smoothed_goleak_durs = smooth_bugs_durs(goleak_bugs, goleak_durs)
+    smoothed_nooracle_bugs, smoothed_nooracle_durs = smooth_bugs_durs(nooracle_bug, nooracle_durs)
 
     ax.plot(smoothed_fb_durs, smoothed_fb_bugs, c=random_color(), marker = 'p')
     ax.plot(smoothed_nfb_durs, smoothed_nfb_bugs, c=random_color(), marker = 'o')
     ax.plot(smoothed_nose_durs, smoothed_nose_bugs,  c=random_color(), marker = 's')
-    ax.plot(smoothed_goleak_durs, smoothed_goleak_bugs, c=random_color(), marker = '*')
+    ax.plot(smoothed_nooracle_durs, smoothed_nooracle_bugs, c=random_color(), marker = '*')
 
     plt.title("GFuzz", fontsize=20)
     plt.xlabel("Time (h)", fontsize=20)
     plt.ylabel("Num of Unique Bugs", fontsize=20)
     plt.xticks(fontsize=20)
     plt.yticks(fontsize=20)
-    leg = plt.legend(["FB","NFB", "NOSE", "GOLEAK"], fontsize=14, handlelength=3)
+    plt.legend(["FB","NFB", "NOSE", "NOORACLE"], fontsize=14, handlelength=3)
     plt.xlim([0, 12])
     ax.xaxis.set_major_locator(x_major_locator)
 

@@ -46,6 +46,7 @@ func (p *ChRecPass) GetPreApply(iCtx *inst.InstContext) func(*astutil.Cursor) bo
 				// For example, we may identified a receive in select and wanted to insert a function call before it, then this function will panic
 			}
 		}()
+
 		switch concrete := c.Node().(type) {
 
 		// channel send operation
