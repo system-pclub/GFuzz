@@ -28,6 +28,7 @@ class ExecStat:
         self.start = start
         self.duration = None
         self.bugs = []
+        self.timeout = False
 
 
 
@@ -81,7 +82,11 @@ def get_exec_stats_from_logs(logs:List[str]) -> List[ExecStat]:
             elif line.find("] finished ") != -1:
                 exec_id = parts[5]
                 exec_stats[exec_id].duration = (curr_t - exec_stats[exec_id].start).total_seconds()
+            elif line.find("ignore because of timeout") != -1:
+                exec_id = parts[4][:-1] # remove semicolon at the end of exec id
+                exec_stats[exec_id].timeout = True
     return exec_stats.values()
+
 
 def analyze_gfuzz_log(log_fp):
     log_start_time = None
@@ -101,9 +106,16 @@ def analyze_gfuzz_log(log_fp):
                 log_end_time = cur_time
         except Exception as ex:
             print(f"failed to parse line {line}: {ex}")
+    
     exec_stats_arr = get_exec_stats_from_logs(logs)
     entry_stats_arr = analyze_exec_stats_arr(exec_stats_arr)
-    
+    num_of_runs_without_timeout = 0
+    total_dur_without_timeout = 0
+    for e in exec_stats_arr:
+        if not e.timeout and e.duration:
+            num_of_runs_without_timeout += 1
+            total_dur_without_timeout += e.duration
+
     num_of_runs = len(exec_stats_arr)
     total_dur = (log_end_time - log_start_time).total_seconds()
     print(f"""
@@ -111,9 +123,14 @@ total entries: {len(entry_stats_arr)}
 total runs: {num_of_runs}
 total duration (sec): {total_dur}
 average (run/sec): {num_of_runs/total_dur:.2f}
+
+total runs (without timeout): {num_of_runs_without_timeout}
+total duration (without timeout): {total_dur_without_timeout}
+average (run/sec): {num_of_runs_without_timeout/total_dur_without_timeout:.2f}
     """)
 
     print("bug statistics:")
+    start_str = log_start_time.strftime("%Y/%m/%d %H:%M:%S")
     for i, e in enumerate(exec_stats_arr):
         skip = False
         for b in e.bugs:
@@ -122,8 +139,9 @@ average (run/sec): {num_of_runs/total_dur:.2f}
         if skip:
             continue
         t = e.start.strftime("%Y/%m/%d %H:%M:%S")
+        dur = (e.start - log_start_time).total_seconds() / 3600
         for b in e.bugs:
-            print(f"{t},{b},{e.exec_id}")
+            print(f"{start_str},{t},{dur:.4f},{b},{e.exec_id}")
 
     # Most time-consuming entries
     print("most time-consuming entries:")

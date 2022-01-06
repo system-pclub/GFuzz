@@ -16,6 +16,7 @@ type Config struct {
 	RandMutateEnergy      int  // Determine the energy of random mutations. If == 100, then each seed would mutate 100 times in the rand mutation stage.
 	IsDisableScore        bool // Is disable score to priority testing case
 	NoSelEfcm             bool // Disable select enforcement on all testing case.
+	NoOracle              bool
 	SelEfcmTimeout        int  // timeout for select enforcement (ms)
 	FixedSelEfcmTimeout   bool // increment timeout by 1000 each time
 	ScoreBasedEnergy      bool // energy reduced based on score

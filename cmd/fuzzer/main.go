@@ -75,6 +75,7 @@ func main() {
 	config.NfbRandEnergy = opts.NfbRandEnergy
 	config.NfbRandSelEfcmTimeout = opts.NfbRandSelEfcmTimeout
 	config.MemRandStrat = opts.MemRandStrat
+	config.NoOracle = opts.NoOracle
 
 	if config.ScoreBasedEnergy {
 		log.Printf("using score based energy")
