@@ -42,8 +42,8 @@ func main() {
 	reg.Register("selefcm", func() inst.InstPass { return &pass.SelEfcmPass{} })
 	reg.Register("chrec", func() inst.InstPass { return &pass.ChRecPass{} })
 	reg.Register("cvrec", func() inst.InstPass { return &pass.CvRecPass{} })
-	reg.Register("mtxrec", func() inst.InstPass { return &pass.WgRecPass{} })
-	reg.Register("wgrec", func() inst.InstPass { return &pass.SelEfcmPass{} })
+	reg.Register("mtxrec", func() inst.InstPass { return &pass.MtxRecPass{} })
+	reg.Register("wgrec", func() inst.InstPass { return &pass.WgRecPass{} })
 	reg.Register("oracle", func() inst.InstPass { return &pass.OraclePass{} })
 	reg.Register("chlc", func() inst.InstPass { return pass.NewChLifeCyclePass() })
 
