@@ -34,6 +34,9 @@ func AddImport(fs *token.FileSet, ast *ast.File, name string, path string) error
 
 // DumpAstFile serialized AST to given file
 func DumpAstFile(fset *token.FileSet, astFile *ast.File, dstFile string) error {
+	if astFile == nil {
+		return fmt.Errorf("found nil ast file for %s", dstFile)
+	}
 	fi, err := os.Stat(dstFile)
 	var mode fs.FileMode
 	if err != nil {

@@ -22,18 +22,20 @@ func NewInstContext(goSrcFile string) (*InstContext, error) {
 	if err != nil {
 		return nil, err
 	}
-	conf := types.Config{Importer: importer.ForCompiler(fs, "source", nil)}
+	conf := types.Config{
+		Importer: importer.ForCompiler(fs, "source", nil),
+		Error: func(err error) {
+			log.Printf("'%s' type checker: %s", goSrcFile, err)
+		},
+	}
 	info := &types.Info{
-		Types:  make(map[ast.Expr]types.TypeAndValue),
-		Defs:   make(map[*ast.Ident]types.Object),
-		Scopes: make(map[ast.Node]*types.Scope),
-		Uses:   make(map[*ast.Ident]types.Object),
+		Types: make(map[ast.Expr]types.TypeAndValue),
+		Defs:  make(map[*ast.Ident]types.Object),
+		Uses:  make(map[*ast.Ident]types.Object),
 	}
 
-	_, err = conf.Check(astF.Name.Name, fs, []*ast.File{astF}, info)
-	if err != nil {
-		log.Printf("type checker: %s", err)
-	}
+	conf.Check(astF.Name.Name, fs, []*ast.File{astF}, info)
+
 	return &InstContext{
 		File:            goSrcFile,
 		OriginalContent: oldSource,

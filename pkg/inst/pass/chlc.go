@@ -59,18 +59,6 @@ func (p *ChLifeCyclePass) GetPostApply(iCtx *inst.InstContext) func(*astutil.Cur
 	return nil
 }
 
-func AddChDerefGoroutine(iCtx *inst.InstContext, ident *ast.Ident) {
-	if to := iCtx.Type.Defs[ident]; to == nil || to.Type() == nil {
-		return
-	} else {
-		println(to.Type().String())
-
-		if to.Type().String() == "chan" {
-			to.Parent()
-		}
-	}
-}
-
 func (p *ChLifeCyclePass) GetPreApply(iCtx *inst.InstContext) func(*astutil.Cursor) bool {
 	return func(c *astutil.Cursor) bool {
 		defer func() {
