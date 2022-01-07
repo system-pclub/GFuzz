@@ -502,8 +502,6 @@ def draw_btg_from_csv(csv_file:str, out:str):
                     nooracle_durs.append(float(line["time spent"]))
 
     
-    x_major_locator=MultipleLocator(1)
-
     plt.figure()
     ax = plt.subplot()
 
@@ -512,22 +510,18 @@ def draw_btg_from_csv(csv_file:str, out:str):
     smoothed_nose_bugs, smoothed_nose_durs = smooth_bugs_durs(nose_bugs, nose_durs)
     smoothed_nooracle_bugs, smoothed_nooracle_durs = smooth_bugs_durs(nooracle_bug, nooracle_durs)
 
-    ax.plot(smoothed_fb_durs, smoothed_fb_bugs, c=random_color(), marker = 'p')
-    ax.plot(smoothed_nfb_durs, smoothed_nfb_bugs, c=random_color(), marker = 'o')
-    ax.plot(smoothed_nose_durs, smoothed_nose_bugs,  c=random_color(), marker = 's')
-    ax.plot(smoothed_nooracle_durs, smoothed_nooracle_bugs, c=random_color(), marker = '*')
+    ax.plot(smoothed_fb_durs, smoothed_fb_bugs, linestyle = 'dashed', marker = 'p', markevery=6, linewidth=2.0, markersize=7)
+    ax.plot(smoothed_nfb_durs, smoothed_nfb_bugs, linestyle = (0, (3, 1, 1, 1, 1, 1)), marker = 'o', markevery=6, linewidth=2.0, markersize=7)
+    ax.plot(smoothed_nose_durs, smoothed_nose_bugs, linestyle = 'dashdot', marker = 's', markevery=6, linewidth=2.0, markersize=7)
+    ax.plot(smoothed_nooracle_durs, smoothed_nooracle_bugs, linestyle = 'dotted', marker = '*', markevery=6, linewidth=2.0, markersize=7)
 
-    plt.title("GFuzz", fontsize=20)
     plt.xlabel("Time (h)", fontsize=20)
     plt.ylabel("Num of Unique Bugs", fontsize=20)
     plt.xticks(fontsize=20)
     plt.yticks(fontsize=20)
-    plt.legend(["FB","NFB", "NOSE", "NOORACLE"], fontsize=14, handlelength=3)
-    plt.xlim([0, 12])
-    ax.xaxis.set_major_locator(x_major_locator)
-
     plt.grid()
-
+    plt.xlim([0, 12])
+    plt.legend(["GFuzz","no_feedbacks", "no_mutations", "no_oracle"], fontsize=14, handlelength=2, bbox_to_anchor=(0.57,0.4))
     plt.tight_layout()
     plt.savefig(out, dpi = 200)
 

@@ -12,9 +12,6 @@ import (
 // MtxResPass, Mutex (and RWMutex) Record Pass.
 type MtxRecPass struct{}
 
-func (p *MtxRecPass) Name() string {
-	return "mtxrec"
-}
 func (p *MtxRecPass) Before(iCtx *inst.InstContext) {
 	iCtx.SetMetadata(MetadataKeyRequiredOrtImport, false)
 }

@@ -24,8 +24,10 @@ func NewInstContext(goSrcFile string) (*InstContext, error) {
 	}
 	conf := types.Config{Importer: importer.ForCompiler(fs, "source", nil)}
 	info := &types.Info{
-		Types: make(map[ast.Expr]types.TypeAndValue),
-		Defs:  make(map[*ast.Ident]types.Object),
+		Types:  make(map[ast.Expr]types.TypeAndValue),
+		Defs:   make(map[*ast.Ident]types.Object),
+		Scopes: make(map[ast.Node]*types.Scope),
+		Uses:   make(map[*ast.Ident]types.Object),
 	}
 
 	_, err = conf.Check(astF.Name.Name, fs, []*ast.File{astF}, info)

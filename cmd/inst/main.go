@@ -41,14 +41,13 @@ func main() {
 	reg := inst.NewPassRegistry()
 
 	// register passes
-	reg.AddPass(&pass.SelEfcmPass{})
-	reg.AddPass(&pass.ChRecPass{})
-	reg.AddPass(&pass.CvRecPass{})
-	reg.AddPass(&pass.MtxRecPass{})
-	reg.AddPass(&pass.WgRecPass{})
-	reg.AddPass(&pass.OraclePass{})
-	// reg.AddPass(&pass.ChLifeCyclePass{})
-	// uncomment above if oraclert is ready
+	reg.Register("selefcm", func() inst.InstPass { return &pass.SelEfcmPass{} })
+	reg.Register("chrec", func() inst.InstPass { return &pass.ChRecPass{} })
+	reg.Register("cvrec", func() inst.InstPass { return &pass.CvRecPass{} })
+	reg.Register("mtxrec", func() inst.InstPass { return &pass.WgRecPass{} })
+	reg.Register("wgrec", func() inst.InstPass { return &pass.SelEfcmPass{} })
+	reg.Register("oracle", func() inst.InstPass { return &pass.OraclePass{} })
+	reg.Register("chlc", func() inst.InstPass { return pass.NewChLifeCyclePass() })
 
 	// prepare passes
 	var passes []string

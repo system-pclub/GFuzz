@@ -11,33 +11,55 @@ import (
 
 // ChLifeCyclePass tries to mark channel's end
 type ChLifeCyclePass struct {
+	chInGs            map[*ast.GoStmt]map[string]struct{}
+	requiredOrtImport bool
 }
 
-func (p *ChLifeCyclePass) Name() string {
-	return "chlc"
+func NewChLifeCyclePass() *ChLifeCyclePass {
+	return &ChLifeCyclePass{
+		chInGs: make(map[*ast.GoStmt]map[string]struct{}),
+	}
 }
-
 func (p *ChLifeCyclePass) Deps() []string {
 	return nil
 }
 
 func (p *ChLifeCyclePass) Before(iCtx *inst.InstContext) {
-	iCtx.SetMetadata(MetadataKeyRequiredOrtImport, false)
 }
 
 func (p *ChLifeCyclePass) After(iCtx *inst.InstContext) {
-	needOracleRtImportItf, _ := iCtx.GetMetadata(MetadataKeyRequiredOrtImport)
-	needOracleRtImport := needOracleRtImportItf.(bool)
-	if needOracleRtImport {
+
+	for g, chs := range p.chInGs {
+		for ch := range chs {
+
+			addRefCall := NewArgCallExpr(oraclertImportName, "CurrentGoAddCh", []ast.Expr{
+				&ast.BasicLit{
+					ValuePos: 0,
+					Kind:     token.STRING,
+					Value:    ch,
+				},
+			})
+			if f, ok := g.Call.Fun.(*ast.FuncLit); ok {
+				// append to beginning of goroutine
+				f.Body.List = append([]ast.Stmt{addRefCall}, f.Body.List...)
+			}
+			p.requiredOrtImport = true
+
+		}
+
+	}
+
+	if p.requiredOrtImport {
 		inst.AddImport(iCtx.FS, iCtx.AstFile, oraclertImportName, oraclertImportPath)
 	}
+
 }
 
 func (p *ChLifeCyclePass) GetPostApply(iCtx *inst.InstContext) func(*astutil.Cursor) bool {
 	return nil
 }
 
-func TryAddChDerefGoroutine(iCtx *inst.InstContext, ident *ast.Ident) {
+func AddChDerefGoroutine(iCtx *inst.InstContext, ident *ast.Ident) {
 	if to := iCtx.Type.Defs[ident]; to == nil || to.Type() == nil {
 		return
 	} else {
@@ -58,52 +80,23 @@ func (p *ChLifeCyclePass) GetPreApply(iCtx *inst.InstContext) func(*astutil.Curs
 		}()
 
 		switch concrete := c.Node().(type) {
-
-		// try to find channel assignment
-		case *ast.AssignStmt:
-			// if len(concrete.Lhs) == 0:
-			// 	return true
-			identExpr := concrete.Lhs[0]
-			if ident, ok := identExpr.(*ast.Ident); ok {
-				if tyObj, ok := iCtx.Type.Defs[ident]; ok {
-					if tyObj == nil || tyObj.Type() == nil {
-						return true
-					}
-					if strings.HasPrefix(tyObj.Type().String(), "chan ") {
-						// confirm this x :=, x type is chan
-						var blockStmtNode ast.Node
-						for {
-							blockStmtNode = c.Parent()
-							if blockStmtNode == nil {
-								break
-							}
-							if bs, ok := blockStmtNode.(*ast.BlockStmt); ok {
-								// TODO: this one should be added when go block found
-								// addRefCall := NewArgCallExpr(oraclertImportName, "AddChRefFromG", []ast.Expr{
-								// 	&ast.BasicLit{
-								// 		ValuePos: 0,
-								// 		Kind:     token.STRING,
-								// 		Value:    ident.Name,
-								// 	},
-								// })
-								rmRefCall := NewArgCallExpr(oraclertImportName, "RemoveChRefFromG", []ast.Expr{
-									&ast.BasicLit{
-										ValuePos: 0,
-										Kind:     token.STRING,
-										Value:    ident.Name,
-									},
-								})
-								bs.List = append(bs.List, rmRefCall)
-								break
-							}
+		case *ast.GoStmt:
+			p.chInGs[concrete] = make(map[string]struct{})
+			ast.Inspect(concrete, func(n ast.Node) bool {
+				switch tn := n.(type) {
+				case *ast.Ident:
+					if tyObj, exist := iCtx.Type.Types[tn]; exist && tyObj.Type != nil {
+						if strings.HasPrefix(tyObj.Type.String(), "chan ") {
+							p.chInGs[concrete][tn.Name] = struct{}{}
 						}
+
 					}
 				}
 
-			}
+				return true
+			})
 
 		}
-
 		return true
 	}
 }

@@ -12,10 +12,6 @@ import (
 // CvResPass, Conditional Variable Pass.
 type CvRecPass struct{}
 
-func (p *CvRecPass) Name() string {
-	return "cvrec"
-}
-
 func (p *CvRecPass) Before(iCtx *inst.InstContext) {
 	iCtx.SetMetadata(MetadataKeyRequiredOrtImport, false)
 }

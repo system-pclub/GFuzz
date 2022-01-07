@@ -21,7 +21,7 @@ func runPasses(iCtx *InstContext, passes []InstPass) error {
 func Run(iCtx *InstContext, r *PassRegistry, passNames []string) error {
 	var passes = make([]InstPass, 0, len(passNames))
 	for _, passName := range passNames {
-		pass, err := r.GetPass(passName)
+		pass, err := r.GetNewPassInstance(passName)
 		if err != nil {
 			return err
 		}

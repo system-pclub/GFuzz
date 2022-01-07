@@ -1,10 +1,18 @@
 package defaultp
 
+import (
+	"fmt"
+	oraclert "gfuzz/pkg/oraclert"
+)
+
 func getChannel() chan string {
 	return make(chan string)
 }
-func Hello() {
 
+func useOfCh(c interface{}) {
+
+}
+func Hello() {
 	ch1 := make(chan int)
 	ch2 := make(chan struct{})
 	ch3 := getChannel()
@@ -13,13 +21,23 @@ func Hello() {
 	for {
 		ch5 := make(chan int)
 		go func() {
+			oraclert.CurrentGoAddCh(ch4)
+			oraclert.CurrentGoAddCh(ch2)
+			oraclert.CurrentGoAddCh(ch3)
+			oraclert.CurrentGoAddCh(ch5)
+			fmt.Printf("many many code here")
+			fmt.Printf("many many code here")
+			fmt.Printf("many many code here")
+			fmt.Printf("many many code here")
+			fmt.Printf("many many code here")
+
 			ch5 <- 1
+			useOfCh(ch3)
+			select {
+			case <-ch2:
+			case ch4 <- 3:
+			}
 		}()
-		oraclert.RemoveChRefFromG(ch5)
 	}
-	oraclert.RemoveChRefFromG(ch1)
-	oraclert.RemoveChRefFromG(ch2)
-	oraclert.RemoveChRefFromG(ch3)
-	oraclert.RemoveChRefFromG(ch4)
 
 }
