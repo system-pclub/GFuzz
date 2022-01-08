@@ -18,18 +18,20 @@ func Hello() {
 	for {
 		ch5 := make(chan int)
 		go func() {
-			fmt.Printf("many many code here")
-			fmt.Printf("many many code here")
-			fmt.Printf("many many code here")
-			fmt.Printf("many many code here")
-			fmt.Printf("many many code here")
 
+			fmt.Printf("many many code here")
+			fmt.Printf("many many code here")
+			fmt.Printf("many many code here")
+			fmt.Printf("many many code here")
+			fmt.Printf("many many code here")
+			ch6 := make(chan int)
 			ch5 <- 1
 			useOfCh(ch3)
 			select {
 			case <-ch2:
 			case ch4 <- 3:
 			}
+			ch6 <- 3
 		}()
 	}
 
