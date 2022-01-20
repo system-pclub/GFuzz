@@ -199,7 +199,7 @@ def generate_bug_time_graph(output_dirs:List[str], graph_fp):
     ax = plt.subplot()
 
     for i in range(len(legends)):
-        ax.plot(times_arr[i], nums_arr[i], c=random_color())
+        ax.plot(times_arr[i], nums_arr[i])
     
     plt.title("GFuzz", fontsize=20)
     plt.xlabel("Time (h)", fontsize=20)

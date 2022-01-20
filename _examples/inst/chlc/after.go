@@ -21,22 +21,24 @@ func Hello() {
 	for {
 		ch5 := make(chan int)
 		go func() {
-			oraclert.CurrentGoAddCh(ch4)
-			oraclert.CurrentGoAddCh(ch2)
 			oraclert.CurrentGoAddCh(ch3)
 			oraclert.CurrentGoAddCh(ch5)
-			fmt.Printf("many many code here")
-			fmt.Printf("many many code here")
-			fmt.Printf("many many code here")
-			fmt.Printf("many many code here")
-			fmt.Printf("many many code here")
+			oraclert.CurrentGoAddCh(ch4)
+			oraclert.CurrentGoAddCh(ch2)
 
+			fmt.Printf("many many code here")
+			fmt.Printf("many many code here")
+			fmt.Printf("many many code here")
+			fmt.Printf("many many code here")
+			fmt.Printf("many many code here")
+			ch6 := make(chan int)
 			ch5 <- 1
 			useOfCh(ch3)
 			select {
 			case <-ch2:
 			case ch4 <- 3:
 			}
+			ch6 <- 3
 		}()
 	}
 
