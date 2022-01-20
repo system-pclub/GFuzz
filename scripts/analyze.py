@@ -199,7 +199,7 @@ def generate_bug_time_graph(output_dirs:List[str], graph_fp):
     ax = plt.subplot()
 
     for i in range(len(legends)):
-        ax.plot(times_arr[i], nums_arr[i], c=random_color())
+        ax.plot(times_arr[i], nums_arr[i])
     
     plt.title("GFuzz", fontsize=20)
     plt.xlabel("Time (h)", fontsize=20)
@@ -373,7 +373,7 @@ def main():
         if args.graph_from_csv is not None:
             draw_btg_from_csv(args.graph_from_csv, args.btg)
             return
-        if len(args.gfuzz_out_dir) != 0:
+        if len(args.gfuzz_out_dir) == 0:
             return print("expect --gfuzz-out-dir has at least one argument")
         generate_bug_time_graph(args.gfuzz_out_dir, args.btg)
         return
