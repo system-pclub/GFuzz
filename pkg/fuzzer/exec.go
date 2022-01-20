@@ -73,6 +73,12 @@ func Run(ctx context.Context, cfg *config.Config, input *api.Input) (*api.Output
 	if cfg.OracleRtDebug {
 		env = append(env, fmt.Sprintf("%s=1", ortEnv.ORACLERT_DEBUG))
 	}
+	if cfg.TimeDivideBy > 1 {
+		env = append(env, fmt.Sprintf("%s=%d", ortEnv.ORACLERT_TIME_DIVIDE, cfg.TimeDivideBy))
+	}
+	if cfg.NoOracle {
+		env = append(env, fmt.Sprintf("%s=%d", ortEnv.ORACLERT_NOORACLE, 1))
+	}
 	cmd.Env = env
 
 	// redirect stdout to the file
@@ -145,9 +151,26 @@ func HandleExec(ctx context.Context, i *api.Input, o *api.Output, fctx *api.Cont
 	if o.OracleRtOutput == nil {
 		return fmt.Errorf("cannot handle an exec without oracle runtime output")
 	}
+
+	entry := fctx.GetQueueEntryByGExecID(i.Exec.String())
+	if entry == nil {
+		return fmt.Errorf("cannot find queue entry for %s", i.Exec.String())
+	}
+
 	logger := getWorkerLogger(ctx)
 	// 1. ignore this exec if timeout
 	if o.Timeout {
+
+		if i.OracleRtConfig != nil && i.OracleRtConfig.SelEfcm.Efcms != nil {
+			cfgHash := hash.AsSha256(i.OracleRtConfig)
+			entry.RecordTimeoutOrtCfgHash(cfgHash)
+		}
+
+		// update init record in interest queue
+		if i.Stage == api.InitStage {
+			ii := fctx.Interests.FindInit(i)
+			ii.Timeout = true
+		}
 		return fmt.Errorf("ignore because of timeout")
 	}
 
@@ -169,31 +192,43 @@ func HandleExec(ctx context.Context, i *api.Input, o *api.Output, fctx *api.Cont
 	}
 
 	// 3. update if any new select records found
-	entry := fctx.GetQueueEntryByGExecID(i.Exec.String())
-	if entry == nil {
-		return fmt.Errorf("cannot find queue entry for %s", i.Exec.String())
-	}
+	isFoundNewSelect := false
+
 	newSelects := entry.UpdateSelectRecordsIfNew(o.OracleRtOutput.Selects)
 	if newSelects != 0 {
 		logger.Printf("found %d new selects", newSelects)
+		isFoundNewSelect = true
 	}
 
 	// 4. update/add interest input
 	if i.Stage == api.InitStage {
 		// if input is init, since init stage by default is interested input, so no need to check interest
 		// simply update output and hash
-		ii := fctx.Interests.Find(i)
+		ii := fctx.Interests.FindInit(i)
 		ii.Output = o
-		fctx.UpdateOrtOutputHash(hash.AsSha256(o.OracleRtOutput))
+
+		// Use SELECT Record as feedback.
+		oSelectCopy := make([]ortOut.SelectRecord, 0)
+		for _, v := range o.OracleRtOutput.Selects {
+			v_copy := v
+			v_copy.Cases = 0
+			oSelectCopy = append(oSelectCopy, v_copy)
+		}
+		fctx.UpdateOrtOutputHash(hash.AsSha256(oSelectCopy))
 		return nil
 	}
-	isInteresed, err := interestHdl.IsInterested(i, o)
-	if err != nil {
-		return nil
-	}
-	if isInteresed {
-		logger.Printf("%s is interesting", i.ID)
-		fctx.Interests.Add(api.NewExecutedInterestInput(i, o))
+
+	if interestHdl != nil {
+		isInteresed, reason, err := interestHdl.IsInterested(i, o, isFoundNewSelect)
+		if err != nil {
+			return nil
+		}
+		if isInteresed {
+			logger.Printf("%s is interesting", i.ID)
+			ii := api.NewExecutedInterestInput(i, o)
+			ii.Reason = reason
+			fctx.Interests.Add(ii)
+		}
 	}
 
 	return nil

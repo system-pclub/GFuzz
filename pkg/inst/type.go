@@ -29,10 +29,6 @@ func (i *InstContext) GetMetadata(key string) (interface{}, bool) {
 
 // InstPass shapes the pass used for instrumenting a single Golang source code
 type InstPass interface {
-
-	// Name returns the name of the pass
-	Name() string
-
 	// Deps returns a list of dependent passes
 	Deps() []string
 
@@ -45,8 +41,10 @@ type InstPass interface {
 	After(iCtx *InstContext)
 }
 
+type InstPassConstructor func() InstPass
+
 // PassRegistry records all registered passes
 type PassRegistry struct {
 	// pass name => pass
-	n2p map[string]InstPass
+	n2p map[string]InstPassConstructor
 }

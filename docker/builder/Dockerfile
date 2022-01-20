@@ -24,13 +24,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 		vim-common \
 	&& rm -rf /var/lib/apt/lists/*
 
-COPY benchmark/clone-repos.sh /gfuzz/benchmark/clone-repos.sh
-
 WORKDIR /repos
 
 COPY benchmark/repos/etcd ./etcd
 COPY benchmark/repos/go-ethereum ./go-ethereum
 COPY benchmark/repos/grpc-go ./grpc-go
+COPY benchmark/repos/grpc-go ./grpc-go-goleak
 COPY benchmark/repos/kubernetes ./kubernetes
 COPY benchmark/repos/prometheus ./prometheus
 COPY benchmark/repos/tidb ./tidb
@@ -40,9 +39,12 @@ COPY benchmark/repos/moby /go/src/github.com/docker/docker
 
 # override leakcheck.go to prevent sideeffect of leakcheck to the benchmark
 COPY docker/builder/leakcheck.go /repos/grpc-go/internal/leakcheck/leakcheck.go
+COPY docker/builder/leakcheck-allow-oracle.go /repos/grpc-go-goleak/internal/leakcheck/leakcheck.go
 
 # avoid gRPC testsuite
 RUN cd grpc-go && grep -rl 'func (s) Test' ./ | xargs sed -i 's/func (s)/func/g' && cd ..
+# Don't replace since goleak only will be called from testsuite way
+# RUN cd grpc-go-goleak && grep -rl 'func (s) Test' ./ | xargs sed -i 's/func (s)/func/g' && cd ..
 
 
 WORKDIR /gfuzz

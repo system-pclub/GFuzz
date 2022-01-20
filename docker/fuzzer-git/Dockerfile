@@ -4,6 +4,28 @@ ARG GIT_URL
 ARG GIT_COMMIT
 
 RUN apt update && apt install -y python3
+RUN apt-get update && apt-get install -y --no-install-recommends \
+		build-essential \
+		curl \
+		cmake \
+		gcc \
+		git \
+		libapparmor-dev \
+		libbtrfs-dev \
+		libdevmapper-dev \
+		libseccomp-dev \
+		ca-certificates \
+		e2fsprogs \
+		iptables \
+		pkg-config \
+		pigz \
+		procps \
+		xfsprogs \
+		xz-utils \
+		\
+		aufs-tools \
+		vim-common \
+	&& rm -rf /var/lib/apt/lists/*
 WORKDIR /gfuzz
 
 # copy source files to docker

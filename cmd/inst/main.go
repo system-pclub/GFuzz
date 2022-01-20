@@ -6,11 +6,9 @@ import (
 	"gfuzz/pkg/inst/pass"
 	"gfuzz/pkg/inst/stats"
 	"gfuzz/pkg/utils/fs"
-	"gfuzz/pkg/utils/gofmt"
 	"log"
 	"os"
 	"runtime/pprof"
-	"sync"
 )
 
 var (
@@ -41,12 +39,13 @@ func main() {
 	reg := inst.NewPassRegistry()
 
 	// register passes
-	reg.AddPass(&pass.SelEfcmPass{})
-	reg.AddPass(&pass.ChRecPass{})
-	reg.AddPass(&pass.CvRecPass{})
-	reg.AddPass(&pass.MtxRecPass{})
-	reg.AddPass(&pass.WgRecPass{})
-	reg.AddPass(&pass.OraclePass{})
+	reg.Register("selefcm", func() inst.InstPass { return &pass.SelEfcmPass{} })
+	reg.Register("chrec", func() inst.InstPass { return &pass.ChRecPass{} })
+	reg.Register("cvrec", func() inst.InstPass { return &pass.CvRecPass{} })
+	reg.Register("mtxrec", func() inst.InstPass { return &pass.MtxRecPass{} })
+	reg.Register("wgrec", func() inst.InstPass { return &pass.WgRecPass{} })
+	reg.Register("oracle", func() inst.InstPass { return &pass.OraclePass{} })
+	reg.Register("chlc", func() inst.InstPass { return pass.NewChLifeCyclePass() })
 
 	// prepare passes
 	var passes []string
@@ -77,11 +76,6 @@ func main() {
 		}
 		goSrcFiles = append(goSrcFiles, files...)
 
-		// try to run go get ./... since dependencies might needed for type checking
-		err = gofmt.GoModDownload(opts.Dir)
-		if err != nil {
-			log.Printf("prepare dependencies: %s", err)
-		}
 	}
 
 	if opts.File != "" {
@@ -100,30 +94,30 @@ func main() {
 	}
 
 	// handle go source files
-	var wg sync.WaitGroup
-	toInstSrcCh := make(chan string)
-	for i := 1; i <= int(opts.Parallel); i++ {
-		wg.Add(1)
-		go func() {
-			for src := range toInstSrcCh {
-				err := HandleSrcFile(src, reg, passes)
-				if err != nil {
-					log.Printf("HandleSrcFile %s: %s", src, err)
-				}
-			}
-
-			wg.Done()
-
-		}()
-	}
-
+	// var wg sync.WaitGroup
+	// toInstSrcCh := make(chan string)
+	// for i := 1; i <= int(opts.Parallel); i++ {
+	// 	wg.Add(1)
+	// 	go func() {
 	for _, src := range goSrcFiles {
-		toInstSrcCh <- src
+		err := HandleSrcFile(src, reg, passes)
+		if err != nil {
+			log.Printf("HandleSrcFile %s: %s", src, err)
+		}
 	}
 
-	close(toInstSrcCh)
+	// 		wg.Done()
 
-	wg.Wait()
+	// 	}()
+	// }
+
+	// for _, src := range goSrcFiles {
+	// 	toInstSrcCh <- src
+	// }
+
+	// close(toInstSrcCh)
+
+	// wg.Wait()
 
 	// handle output
 	if opts.StatsOut != "" {

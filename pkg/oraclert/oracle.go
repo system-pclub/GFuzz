@@ -91,15 +91,6 @@ func BeforeRunFuzz() (result *OracleEntry) {
 		BoolOracleStarted = true
 		println("[oraclert] started")
 	}
-	var err error
-	baseStr := os.Getenv("GF_TIME_DIVIDE")
-	if baseStr == "" {
-		baseStr = "1"
-	}
-	time.DurDivideBy, err = strconv.Atoi(baseStr)
-	if err != nil {
-		fmt.Println("Failed to set time.DurDivideBy. time.DurDivideBy is set to 1. Err:", err)
-	}
 
 	result = &OracleEntry{
 		WgCheckBug:              &sync.WaitGroup{},
@@ -142,7 +133,9 @@ func LightBeforeRun() *OracleEntry {
 
 // Start the endless loop that checks bug. Should be called at the beginning of unit test
 func CheckBugStart(entry *OracleEntry) {
-	go CheckBugLate()
+	// go CheckBugLate()
+	// cancelled CheckBugLate since we are going to ignore timeout result
+
 	if runtime.BoolDelayCheck {
 		if DelayCheckMod == DelayCheckModCount {
 			runtime.FnCheckCount = DelayCheckCounterFN
@@ -301,22 +294,15 @@ func CheckBugEnd(entry *OracleEntry) {
 		if ortBenchmark {
 			return
 		}
-		if ortStdoutFile != "" {
-			out, err := os.OpenFile(ortStdoutFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
-			if err != nil {
-				fmt.Println("Failed to create file:", ortStdoutFile, err)
-				print(str)
-				return
-			}
-			defer out.Close()
 
-			w := bufio.NewWriter(out)
-			defer w.Flush()
-
-			w.WriteString(str)
-			w.WriteString(runtime.StrWithdraw)
-
+		if str == "" {
+			println("\n-----NO BLOCKING\n")
+		} else {
+			println("\n-----FOUND BLOCKING\n")
 		}
+		//println(str) ignore this since we have stack trace
+		println(runtime.StrWithdraw)
+
 		// print stdout
 	}
 }

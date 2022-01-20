@@ -6,10 +6,10 @@ func init() {
 	MapChToChanInfo = make(map[interface{}]PrimInfo)
 }
 
-var GlobalEnableOracle = true
+var GlobalEnableOracle = gogetenv("ORACLERT_NOORACLE") != "1"
 
 // during benchmark, we don't need to print bugs to stdout
-var BoolReportBug = gogetenv("GF_BENCHMARK") != "1"
+var BoolReportBug = gogetenv("ORACLERT_BENCHMARK") != "1"
 var BoolDelayCheck = true
 
 var MuReportBug mutex
@@ -85,8 +85,12 @@ func NewChanInfo(ch *hchan) *ChanInfo {
 
 	// If this channel is in some special API, set special flag
 	//creationFunc := MyCaller(1)
-	if Index(strLoc, "time") >= 0 {
+	if !newChInfo.BoolInSDK && Index(strLoc, "/time") >= 0 {
 		newChInfo.SpecialFlag = TimeTicker
+	}
+
+	if BoolDebug {
+		println(strLoc, "SpecialFlag", newChInfo.SpecialFlag)
 	}
 
 	return newChInfo
@@ -321,6 +325,12 @@ func CheckBlockBug(CS []PrimInfo) (finished bool) {
 			if chI.OKToCheck == false {
 				return true
 			}
+			if chI.Chan.closed == 1 {
+				if BoolDebug {
+					println("Abort checking because this prim is closed")
+				}
+				return true
+			}
 		}
 		if Index(primI.StringDebug(), strSDKPath) >= 0 {
 			if BoolDebug {
@@ -341,6 +351,10 @@ func CheckBlockBug(CS []PrimInfo) (finished bool) {
 loopGS:
 	if BoolDebug {
 		println("Going through mapGS whose length is:", len(mapGS))
+	}
+	if len(mapCS) == 0 {
+		println("no linked goroutines, return true")
+		return true
 	}
 	for goInfo, _ := range mapGS {
 		if atomic.LoadUint32(&goInfo.BitCheckBugAtEnd) == 1 { // The goroutine is checking bug at the end of unit test
@@ -368,9 +382,25 @@ loopGS:
 		for _, blockInfo := range goInfo.VecBlockInfo { // if it is blocked at select, VecBlockInfo contains multiple primitives
 
 			primI := blockInfo.Prim
+			if chI, ok := primI.(*ChanInfo); ok {
+				if chI.Chan.closed == 1 {
+					if BoolDebug {
+						println("Blocked at select. Abort checking because this prim is closed")
+					}
+					return true
+				}
+
+				// if blocked at send
+				if blockInfo.StrOp == Send && chI.Chan.qcount < chI.Chan.dataqsiz {
+					return false
+				} else if blockInfo.StrOp == Recv && chI.Chan.qcount > 0 {
+					return false
+				}
+
+			}
 			if _, exist := mapCS[primI]; !exist {
 				if BoolDebug {
-					println("\t\tNot existing prim in CS:", blockInfo.Prim.StringDebug())
+					println("\t\tNot existing prim in CS:", blockInfo.Prim.StringDebug(), blockInfo.StrOp)
 				}
 				mapCS[primI] = struct{}{} // update CS
 				primI.Lock()
@@ -510,6 +540,15 @@ func ReportBug(mapCS map[PrimInfo]struct{}) {
 	if BoolReportBug == false {
 		return
 	}
+	if BoolDebug {
+		for primI, _ := range mapCS {
+			if chI, ok := primI.(*ChanInfo); ok {
+				println(chI.StringDebug(), "qcount", chI.Chan.qcount)
+			}
+		}
+
+	}
+
 	lock(&MuReportBug)
 	print("-----New Blocking Bug:\n")
 	print("---Primitive location:\n")

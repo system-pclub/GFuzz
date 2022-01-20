@@ -1,0 +1,6 @@
+{
+    "search.exclude": {
+        "tmp/**/*": true,
+        "benchmark/repos/**/*": true
+    }
+}

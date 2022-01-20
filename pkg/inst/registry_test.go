@@ -8,10 +8,6 @@ import (
 
 type MockPass struct{}
 
-func (p *MockPass) Name() string {
-	return "mock"
-}
-
 func (p *MockPass) Deps() []string {
 	return nil
 }
@@ -32,24 +28,11 @@ func (p *MockPass) GetPostApply(*InstContext) func(*astutil.Cursor) bool {
 
 func TestAddGetRegistryPass(t *testing.T) {
 	reg := NewPassRegistry()
-	p := &MockPass{}
-	reg.AddPass(p)
+	reg.Register("mock", func() InstPass { return &MockPass{} })
 
-	gp, err := reg.GetPass("mock")
-	if err != nil {
+	exist := reg.HasPass("mock")
+	if !exist {
 		t.Fail()
 	}
 
-	if gp != p {
-		t.Fail()
-	}
-}
-func TestHasRegistryPass(t *testing.T) {
-	reg := NewPassRegistry()
-	p := &MockPass{}
-	reg.AddPass(p)
-
-	if reg.HasPass("abcdef") {
-		t.Fail()
-	}
 }

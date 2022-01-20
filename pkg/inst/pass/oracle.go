@@ -12,10 +12,6 @@ import (
 // OraclePass, instrument the oracle entry and defer function call to trigger oracle bug detection
 type OraclePass struct{}
 
-func (p *OraclePass) Name() string {
-	return "oracle"
-}
-
 func (p *OraclePass) Before(iCtx *inst.InstContext) {
 	iCtx.SetMetadata(MetadataKeyRequiredOrtImport, false)
 }

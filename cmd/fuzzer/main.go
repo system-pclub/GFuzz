@@ -25,6 +25,7 @@ var (
 func main() {
 	var err error
 	parseFlags()
+	log.Printf("%+v", opts)
 
 	// flags sanity check
 	if opts.Version {
@@ -44,7 +45,7 @@ func main() {
 	}
 
 	if opts.GoModDir == "" && opts.TestBinGlobs == nil {
-		log.Fatal("Either --gomod or --testbin is required")
+		log.Fatal("Either --gomod or --bin is required")
 	}
 
 	gLog.SetupLogger(filepath.Join(opts.OutputDir, GFUZZ_LOG_FILE), true)
@@ -66,13 +67,27 @@ func main() {
 	log.Printf("Running with MaxParallel: %v", config.MaxParallel)
 
 	config.IsIgnoreFeedback = opts.IsIgnoreFeedback
+	config.IsDisableScore = opts.IsDisableScore
+	config.ScoreBasedEnergy = opts.ScoreBasedEnergy
+	config.FixedSelEfcmTimeout = opts.FixedSelEfcmTimeout
+	config.SelEfcmTimeout = opts.SelEfcmTimeout
+	config.AllowDupCfg = opts.AllowDupCfg
+	config.NfbRandEnergy = opts.NfbRandEnergy
+	config.NfbRandSelEfcmTimeout = opts.NfbRandSelEfcmTimeout
+	config.MemRandStrat = opts.MemRandStrat
+	config.NoOracle = opts.NoOracle
+
+	if config.ScoreBasedEnergy {
+		log.Printf("using score based energy")
+	}
 	if config.IsIgnoreFeedback {
 		log.Printf("Warning: Ignoring feedback from the oracle. ")
+		config.IsDisableScore = true
 	}
 
-	config.IsNoMutation = opts.IsNoMutation
-	if config.IsNoMutation {
-		log.Printf("Warning: Do not apply mutations to all test cases. ")
+	config.NoSelEfcm = opts.NoSelEfcm
+	if config.NoSelEfcm {
+		log.Printf("Warning: no select enforcement ")
 	}
 
 	config.OracleRtDebug = opts.OracleRtDebug
@@ -81,15 +96,20 @@ func main() {
 	if config.RandMutateEnergy == 0 {
 		// Default 5
 		config.RandMutateEnergy = 5
-		//config.RandMutateEnergy = 1
 	}
-	log.Printf("Using Random mutation energy: %v", config.RandMutateEnergy)
+	log.Printf("default random mutation energy: %v", config.RandMutateEnergy)
 
-	// Default: do not use score
-	config.IsUsingScore = opts.IsUsingScore
-	if config.IsUsingScore {
+	if config.IsDisableScore {
+		log.Printf("Warning: Disabling score to prioritize fuzzing entries. ")
+	} else {
 		log.Printf("Using score to prioritize fuzzing entries. ")
 	}
+
+	if config.SelEfcmTimeout == 0 {
+		config.SelEfcmTimeout = 500
+	}
+
+	log.Printf("SelEfcmTimeout: %d", config.SelEfcmTimeout)
 
 	// prepare fuzz targets
 	var execs []gexec.Executable
@@ -133,22 +153,31 @@ func main() {
 		filteredExecs = append(filteredExecs, e)
 	}
 
-	fuzzer.Shuffle(filteredExecs)
+	//fuzzer.Shuffle(filteredExecs)
 	fctx := api.NewContext(filteredExecs, config)
 
 	var scorer api.ScoreStrategy = score.NewScoreStrategyImpl(fctx)
 	var interestHdl api.InterestHandler = interest.NewInterestHandlerImpl(fctx)
 
 	if opts.Ortconfig != "" {
+		if len(filteredExecs) == 0 {
+			log.Panicf("no executable found to replay, exit")
+		}
+		if len(filteredExecs) > 1 {
+			log.Panicf("more than 1 executable found to replay, exit")
+		}
 		ortcfgbytes, err := ioutil.ReadFile(opts.Ortconfig)
 		if err != nil {
-			fmt.Errorf("read %s: %s", opts.Ortconfig, err)
+			log.Printf("read %s: %s", opts.Ortconfig, err)
 		}
 		ortconfig, err := ortconfig.Deserilize(ortcfgbytes)
 		if err != nil {
-			fmt.Errorf("parse %s: %s", opts.Ortconfig, err)
+			log.Printf("parse %s: %s", opts.Ortconfig, err)
 		}
-		fuzzer.Replay(fctx, filteredExecs[0], config, ortconfig)
+
+		for i := 0; i < opts.Repeat; i++ {
+			fuzzer.Replay(fctx, filteredExecs[0], config, ortconfig)
+		}
 		return
 	}
 

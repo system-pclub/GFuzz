@@ -58,6 +58,8 @@ func GetListOfBugIDFromStdoutContent(c string) ([]string, error) {
 	result := []string{}
 	mapBlockingBug := make(map[*bugInfo]struct{})
 	numOfLines := len(lines)
+	foundBlockingLogExist := false
+	foundNonBlocking := false
 	for idx, line := range lines {
 		if line == "" {
 			continue
@@ -71,6 +73,7 @@ func GetListOfBugIDFromStdoutContent(c string) ([]string, error) {
 			if strings.HasPrefix(line, "panic: test timed out after") {
 				continue
 			}
+			foundNonBlocking = true
 			idLineIdx := idx + 1
 
 			// Skip file location(s) that belongs to my*.go until find the bug root cause
@@ -255,6 +258,10 @@ func GetListOfBugIDFromStdoutContent(c string) ([]string, error) {
 					}
 				}
 			}
+		} else if strings.HasPrefix(line, "-----NO BLOCKING") {
+			continue
+		} else if strings.HasPrefix(line, "-----FOUND BLOCKING") {
+			foundBlockingLogExist = true
 		}
 	}
 
@@ -267,7 +274,10 @@ func GetListOfBugIDFromStdoutContent(c string) ([]string, error) {
 		result = append(result, id)
 	}
 
-	return result, nil
+	if foundBlockingLogExist || foundNonBlocking {
+		return result, nil
+	}
+	return nil, nil
 }
 
 // getFileAndLineFromStacktraceLine returns only <file>:<line>

@@ -39,4 +39,6 @@ $ ./build.sh
 # /builder is the mapped directory of host directory 'tmp/builder', which is output of ./build.sh
 $ ./benchmark.sh benchmark --dir /builder/grpc/native --mode native
 $ ./benchmark.sh benchmark --dir /builder/grpc/inst --mode inst
+
+$ ./benchmark.sh count-tests --dir /builder/kubernetes/native
 ```

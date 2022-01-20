@@ -1,3 +1,7 @@
 .git
 tmp
 bin
+_examples
+*.lock
+*.unix-conn
+new_session:0

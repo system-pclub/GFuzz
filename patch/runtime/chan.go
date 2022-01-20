@@ -229,15 +229,19 @@ func chansend(c *hchan, ep unsafe.Pointer, block bool, callerpc uintptr) bool {
 	if GlobalEnableOracle && c.chInfo.OKToCheck && okToCheck(c) {
 		currentGo := CurrentGoInfo()
 		AddRefGoroutine(c.chInfo, currentGo)
-		currentGo.SetBlockAt(c.chInfo, Send)
-		CS := []PrimInfo{c.chInfo}
-		var checkEntry *CheckEntry
-		if BoolDelayCheck {
-			checkEntry = EnqueueCheckEntry(CS)
-		} else {
-			CheckBlockBug(CS)
+
+		if c.qcount >= c.dataqsiz {
+			currentGo.SetBlockAt(c.chInfo, Send)
+			CS := []PrimInfo{c.chInfo}
+			var checkEntry *CheckEntry
+			if BoolDelayCheck {
+				checkEntry = EnqueueCheckEntry(CS)
+			} else {
+				CheckBlockBug(CS)
+			}
+			defer currentGo.WithdrawBlock(checkEntry)
 		}
-		defer currentGo.WithdrawBlock(checkEntry)
+
 	}
 
 	///MYCODE
@@ -416,9 +420,7 @@ func closechan(c *hchan) {
 	lock(&c.lock)
 
 	///MYCODE
-	if BoolRecord {
-		RecordChOp(c)
-	}
+
 	if c.chInfo != nil {
 		if GlobalEnableOracle && c.chInfo.OKToCheck && okToCheck(c) {
 			currentGo := CurrentGoInfo()
@@ -441,6 +443,11 @@ func closechan(c *hchan) {
 	}
 
 	c.closed = 1
+
+	///MYCODE
+	if BoolRecord {
+		RecordChOp(c)
+	}
 
 	var glist gList
 
@@ -545,6 +552,7 @@ func chanrecv(c *hchan, ep unsafe.Pointer, block bool) (selected, received bool)
 	}
 	if c.chInfo != nil {
 		Monitor(c.chInfo)
+
 	}
 
 	// Fast path: check for failed non-blocking operation without acquiring the lock.
@@ -591,15 +599,18 @@ func chanrecv(c *hchan, ep unsafe.Pointer, block bool) (selected, received bool)
 	if GlobalEnableOracle && c.chInfo.OKToCheck && okToCheck(c) {
 		currentGo := CurrentGoInfo()
 		AddRefGoroutine(c.chInfo, currentGo)
-		currentGo.SetBlockAt(c.chInfo, Recv)
-		CS := []PrimInfo{c.chInfo}
-		var checkEntry *CheckEntry
-		if BoolDelayCheck {
-			checkEntry = EnqueueCheckEntry(CS)
-		} else {
-			CheckBlockBug(CS)
+		if c.qcount == 0 {
+			currentGo.SetBlockAt(c.chInfo, Recv)
+			CS := []PrimInfo{c.chInfo}
+			var checkEntry *CheckEntry
+			if BoolDelayCheck {
+				checkEntry = EnqueueCheckEntry(CS)
+			} else {
+				CheckBlockBug(CS)
+			}
+			defer currentGo.WithdrawBlock(checkEntry)
 		}
-		defer currentGo.WithdrawBlock(checkEntry)
+
 	}
 
 	///MYCODE

@@ -2,51 +2,41 @@ package inst
 
 func NewPassRegistry() *PassRegistry {
 	return &PassRegistry{
-		n2p: make(map[string]InstPass),
+		n2p: make(map[string]InstPassConstructor),
 	}
 }
 
 // AddPass adds a unique pass into registry
-func (r *PassRegistry) AddPass(pass InstPass) error {
-	_, exist := r.n2p[pass.Name()]
+func (r *PassRegistry) Register(name string, passc InstPassConstructor) error {
+	_, exist := r.n2p[name]
 	if exist {
-		return &PassExistedError{Name: pass.Name()}
+		return &PassExistedError{Name: name}
 	}
-	r.n2p[pass.Name()] = pass
+	r.n2p[name] = passc
 	return nil
 }
 
 // GetPass returns the pass with given name
-func (r *PassRegistry) GetPass(name string) (InstPass, error) {
-	p, exist := r.n2p[name]
+func (r *PassRegistry) GetNewPassInstance(name string) (InstPass, error) {
+	c, exist := r.n2p[name]
 	if exist {
-		return p, nil
+		return c(), nil
 	}
 
 	return nil, &NoPassError{Name: name}
 }
 
-// ListOfPasses return a list of registered passes
-func (r *PassRegistry) ListOfPasses() []InstPass {
-	passes := make([]InstPass, 0, len(r.n2p))
-
-	for _, p := range r.n2p {
-		passes = append(passes, p)
-	}
-	return passes
-}
-
 func (r *PassRegistry) ListOfPassNames() []string {
 	passes := make([]string, 0, len(r.n2p))
 
-	for _, p := range r.n2p {
-		passes = append(passes, p.Name())
+	for n, _ := range r.n2p {
+		passes = append(passes, n)
 	}
 	return passes
 }
 
 // HasPass return true if pass registered, false otherwise
 func (r *PassRegistry) HasPass(name string) bool {
-	_, err := r.GetPass(name)
-	return err == nil
+	_, exist := r.n2p[name]
+	return exist
 }
