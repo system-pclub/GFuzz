@@ -373,7 +373,7 @@ def main():
         if args.graph_from_csv is not None:
             draw_btg_from_csv(args.graph_from_csv, args.btg)
             return
-        if len(args.gfuzz_out_dir) != 0:
+        if len(args.gfuzz_out_dir) == 0:
             return print("expect --gfuzz-out-dir has at least one argument")
         generate_bug_time_graph(args.gfuzz_out_dir, args.btg)
         return

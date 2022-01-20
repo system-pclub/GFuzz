@@ -127,7 +127,7 @@ def run_benchmark_with_tests(tests: List[BinTest], mode:str):
                 env=inst_run_env, timeout=10
                 ))
         elif mode == "native":
-            dur = benchmark(REPEAT, lambda: subprocess.run([t.bin, "-test.timeout", "10s", "-test.run", strict_func_name]))
+            dur = benchmark(REPEAT, lambda: subprocess.run([t.bin, "-test.timeout", "10s", "-test.run", strict_func_name], timeout=10))
         full_name = f"{t.bin}->{t.func}"
         if dur == -1:
             print(f"{full_name}: timeout")
@@ -135,9 +135,18 @@ def run_benchmark_with_tests(tests: List[BinTest], mode:str):
         tests_dur[full_name] = dur
         total_dur += dur
     print(f"total {len(tests)} tests")
+
+    notimeout_dur = 0
+    notimeout_cnt = 0
     for k, v in tests_dur.items():
-        print(f"{k}:{v:.04f} seconds")
-    print(f"total average {total_dur/len(tests):.04f} seconds / test")
+        print(f"{k}:{v:.2f} seconds")
+        if 0.1 < v < 10:
+            notimeout_dur += v
+            notimeout_cnt += 1
+    print(f"total average {total_dur/len(tests):.2f} seconds / test")
+    print(f"total average(no timeout) {notimeout_dur/notimeout_cnt:.2f} seconds / test")
+
+    
 
 
 def main():
