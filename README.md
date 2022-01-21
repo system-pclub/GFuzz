@@ -76,8 +76,9 @@ $ ./clone-repos.sh repos
 # If you run before, skip it.
 $ ./build.sh
 
-# run script to count specific app. Same way for the others
-$ ./benchmark.sh count-tests --dir /builder/etcd/native
+# run script to count specific app. Same way for the others.
+# Make sure that --dir is /builder/xxx/inst.
+$ ./benchmark.sh count-tests --dir /builder/etcd/inst
 ```
 
 ## 3. Tab Table-2-Bug 
@@ -283,8 +284,11 @@ $ ./clone-repos.sh repos
 $ ./build.sh
 
 # /builder is the mapped directory of host directory 'tmp/builder', which is output of ./build.sh
-$ ./benchmark.sh benchmark --dir /builder/grpc/native --mode native
-$ ./benchmark.sh benchmark --dir /builder/grpc/inst --mode inst
+$ ./benchmark.sh benchmark --dir /builder/grpc-go/native --mode native --out /builder/out/grpc-go-native.out
+$ ./benchmark.sh benchmark --dir /builder/grpc-go/inst --mode inst --out /builder/out/grpc-go-inst.out
+
+# After you have both results, compare common parts of them
+$ ./filter.py ../builder/out/grpc-go-native.out ../builder/out/grpc-go-inst.out
 ```
 
 
@@ -301,60 +305,40 @@ This tab shows the detailed labeling.
 
 We evaluate GFuzz on grpc in Figure 5. 
 
-``` bash
-# First of all, setup grpc
-$ cd ~
-$ git clone https://github.com/grpc/grpc-go.git
-$ cd grpc-go
 
-# Checkout the version we are evaluating on
-$ git checkout 9280052d36656451dd7568a18a836c2a74edaf6c 
-```
 
-It is required to use a fresh grpc folder each time we begin the GFuzz fuzzing. 
-To run GFuzz on the grpc library:
-``` bash
-# Copy a new fresh grpc folder to fuzz on. 
-$ cp -r /path/to/grpc/ /path/to/grpc_0/
-$ sudo ./script/fuzz-mount.sh /path/to/grpc_0/ /path/to/output/folder/GFuzz_out/
-```
-For fuzzing without feedback:
 
 ``` bash
-$ cp -r /path/to/grpc/ /path/to/grpc_1/
-$ sudo ./script/fuzz-mount.sh /path/to/grpc_1/ /path/to/output/folder/GFuzz_no_feedback/ --isIgnoreFeedback 1
-```
-
-For fuzzing without mutations:
-
-``` bash
-$ cp -r /path/to/grpc/ /path/to/grpc_2/
-$ sudo ./script/fuzz-mount.sh /path/to/grpc_2/ /path/to/output/folder/GFuzz_no_mutation/ --isNoMutation 1
-```
-
-For fuzzing without oracle:
-
-``` bash
+# If you have ran this script before, skip it
 $ ./benchmark/clone-repos.sh ./repos
 
 # If you have ran this script before, skip it
 $ ./benchmark/build.sh
-
-# Build an uninstrumented grpc
-# /builder is the mapped directory of host directory 'tmp/builder', which is output of ./build.sh
-$ ./benchmark.sh benchmark --dir /builder/grpc/native --mode native
-
-# Run GFuzz with the compiled grpc
-$ sudo ./script/fuzz-testbins.sh ./tmp/builder/grpc/native/ /path/to/output/folder/GFuzz_no_oracle/
 ```
 
-After fuzzing for 3 hours with each configs, we can plot Figure 5 using the following script: 
+```bash
+# Run gfuzz without feedback
+./scripts/fuzz-testbins.sh $(pwd)/tmp/builder/grpc-go/inst ~/gfuzz/output/grpc-nfb-fixed --ignorefeedback --fixedsetimeout
+# Run gfuzz with feedback
+./scripts/fuzz-testbins.sh $(pwd)/tmp/builder/grpc-go/inst ~/gfuzz/output/grpc-se --scoreenergy --allowdupcfg --fixedsetimeout
+# Run gfuzz without select enforcement
+./scripts/fuzz-testbins.sh $(pwd)/tmp/builder/grpc-go/inst ~/gfuzz/output/grpc-nose --scoreenergy --allowdupcfg --nose
+# Run gfuzz without oracle(sanitizer)
+./scripts/fuzz-testbins.sh $(pwd)/tmp/builder/grpc-go/inst ~/gfuzz/output/grpc-nooracle --scoreenergy --allowdupcfg --fixedsetimeout --nooracle
+```
 
-``` bash
-# Install python3 dependent libraries
-$ pip3 install matplotlib click datetime
+After fuzzing for 12 hours with each configs, we can check when and what bugs they have found by:
 
-$ python3 ./script/plot_Figure_5.py --with-feedback-path /path/to/output/folder/GFuzz_out/ --no-feedback-path /path/to/output/folder/GFuzz_no_feedback/ --no-mutation-path /path/to/output/folder/GFuzz_no_mutation/ --no-oracle-path /path/to/output/folder/GFuzz_no_oracle/
+```bash
+$ ./scripts/analyze.py --bug-analyze --gfuzz-out-dir <gfuzz output>
+
+# you should be able to see something like following:
+
+bug statistics:
+used (hours), buggy primitive location, gfuzz exec
+0.05 h,/repos/grpc-go/xds/internal/testutils/fakeserver/server.go:160,1053-rand-google.golang.org-grpc-xds-internal-client-v2.test-TestLDSHandleResponseWithoutWatch-60
+0.09 h,/repos/grpc-go/balancer/grpclb/grpclb_test.go:831,1168-rand-google.golang.org-grpc-balancer-grpclb.test-TestDropRequest-132
+
 ```
 
 ## 7. Using GCatch to test GFuzz bugs: 

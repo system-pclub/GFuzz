@@ -129,7 +129,7 @@ average (run/sec): {num_of_runs_without_timeout/total_dur_without_timeout:.2f}
     """)
 
     print("bug statistics:")
-    print("used (hours), buggy primitive location")
+    print("used (hours), buggy primitive location, gfuzz exec")
     start_str = log_start_time.strftime("%Y/%m/%d %H:%M:%S")
     for i, e in enumerate(exec_stats_arr):
         skip = False
