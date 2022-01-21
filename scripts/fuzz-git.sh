@@ -14,9 +14,9 @@ docker build \
 -f docker/fuzzer-git/Dockerfile \
 -t gfuzzgit:latest .
 
-container_id=$(docker run --rm -it -d \
+container_id=$(docker run --rm -d \
 -v $(pwd)/tmp/pkgmod:/go/pkg/mod \
 -v $OUTPUT_DIR:/fuzz/output \
 gfuzzgit:latest /fuzz/output $@)
 
-echo "using command `docker logs $container_id -f` to get latest log"
+echo "using command `docker logs $container_id -f` or checking $OUTPUT_DIR/fuzzer.log to get latest log"

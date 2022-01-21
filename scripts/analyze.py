@@ -33,8 +33,7 @@ class ExecStat:
 
 
 def analyze_gfuzz_output_dir(output_dir):
-    log_fp = os.path.join(output_dir, "fuzzer.log")
-    analyze_gfuzz_log(log_fp)
+    analyze_gfuzz_log(output_dir)
 
 def find_next_in_same_worker(logs:List[str], from_idx:int, worker_id:str, if_fn: Callable[[str], bool]) -> str:
     for i in range(from_idx, len(logs)):
@@ -88,10 +87,10 @@ def get_exec_stats_from_logs(logs:List[str]) -> List[ExecStat]:
     return exec_stats.values()
 
 
-def analyze_gfuzz_log(log_fp):
+def analyze_gfuzz_log(output_dir):
     log_start_time = None
     log_end_time = None
-    logs = get_logs(log_fp)
+    logs = get_logs(os.path.join(output_dir, GFUZZ_LOG_FILE))
     
     for line in logs:
         try:
@@ -130,6 +129,7 @@ average (run/sec): {num_of_runs_without_timeout/total_dur_without_timeout:.2f}
     """)
 
     print("bug statistics:")
+    print("used (hours), buggy primitive location")
     start_str = log_start_time.strftime("%Y/%m/%d %H:%M:%S")
     for i, e in enumerate(exec_stats_arr):
         skip = False
@@ -140,13 +140,19 @@ average (run/sec): {num_of_runs_without_timeout/total_dur_without_timeout:.2f}
             continue
         t = e.start.strftime("%Y/%m/%d %H:%M:%S")
         dur = (e.start - log_start_time).total_seconds() / 3600
+        exec_base_dir = os.path.join(output_dir, GFUZZ_EXEC_FOLDER, e.exec_id)
+        stdout_file = os.path.join(exec_base_dir, GFUZZ_EXEC_STDOUT)
+        with open(stdout_file) as stdout_f:
+            s = stdout_f.read()
+            if bug_filter_cond(s):
+                continue
         for b in e.bugs:
-            print(f"{start_str},{t},{dur:.4f},{b},{e.exec_id}")
+            print(f"{dur:.2f} h,{b},{e.exec_id}")
 
     # Most time-consuming entries
-    print("most time-consuming entries:")
-    for e in top_n_time_consuming_entries(entry_stats_arr, 10):
-        print(f"{e.entry}, {e.num_of_runs} runs, {e.total_duration} seconds\n")
+    # print("most time-consuming entries:")
+    # for e in top_n_time_consuming_entries(entry_stats_arr, 10):
+    #     print(f"{e.entry}, {e.num_of_runs} runs, {e.total_duration} seconds\n")
 
 def top_n_time_consuming_entries(entry_stats_arr, top):
     sorted_arr = sorted(entry_stats_arr, key= lambda e:e.total_duration, reverse=True)
@@ -269,7 +275,7 @@ def get_entry_from_exec_id(exec_id:str):
 
 
 
-def test_bug_filter(gfuzz_out_dir:str, bug_filter:Callable[[str], bool]) -> List[str]:
+def filter_bug(gfuzz_out_dir:str, bug_filter:Callable[[str], bool]) -> List[ExecStat]:
     """To test bug filter condition will filter out which bugs
 
     Args:
@@ -279,7 +285,7 @@ def test_bug_filter(gfuzz_out_dir:str, bug_filter:Callable[[str], bool]) -> List
     logs = get_logs(log_file)
     stats = get_exec_stats_from_logs(logs)
 
-    filtered_exec_ids = []
+    filtered_execs = []
 
     for e in stats:
         if len(e.bugs) == 0:
@@ -288,15 +294,14 @@ def test_bug_filter(gfuzz_out_dir:str, bug_filter:Callable[[str], bool]) -> List
         stdout_file = os.path.join(exec_base_dir, GFUZZ_EXEC_STDOUT)
         with open(stdout_file) as stdout_f:
             s = stdout_f.read()
-            if bug_filter(s):
-                filtered_exec_ids.append(e.exec_id)
+            if not bug_filter_cond(s):
+                filtered_execs.append(e)
 
-    for id in filtered_exec_ids:
-        print(id)
-    return filtered_exec_ids
-    
-def bug_filter(stdout: str) -> bool:
-    return stdout.find("[IO wait]") != -1 or stdout.find("[syscall]") != -1
+    return filtered_execs
+
+
+def bug_filter_cond(stdout: str) -> bool:
+    return stdout.find("[IO wait]") != -1 or stdout.find("[syscall]") != -1 or stdout.find("[runnable]") != -1
 
 
 def analyze_exec_with_goleak(gfuzz_out_dir:str):
@@ -330,7 +335,7 @@ def analyze_exec_with_goleak(gfuzz_out_dir:str):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--log', type=str)
+    parser.add_argument('--bug-analyze', default=False, action='store_true')
 
     # Bug Time Graph
     parser.add_argument('--btg', type=str)
@@ -353,14 +358,16 @@ def main():
 
     
 
-    if args.log is not None:
-        analyze_gfuzz_log(args.log)
+    if args.bug_analyze is not None:
+        if len(args.gfuzz_out_dir) != 1:
+            return print("expect --gfuzz-out-dir has exact one argument")
+        analyze_gfuzz_log(args.gfuzz_out_dir[0])
         return
     
     if args.test_bug_filter:
         if len(args.gfuzz_out_dir) != 1:
             return print("expect --gfuzz-out-dir has exact one argument")
-        test_bug_filter(args.gfuzz_out_dir[0], bug_filter)
+        filter_bug(args.gfuzz_out_dir[0], bug_filter_cond)
         return
     
     if args.analyze_goleak:

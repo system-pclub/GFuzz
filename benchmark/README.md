@@ -26,19 +26,20 @@ $ loc.sh ./repos
 $ ./build.sh
 
 // Second, run script to count specific app. Same way for the others
-$ ./benchmark.sh count-tests --dir /builder/etcd/native
+$ ./benchmark.sh count-tests --dir /builder/etcd/inst
 ```
 
 
 ### 4. Calculate Performance
 ```bash
 
-// If you run before, skip it.
+# If you run before, skip it.
 $ ./build.sh
 
 # /builder is the mapped directory of host directory 'tmp/builder', which is output of ./build.sh
-$ ./benchmark.sh benchmark --dir /builder/grpc/native --mode native
-$ ./benchmark.sh benchmark --dir /builder/grpc/inst --mode inst
+$ ./benchmark.sh benchmark --dir /builder/grpc-go/native --mode native --out /builder/out/grpc-go-native.out
+$ ./benchmark.sh benchmark --dir /builder/grpc-go/inst --mode inst --out /builder/out/grpc-go-inst.out
 
-$ ./benchmark.sh count-tests --dir /builder/kubernetes/native
+# After you have both results, compare common parts of them
+$ ./filter.py ../builder/out/grpc-go-native.out ../builder/out/grpc-go-inst.out
 ```

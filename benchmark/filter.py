@@ -18,7 +18,10 @@ def main():
     b2cnt = 0
     b2dur = 0
     for k, v in b1rec.items():
+        
         if v < 0.001:
+            continue
+        if v > 10:
             continue
         if k in b2rec:
             b1cnt += 1
@@ -36,6 +39,9 @@ def parse_benchmark(logs:str):
     for log in logs:
         parts = log.split(":")
         id = parts[0]
+        if not id.split("->")[1].startswith("Test"):
+            # we should ignore any other methods that does not start with Test
+            continue
         id = id.split("/")[-1]
         time = float(parts[1].split(" ")[0])
         rec[id] = time

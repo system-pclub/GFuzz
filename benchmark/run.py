@@ -35,40 +35,17 @@ class BinTest:
         self.bin = bin
         self.func = func
 
-def benchmark_simple(run_mode:str):
-    """evaluate performance by using tests from `benchmark/tests` folder
 
-    Args:
-        run_mode (str): `native`, `inst`
-        native: run without patching golang runtime and insturmenting code
-        inst: run with patched golang runtime & instrumented code
-    """
-    
-    # prepare test bin
-    if run_mode == "inst":
-        patch_go_runtime()
-        copytree(TEST_PKG, TEST_PKG_INST_TMP)
-        inst_dir(TEST_PKG_INST_TMP)
-        compile_test_bin(TEST_PKG_INST_TMP, TEST_BIN_INST)
-        target_bin = TEST_BIN_INST
-    else:
-        compile_test_bin(TEST_PKG, TEST_BIN_NATIVE)
-        target_bin = TEST_BIN_NATIVE
-    
-    tests = get_tests_from_test_bin(target_bin)
-    run_benchmark_with_tests(tests, run_mode)
-
-def benchmark_custom(dir:str, mode:str, selected_bins: List[str] = None):
+def benchmark_custom(out:str, dir:str, mode:str, selected_bins: List[str] = None):
     if not selected_bins:
         selected_bins = glob(f"{dir}/*")
-
     tests = []
 
     for bin in selected_bins:
         ts = get_tests_from_test_bin(bin)
         tests.extend(ts)
     
-    run_benchmark_with_tests(tests, mode)
+    run_benchmark_with_tests(out, tests, mode)
 
 def benchmark_custom_native_parallel(dir:str, selected_bins: List[str] = None) -> Tuple[int, int]:
     if not selected_bins:
@@ -112,7 +89,7 @@ def benchmark_all_native_parallel(dirs:List[str], repeat=3) -> Tuple[int, int]:
 
     
     
-def run_benchmark_with_tests(tests: List[BinTest], mode:str):
+def run_benchmark_with_tests(out:str, tests: List[BinTest], mode:str):
     if mode == "inst":
         inst_run_env = os.environ.copy()
         inst_run_env["GF_BENCHMARK"] = "1"
@@ -136,18 +113,15 @@ def run_benchmark_with_tests(tests: List[BinTest], mode:str):
         total_dur += dur
     print(f"total {len(tests)} tests")
 
-    notimeout_dur = 0
-    notimeout_cnt = 0
-    for k, v in tests_dur.items():
-        print(f"{k}:{v:.2f} seconds")
-        if 0.1 < v < 10:
-            notimeout_dur += v
-            notimeout_cnt += 1
-    print(f"total average {total_dur/len(tests):.2f} seconds / test")
-    print(f"total average(no timeout) {notimeout_dur/notimeout_cnt:.2f} seconds / test")
+    if not os.path.exists(os.path.dirname(out)):
+        os.makedirs(os.path.dirname(out))
 
-    
+    with open(out, "w") as outf:
+        for k, v in tests_dur.items():
+            outf.write(f"{k}:{v:.2f} seconds\n")
 
+    if len(tests) == 0:
+        return print(f"no test found/run")
 
 def main():
     parser = argparse.ArgumentParser()
@@ -155,6 +129,7 @@ def main():
     #parser.add_argument('testsuite', choices=["simple", "custom"])
     parser.add_argument('--mode', choices=["native", "inst", "parallel-native"])
     parser.add_argument('--dir', type=str)
+    parser.add_argument('--out', type=str)
     parser.add_argument('--bins',  nargs='*')
     parser.add_argument('--bins-list-file', type=str)
     parser.add_argument('--repeat', type=int, default=10)
@@ -165,6 +140,7 @@ def main():
     bins_dir = args.dir
     selected_bins = args.bins
     mode = args.mode
+    out = args.out
     #testsuite = args.testsuite
     testsuite = "custom"
     bins_list_file = args.bins_list_file
@@ -201,15 +177,12 @@ def main():
     if testsuite == "custom" and not bins_dir:
         raise Exception("--dir is required if testsuite is custom")
 
-    
-    
-    if testsuite == "simple":
-        benchmark_simple(mode)
-    else:
-        if bins_list_file:
-            bins = get_bins_from_file(bins_list_file)
-            selected_bins = [os.path.join(bins_dir, bin) for bin in bins]
-        benchmark_custom(bins_dir, mode, selected_bins)
+    if bins_list_file:
+        bins = get_bins_from_file(bins_list_file)
+        selected_bins = [os.path.join(bins_dir, bin) for bin in bins]
+    if out is None:
+        raise Exception("--out is required")
+    benchmark_custom(out, bins_dir, mode, selected_bins)
 
 def count_tests_from_bins_dir(bins_dir:str) -> int:
     bins = glob(f"{bins_dir}/*")
