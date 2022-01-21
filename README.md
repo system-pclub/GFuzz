@@ -293,21 +293,11 @@ $ ./filter.py ../tmp/builder/out/grpc-go-native.out ../tmp/builder/out/grpc-go-i
 # you should see following output:
 common tests: 832
 first average 0.1982 # second/test, first means first arg, which is ../tmp/builder/out/grpc-go-native.out
-seond average 0.2032 # second/test, second means second arg, which is ../tmp/builder/out/grpc-go-inst.out
-
-
+seond average 0.2032 # second/test, second means second arg, which is ../tmp/builder/out/grpc-go-inst.outß
 ```
 
 
-## 5. Tab Table-3
-
-In Section 7.2 of the paper, we manually studied whether reordering messages can
-help detect channel-related bugs in two public sets of Go concurrency bugs. 
-This tab shows the detailed labeling. 
-
-
-
-## 6. Figure 5 of the paper
+## 5. Figure 5 of the paper
 
 
 We evaluate GFuzz on grpc in Figure 5. 
@@ -348,7 +338,7 @@ used (hours), buggy primitive location, gfuzz exec
 
 ```
 
-## 7. Using GCatch to test GFuzz bugs: 
+## 6. Using GCatch to test GFuzz bugs: 
 
 Let's set up GCatch using a Docker environment
 
@@ -474,7 +464,7 @@ Return :/playground/prometheus/web/web.go:950:13         '✗'
 ```
 
 
-## 8. Example Output of Fuzzing
+## 7. Example Output of Fuzzing
 
 
 
