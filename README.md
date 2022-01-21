@@ -1,7 +1,7 @@
 # The code, analysis scripts and results for ASPLOS 2022 Artifact Evaluation
 
-Version: 1.1\
-Update:  Dec 01, 2021\
+Version: 1.2\
+Update:  Jan 20, 2022\
 Paper:   Who Goes First? Detecting Go Concurrency Bugs via Message Reordering
 
 This document is to help users reproduce the results we reported in our submission. 
@@ -9,25 +9,24 @@ It contains the following descriptions:
 
 ## 0. Artifact Expectation
 
-The code and the scripts of our built tool are released in this repository. 
-The detailed information of our experiments is released in an excel file. 
-All the experiments can be executed using Docker 20.10.8. We expect users 
-to use a docker of this version or higher to reproduce our experiments. 
+The code and the scripts of our built tool and the paper's final version are 
+released in this repository. The detailed information of our experiments is 
+released in an excel file. All the experiments can be executed using Docker 20.10.8. 
+We expect users to use a docker of this version or higher to reproduce our experiments. 
 
 ## 1. Artifact Overview
 
 Our paper presents GFuzz, a dynamic detector for channel-related concurrency
 bugs in Go programs. For artifact evaluation, we release 
-- (1) the tool we built, 
-- (2) information of evaluated benchmarks, 
-- (3) information of detected bugs, 
-- (4) execution overhead of GFuzz's sanitizer, 
-- (5) study results of whether 
-GFuzz can help detect bugs in two public concurrency bug sets,
+- (1) the tool we built,
+- (2) the paper's final version,
+- (3) information of evaluated benchmarks, 
+- (4) information of detected bugs, 
+- (5) execution overhead of GFuzz's sanitizer, 
 - and (6) scripts to compare the effectiveness of GFuzz's different features.  
 
 
-Item (1) can be checked out by executing the following commands
+Items (1), (2) and (6) can be checked out by executing the following commands
 
 ``` bash
 $ git clone https://github.com/system-pclub/GFuzz.git
@@ -36,12 +35,12 @@ $ git checkout asplos-artifact
 ```
 
 
-Items (2), (3), (4) and (5) are released using a Google Sheet file [asplos-710-artifact](https://docs.google.com/spreadsheets/d/1tLcgsfYlll0g20KMYgDKkAtwZtk426dMSUZ6SvXk04s/edit?usp=sharing). 
-Particularly, (2), (3) and (4) are related to Table 2 in the paper, and
-(5) is to provide more information for Table 3 in the paper. 
-All columns and tabs discussed later are in the Google Sheet file, unless otherwise specified. 
+Items (3), (4) and (5) are released using a Google Sheet file [asplos-710-artifact-2](https://docs.google.com/spreadsheets/d/11lUctFnLQAdGj_GK3wVfqMq_dHotW100rI96w-ez1tU/edit?usp=sharing). 
+Particularly, (3), (4) and (5) are related to Table 2 in the paper. 
+All columns and tabs discussed later are in the Google Sheet file, 
+unless otherwise specified. 
 
-Item (6) is to reproduce Figure 5 in the paper. 
+Item (6) is to reproduce Figure 7 in the paper. 
 
 
 ## 2. Tab Table-2-Benchmark
