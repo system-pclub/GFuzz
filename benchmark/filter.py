@@ -29,9 +29,9 @@ def main():
             b1dur += v
             b2dur += b2rec[k]
     
-    print(f"count {b2cnt}")
-    print(f"b1 average {b1dur/b1cnt:0.2f}")
-    print(f"b2 average {b2dur/b2cnt:0.2f}")
+    print(f"common tests: {b2cnt}")
+    print(f"first average {b1dur/b1cnt:0.4f}")
+    print(f"second average {b2dur/b2cnt:0.4f}")
 
 
 def parse_benchmark(logs:str):

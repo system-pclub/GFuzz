@@ -288,7 +288,14 @@ $ ./benchmark.sh benchmark --dir /builder/grpc-go/native --mode native --out /bu
 $ ./benchmark.sh benchmark --dir /builder/grpc-go/inst --mode inst --out /builder/out/grpc-go-inst.out
 
 # After you have both results, compare common parts of them
-$ ./filter.py ../builder/out/grpc-go-native.out ../builder/out/grpc-go-inst.out
+$ ./filter.py ../tmp/builder/out/grpc-go-native.out ../tmp/builder/out/grpc-go-inst.out
+
+# you should see following output:
+common tests: 832
+first average 0.1982 # second/test, first means first arg, which is ../tmp/builder/out/grpc-go-native.out
+seond average 0.2032 # second/test, second means second arg, which is ../tmp/builder/out/grpc-go-inst.out
+
+
 ```
 
 
