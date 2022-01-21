@@ -84,10 +84,10 @@ $ ./benchmark.sh count-tests --dir /builder/etcd/inst
 ## 3. Tab Table-2-Bug 
 
 This tab shows the detailed information of each detected bugs, including at which application
-version we find the bug (Column B), where we report the bug (Column E), what is the current 
-status of the filed bug report (Columns G-J), which category the bug belongs to (Columns L-V), whether 
-GCatch can detect the bug (Column X), what is the reason if GCatch fails (Columns Y-AC), 
-and the unit test we used to find the bug (columns AE-AF). 
+version we find the bug (Column B), where we report the bug (Column H), what is the current 
+status of the filed bug report (Columns J-L), which category the bug belongs to (Columns Q-Y), whether 
+GCatch can detect the bug (Column AA), what is the reason if GCatch fails (Columns AB-AF), 
+and the unit test we used to find the bug (columns AG-AH). 
 
 ### 3.1. Kubernetes
 
@@ -102,7 +102,7 @@ $ ./scripts/fuzz-git.sh https://github.com/kubernetes/kubernetes 97d40890d00acf7
 
 By default, GFuzz will use all unit tests of a given application. To ease
 the reproduction of our results, we enhance GFuzz to only use one unit 
-test (columns AE-AF). For example, users can execute the following command
+test (columns AG-AH). For example, users can execute the following command
 to inspect whether GFuzz can still detect the bug at row 4. 
 
 ``` bash
