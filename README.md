@@ -84,10 +84,10 @@ $ ./benchmark.sh count-tests --dir /builder/etcd/inst
 ## 3. Tab Table-2-Bug 
 
 This tab shows the detailed information of each detected bugs, including at which application
-version we find the bug (Column B), where we report the bug (Column H), what is the current 
-status of the filed bug report (Columns J-L), which category the bug belongs to (Columns Q-Y), whether 
-GCatch can detect the bug (Column AA), what is the reason if GCatch fails (Columns AB-AF), 
-and the unit test we used to find the bug (columns AG-AH). 
+version we find the bug (Column B), where we report the bug (Column F), what is the current 
+status of the filed bug report (Columns H-J), which category the bug belongs to (Columns L-T), whether 
+GCatch can detect the bug (Column V), what is the reason if GCatch fails (Columns W-Z), 
+and the unit test we used to find the bug (columns AB-AC). 
 
 ### 3.1. Kubernetes
 
