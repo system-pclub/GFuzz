@@ -7,6 +7,51 @@ Paper:   Who Goes First? Detecting Go Concurrency Bugs via Message Reordering
 This document is to help users reproduce the results we reported in our submission. 
 It contains the following descriptions:
 
+## Getting Started
+
+### Fuzzing a Golang Project with Git
+`fuzz-git.sh` will automatically git clone and checkout the corresponding repository, instrument, and start fuzzing.
+
+```bash
+$ ./scripts/fuzz-git.sh <GIT URL> <GIT COMMIT> <OUTPUT DIR> [...optional parameters passed to fuzzer]
+
+# Examples (fuzzing prometheus)
+$ ./scripts/fuzz-git.sh https://github.com/prometheus/prometheus main /AbsolutePathOnYourFileSystem
+
+# This script will do following things:
+# 1. create a docker image
+# 2. copy fuzzer and instrumentation tool source code and Golang runtime patches
+# 3. git clone and checkout target repository
+# 4. compile fuzzer and instrumentation tool
+# 5. patch Golang runtime
+# 6. instrument target repository (only caring about .go files)
+# 7. done building docker image
+# 8. docker run (start fuzzing)
+```
+
+### Fuzzing a Golang Project with Source Code
+`fuzz-mount.sh` will mount target Golang project folder to the docker container, instrument, and start fuzzing.
+
+#### Note
+This script will modify your source code in local filesystem(due to instrumentation), please commit all your changes before running script so that you can easily recover source code after fuzzing.
+
+```bash
+$ ./scripts/fuzz-mount.sh <GOMOD DIR> <OUTPUT DIR> [...optional parameters passed to fuzzer]
+
+# Examples 
+$ ./scripts/fuzz-mount.sh /AbsolutePathOnYourFileSystemToGolangProject /AbsolutePathOnYourFileSystem
+
+# This script will do following things:
+# 1. create a docker image
+# 2. copy fuzzer and instrumentation tool source code and Golang runtime patches
+# 3. compile fuzzer and instrumentation tool
+# 4. patch Golang runtime
+# 5. done building docker image
+# 6. docker run (start fuzzing)
+# 7. instrument target repository (only caring about .go files)
+# 8. start fuzzing
+```
+
 ## 0. Artifact Expectation
 
 The code and the scripts of our built tool and the paper's final version are 
