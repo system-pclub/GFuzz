@@ -305,7 +305,7 @@ $ ./scripts/fuzz-git.sh https://github.com/gfuzz-asplos/grpc-go-9280052d36656451
 ```
 
 We compare GFuzz with GCatch in our evaluation. To check whether 
-GCatch can detect a bug, please see instruction at section [Using GCatch to test GFuzz bugs](https://github.com/system-pclub/GFuzz#7-using-gcatch-to-test-gfuzz-bugs) below.
+GCatch can detect a bug, please see instruction at section [Using GCatch to test GFuzz bugs](https://github.com/system-pclub/GFuzz#6-using-gcatch-to-test-gfuzz-bugs) below.
 
 
 
